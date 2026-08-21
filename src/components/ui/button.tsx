@@ -16,12 +16,22 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        /* Luxury storefront variants — design-system owned, no ad hoc colours */
+        luxe: "rounded-none bg-primary text-primary-foreground uppercase tracking-[0.22em] text-[11px] hover:bg-gold hover:text-ink transition-all duration-500",
+        luxeOutline:
+          "rounded-none border border-primary/25 bg-transparent text-foreground uppercase tracking-[0.22em] text-[11px] hover:border-gold hover:text-gold-deep transition-all duration-500",
+        onImage:
+          "rounded-none border border-ivory/70 bg-ivory/10 text-ivory uppercase tracking-[0.22em] text-[11px] backdrop-blur-sm hover:bg-ivory hover:text-ink transition-all duration-500",
+        gold: "rounded-none bg-gold text-ink uppercase tracking-[0.22em] text-[11px] hover:bg-gold-deep hover:text-ivory transition-all duration-500",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        luxe: "h-12 px-8",
+        luxeLg: "h-14 px-12",
+        luxeSm: "h-10 px-6",
       },
     },
     defaultVariants: {
