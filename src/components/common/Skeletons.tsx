@@ -41,10 +41,18 @@ export function ProductDetailSkeleton() {
 }
 
 export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+  const colClass =
+    cols === 3
+      ? "grid-cols-3"
+      : cols === 4
+        ? "grid-cols-4"
+        : cols === 6
+          ? "grid-cols-6"
+          : "grid-cols-5";
   return (
     <div className="divide-y divide-border border border-border">
       {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="grid gap-4 p-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+        <div key={r} className={cn("grid gap-4 p-4", colClass)}>
           {Array.from({ length: cols }).map((__, c) => (
             <Bar key={c} className="h-3 w-full" />
           ))}
