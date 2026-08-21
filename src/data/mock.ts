@@ -249,7 +249,19 @@ export const users: User[] = [
   },
 ];
 
-const defaultAddress = users[0].addresses[0];
+const defaultAddress: Address = {
+  id: "adr-1",
+  label: "Home",
+  fullName: "Ragini Sarkar",
+  phone: "+91 98200 11223",
+  line1: "12 Aurangzeb Lane, Bungalow 4",
+  locality: "Lutyens Bungalow Zone",
+  city: "New Delhi",
+  state: "Delhi",
+  pincode: "110011",
+  country: "India",
+  isDefault: true,
+};
 
 export const orders: Order[] = [
   {
