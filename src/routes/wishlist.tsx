@@ -4,7 +4,6 @@ import { Heart, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { AccountGate } from "@/components/account/AccountLayout";
-import { PeacockGlyph } from "@/components/brand/BrandMark";
 import { EmptyState } from "@/components/common/SectionHeading";
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -217,6 +216,3 @@ function WishlistPage() {
     </SiteLayout>
   );
 }
-
-// Keep reference so PeacockGlyph import isn't flagged unused if not used elsewhere in file.
-void PeacockGlyph;
