@@ -31,10 +31,10 @@ export function PageHeader({
   description,
   meta,
 }: {
-  breadcrumb?: ReactNode;
+  breadcrumb?: ReactNode | undefined;
   title: string;
-  description?: string;
-  meta?: ReactNode;
+  description?: string | undefined;
+  meta?: ReactNode | undefined;
 }) {
   return (
     <div className="border-b border-border bg-secondary/40">

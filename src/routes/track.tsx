@@ -14,8 +14,8 @@ import type { Order, OrderStatus } from "@/data/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/track")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    id: typeof s.id === "string" ? s.id : undefined,
+  validateSearch: (s: Record<string, unknown>): { id?: string | undefined } => ({
+    id: typeof s["id"] === "string" ? (s["id"] as string) : undefined,
   }),
   component: TrackPage,
   head: () => ({
