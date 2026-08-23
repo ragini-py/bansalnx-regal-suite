@@ -21,25 +21,28 @@ import { useStore } from "@/lib/store";
 import type { Product } from "@/data/types";
 
 interface ProductSearch {
-  q?: string;
-  sort?: string;
-  category?: string;
-  collection?: string;
-  size?: string;
-  colour?: string;
+  q?: string | undefined;
+  sort?: string | undefined;
+  category?: string | undefined;
+  collection?: string | undefined;
+  size?: string | undefined;
+  colour?: string | undefined;
+}
+
+function str(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
 }
 
 export const Route = createFileRoute("/products/")({
   validateSearch: (search: Record<string, unknown>): ProductSearch => ({
-    q: typeof search.q === "string" && search.q ? search.q : undefined,
-    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    category:
-      typeof search.category === "string" && search.category ? search.category : undefined,
-    collection:
-      typeof search.collection === "string" && search.collection ? search.collection : undefined,
-    size: typeof search.size === "string" && search.size ? search.size : undefined,
-    colour: typeof search.colour === "string" && search.colour ? search.colour : undefined,
+    q: str(search["q"]),
+    sort: str(search["sort"]),
+    category: str(search["category"]),
+    collection: str(search["collection"]),
+    size: str(search["size"]),
+    colour: str(search["colour"]),
   }),
+
   head: () => ({
     meta: [
       { title: "Shop All Couture — Lehengas, Sarees & Gowns | Bansal-nx" },
