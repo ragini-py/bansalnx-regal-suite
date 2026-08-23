@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 import { BrandMark } from "@/components/brand/BrandMark";
 
 export const Route = createFileRoute("/reset-password")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    token: typeof s.token === "string" ? s.token : undefined,
+  validateSearch: (s: Record<string, unknown>): { token?: string | undefined } => ({
+    token: typeof s["token"] === "string" ? (s["token"] as string) : undefined,
   }),
   component: ResetPasswordPage,
   head: () => ({

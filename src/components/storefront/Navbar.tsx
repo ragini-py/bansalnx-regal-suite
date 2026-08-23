@@ -217,14 +217,24 @@ export function Navbar() {
                 <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
                 <CountBadge count={wishlist.length} />
               </Link>
-              <Link
-                to={isAuthenticated ? "/account" : "/login"}
-                search={isAuthenticated ? undefined : { redirect: "/account" }}
-                aria-label={isAuthenticated ? "My account" : "Sign in"}
-                className="hidden h-9 w-9 place-items-center transition-colors hover:text-gold-deep sm:grid"
-              >
-                <User className="h-[18px] w-[18px]" strokeWidth={1.4} />
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/account"
+                  aria-label="My account"
+                  className="hidden h-9 w-9 place-items-center transition-colors hover:text-gold-deep sm:grid"
+                >
+                  <User className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  search={{ redirect: "/account" }}
+                  aria-label="Sign in"
+                  className="hidden h-9 w-9 place-items-center transition-colors hover:text-gold-deep sm:grid"
+                >
+                  <User className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setCartDrawerOpen(true)}

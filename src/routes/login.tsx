@@ -13,8 +13,8 @@ import { useStore } from "@/lib/store";
 import hero from "@/assets/collection-1.jpg";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  validateSearch: (s: Record<string, unknown>): { redirect?: string | undefined } => ({
+    redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined,
   }),
   component: LoginPage,
   head: () => ({
