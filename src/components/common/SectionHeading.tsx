@@ -10,12 +10,12 @@ export function SectionHeading({
   action,
   className,
 }: {
-  eyebrow?: string;
+  eyebrow?: string | undefined;
   title: string;
-  description?: string;
-  align?: "center" | "left";
-  action?: ReactNode;
-  className?: string;
+  description?: string | undefined;
+  align?: "center" | "left" | undefined;
+  action?: ReactNode | undefined;
+  className?: string | undefined;
 }) {
   return (
     <div
@@ -45,9 +45,9 @@ export function EmptyState({
   icon,
 }: {
   title: string;
-  description?: string;
-  action?: ReactNode;
-  icon?: ReactNode;
+  description?: string | undefined;
+  action?: ReactNode | undefined;
+  icon?: ReactNode | undefined;
 }) {
   return (
     <div className="flex flex-col items-center justify-center border border-border/70 bg-card px-6 py-20 text-center">

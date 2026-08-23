@@ -21,9 +21,9 @@ export function Reveal({
   as: As = "div",
 }: {
   children: ReactNode;
-  className?: string;
-  delay?: number;
-  as?: "div" | "section" | "li" | "article";
+  className?: string | undefined;
+  delay?: number | undefined;
+  as?: "div" | "section" | "li" | "article" | undefined;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
