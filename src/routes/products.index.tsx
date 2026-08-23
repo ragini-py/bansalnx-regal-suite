@@ -29,7 +29,7 @@ interface ProductSearch {
   colour?: string;
 }
 
-export const Route = createFileRoute("/products")({
+export const Route = createFileRoute("/products/")({
   validateSearch: (search: Record<string, unknown>): ProductSearch => ({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
