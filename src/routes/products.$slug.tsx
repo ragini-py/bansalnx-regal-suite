@@ -123,9 +123,7 @@ function ProductDetail() {
       setPendingIntent({
         type: "cart",
         productId: product.id,
-        size,
-        colour,
-        quantity,
+        variant: { size, colour },
         returnTo: `/products/${product.slug}`,
       });
       setPromptIntent("cart");
