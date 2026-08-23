@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactElement } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Reveal } from "@/components/common/Reveal";
@@ -49,7 +50,7 @@ function HomePage() {
     .map((id) => collections.find((c) => c.id === id))
     .filter((c): c is Collection => !!c && c.published);
 
-  const blocks: Record<string, JSX.Element | null> = {
+  const blocks: Record<string, ReactElement | null> = {
     hero: <Hero key="hero" />,
     collections: featuredCollections.length ? (
       <CollectionsBlock key="collections" collections={featuredCollections} />
