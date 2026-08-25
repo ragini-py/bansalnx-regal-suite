@@ -180,6 +180,27 @@
   color: var(--muted-foreground);
 }
 
+/* Metallic gold text gradient */
+@utility text-gold-gradient {
+  background: linear-gradient(135deg, #E6C875 0%, #C8A45A 50%, #9B7830 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Metallic gold button / badge background */
+@utility bg-gold-gradient {
+  background: linear-gradient(135deg, #DFBF7A 0%, #C8A45A 50%, #9E7D33 100%);
+  color: #0B0B0B;
+}
+
+/* Luxury Glassmorphism */
+@utility luxury-glass {
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+
 /* Thin gold hairline divider */
 @utility rule-gold {
   height: 1px;
@@ -189,6 +210,11 @@
     color-mix(in oklab, var(--gold) 70%, transparent),
     transparent
   );
+}
+
+/* Subtle gold border glow */
+@utility gold-border-glow {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--gold) 40%, transparent), 0 8px 24px -8px color-mix(in oklab, var(--gold) 25%, transparent);
 }
 
 /* Animated underline link used across storefront nav */
@@ -225,6 +251,21 @@
     opacity: 1;
     transform: none;
   }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@utility shimmer-effect {
+  background: linear-gradient(90deg, transparent 0%, rgba(200, 164, 90, 0.15) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

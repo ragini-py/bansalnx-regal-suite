@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -29,8 +29,8 @@ export function AuthPromptDialog({
   onOpenChange: (open: boolean) => void;
   intent: "wishlist" | "cart" | "checkout";
 }) {
-  const router = useRouter();
-  const redirect = router.state.location.href;
+  const location = useLocation();
+  const redirect = location.pathname + location.search;
   const { title, description } = copy[intent];
 
   return (
@@ -46,12 +46,18 @@ export function AuthPromptDialog({
           </DialogDescription>
           <div className="mt-8 flex w-full flex-col gap-3">
             <Button asChild variant="luxe" size="luxe">
-              <Link to="/login" search={{ redirect }} onClick={() => onOpenChange(false)}>
+              <Link
+                to={`/login?redirect=${encodeURIComponent(redirect)}`}
+                onClick={() => onOpenChange(false)}
+              >
                 Login
               </Link>
             </Button>
             <Button asChild variant="luxeOutline" size="luxe">
-              <Link to="/register" search={{ redirect }} onClick={() => onOpenChange(false)}>
+              <Link
+                to={`/register?redirect=${encodeURIComponent(redirect)}`}
+                onClick={() => onOpenChange(false)}
+              >
                 Create Account
               </Link>
             </Button>

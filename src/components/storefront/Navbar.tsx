@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,10 +16,10 @@ import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
-  { label: "Home", to: "/" as const },
-  { label: "Shop", to: "/products" as const },
-  { label: "Collections", to: "/collections" as const },
-  { label: "About", to: "/about" as const },
+  { label: "Home", to: "/" },
+  { label: "Shop", to: "/products" },
+  { label: "Collections", to: "/collections" },
+  { label: "About", to: "/about" },
 ];
 
 export function AnnouncementBar() {
@@ -59,24 +59,21 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
             p.tags.some((t) => t.includes(q))),
       )
       .slice(0, 6);
-  }, [query, products]);
-
-  useEffect(() => {
-    if (!open) setQuery("");
-  }, [open]);
+  }, [products, query]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-24 max-w-2xl translate-y-0 gap-0 rounded-none border-border bg-background p-0">
+      <DialogContent className="max-w-xl gap-0 rounded-none border-border bg-background p-0 sm:top-[28%]">
         <DialogTitle className="sr-only">Search products</DialogTitle>
         <DialogDescription className="sr-only">
-          Search the Bansal-nx catalogue by name, category or fabric.
+          Search the Bansal-nx catalogue by keyword, occasion, fabric or category.
         </DialogDescription>
         <div className="flex items-center gap-3 border-b border-border px-5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input
-            autoFocus
+            type="search"
             value={query}
+            autoFocus
             maxLength={80}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a piece, fabric or occasion"
@@ -94,8 +91,7 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
             {results.map((product) => (
               <li key={product.id}>
                 <Link
-                  to="/products/$slug"
-                  params={{ slug: product.slug }}
+                  to={`/products/${product.slug}`}
                   onClick={() => onOpenChange(false)}
                   className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-muted"
                 >
@@ -121,7 +117,7 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
           {query.trim().length >= 2 && (
             <div className="border-t border-border p-4">
               <Button asChild variant="luxeOutline" size="luxeSm" className="w-full">
-                <Link to="/products" search={{ q: query.trim() }} onClick={() => onOpenChange(false)}>
+                <Link to={`/products?q=${encodeURIComponent(query.trim())}`} onClick={() => onOpenChange(false)}>
                   See all results
                 </Link>
               </Button>
@@ -145,11 +141,11 @@ function CountBadge({ count }: { count: number }) {
 export function Navbar() {
   const { cartCount, wishlist, isAuthenticated, isAdmin, setCartDrawerOpen, user, logout } =
     useStore();
-  const router = useRouter();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = router.state.location.pathname;
+  const pathname = location.pathname;
 
   useEffect(() => {
     function onScroll() {
@@ -227,8 +223,7 @@ export function Navbar() {
                 </Link>
               ) : (
                 <Link
-                  to="/login"
-                  search={{ redirect: "/account" }}
+                  to="/login?redirect=/account"
                   aria-label="Sign in"
                   className="hidden h-9 w-9 place-items-center transition-colors hover:text-gold-deep sm:grid"
                 >
@@ -259,8 +254,8 @@ export function Navbar() {
             <nav className="flex-1 overflow-y-auto px-6 py-6" aria-label="Mobile">
               <ul className="space-y-1">
                 {[
-                  { label: "Shop", to: "/products" as const },
-                  { label: "Collections", to: "/collections" as const },
+                  { label: "Shop", to: "/products" },
+                  { label: "Collections", to: "/collections" },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link
@@ -274,8 +269,7 @@ export function Navbar() {
                 ))}
                 <li>
                   <Link
-                    to="/products"
-                    search={{ sort: "newest" }}
+                    to="/products?sort=newest"
                     onClick={() => setMenuOpen(false)}
                     className="block py-3 font-display text-2xl"
                   >
@@ -284,8 +278,7 @@ export function Navbar() {
                 </li>
                 <li>
                   <Link
-                    to="/products"
-                    search={{ sort: "best-selling" }}
+                    to="/products?sort=best-selling"
                     onClick={() => setMenuOpen(false)}
                     className="block py-3 font-display text-2xl"
                   >
@@ -296,11 +289,11 @@ export function Navbar() {
               <div className="rule-gold my-6" />
               <ul className="space-y-3">
                 {[
-                  { label: `Account${isAuthenticated ? "" : " / Sign in"}`, to: isAuthenticated ? ("/account" as const) : ("/login" as const) },
-                  { label: `Wishlist (${wishlist.length})`, to: "/wishlist" as const },
-                  { label: "Track Order", to: "/track" as const },
-                  { label: "About", to: "/about" as const },
-                  { label: "Contact", to: "/contact" as const },
+                  { label: `Account${isAuthenticated ? "" : " / Sign in"}`, to: isAuthenticated ? "/account" : "/login" },
+                  { label: `Wishlist (${wishlist.length})`, to: "/wishlist" },
+                  { label: "Track Order", to: "/track" },
+                  { label: "About", to: "/about" },
+                  { label: "Contact", to: "/contact" },
                 ].map((item) => (
                   <li key={item.label}>
                     <Link

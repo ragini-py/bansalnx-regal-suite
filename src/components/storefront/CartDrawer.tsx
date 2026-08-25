@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 
 import { EmptyState } from "@/components/common/SectionHeading";
@@ -52,8 +52,7 @@ export function CartDrawer() {
               {cartLines.map((line) => (
                 <li key={line.variantId} className="flex gap-4 py-5">
                   <Link
-                    to="/products/$slug"
-                    params={{ slug: line.product.slug }}
+                    to={`/products/${line.product.slug}`}
                     onClick={() => setCartDrawerOpen(false)}
                     className="shrink-0"
                   >

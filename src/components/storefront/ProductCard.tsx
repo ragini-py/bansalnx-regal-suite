@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ const badgeLabel: Record<string, string> = {
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const { isWishlisted, toggleWishlist, isAuthenticated, setPendingIntent } = useStore();
-  const router = useRouter();
+  const location = useLocation();
   const [promptOpen, setPromptOpen] = useState(false);
   const saved = isWishlisted(product.id);
   const off = discountPercent(product.mrp, product.price);
@@ -30,7 +30,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       setPendingIntent({
         type: "wishlist",
         productId: product.id,
-        returnTo: router.state.location.href,
+        returnTo: location.pathname + location.search,
       });
       setPromptOpen(true);
       return;
@@ -45,8 +45,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
     <>
       <article className="group relative flex flex-col">
         <Link
-          to="/products/$slug"
-          params={{ slug: product.slug }}
+          to={`/products/${product.slug}`}
           className="focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           aria-label={product.name}
         >
@@ -103,8 +102,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             {product.category}
           </p>
           <Link
-            to="/products/$slug"
-            params={{ slug: product.slug }}
+            to={`/products/${product.slug}`}
             className="link-underline self-start font-display text-lg leading-snug"
           >
             {product.name}

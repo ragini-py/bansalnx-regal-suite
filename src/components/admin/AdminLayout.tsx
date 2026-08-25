@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -97,7 +97,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export function AdminLayout({ title, children }: { title?: string; children: ReactNode }) {
   const { user, isAdmin, logout } = useStore();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const location = useLocation();
+  const pathname = location.pathname;
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -144,7 +145,7 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
                 size="sm"
                 onClick={() => {
                   logout();
-                  navigate({ to: "/" });
+                  navigate("/");
                 }}
               >
                 <LogOut className="h-3.5 w-3.5" /> Sign out
@@ -184,7 +185,7 @@ export function AdminGuard({
             You need an admin account to view the Bansal-nx admin console.
           </p>
           <Button asChild variant="luxe" size="luxe" className="mt-6 w-full">
-            <Link to="/login" search={{ redirect: "/admin" }}>
+            <Link to="/login?redirect=/admin">
               Go to login
             </Link>
           </Button>

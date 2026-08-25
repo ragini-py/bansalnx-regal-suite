@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -14,40 +13,67 @@ const columns = [
   {
     title: "Shop",
     links: [
-      { label: "All Products", to: "/products" as const },
-      { label: "Collections", to: "/collections" as const },
-      { label: "New Arrivals", to: "/products" as const, search: { sort: "newest" } },
-      { label: "Best Sellers", to: "/products" as const, search: { sort: "best-selling" } },
+      { label: "All Products", to: "/products" },
+      { label: "Collections", to: "/collections" },
+      { label: "New Arrivals", to: "/products?sort=newest" },
+      { label: "Best Sellers", to: "/products?sort=best-selling" },
     ],
   },
   {
     title: "Customer Care",
     links: [
-      { label: "Contact", to: "/contact" as const },
-      { label: "Shipping", to: "/shipping" as const },
-      { label: "Returns", to: "/returns" as const },
-      { label: "FAQs", to: "/faqs" as const },
-      { label: "Track Order", to: "/track" as const },
+      { label: "Contact", to: "/contact" },
+      { label: "Shipping", to: "/shipping" },
+      { label: "Returns", to: "/returns" },
+      { label: "FAQs", to: "/faqs" },
+      { label: "Track Order", to: "/track" },
     ],
   },
   {
     title: "Account",
     links: [
-      { label: "My Account", to: "/account" as const },
-      { label: "Orders", to: "/account/orders" as const },
-      { label: "Wishlist", to: "/wishlist" as const },
+      { label: "My Account", to: "/account" },
+      { label: "Orders", to: "/account/orders" },
+      { label: "Wishlist", to: "/wishlist" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", to: "/about" as const },
-      { label: "Privacy Policy", to: "/privacy" as const },
-      { label: "Terms", to: "/terms" as const },
-      { label: "Refund Policy", to: "/refund-policy" as const },
+      { label: "About", to: "/about" },
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms", to: "/terms" },
+      { label: "Refund Policy", to: "/returns" },
     ],
   },
 ];
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
+function YoutubeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+      <polygon points="10 15 15 12 10 9 10 15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 export function Footer() {
   const { settings } = useStore();
@@ -116,9 +142,9 @@ export function Footer() {
             </form>
             <div className="mt-8 flex gap-5">
               {[
-                { Icon: Instagram, label: "Instagram" },
-                { Icon: Facebook, label: "Facebook" },
-                { Icon: Youtube, label: "YouTube" },
+                { Icon: InstagramIcon, label: "Instagram" },
+                { Icon: FacebookIcon, label: "Facebook" },
+                { Icon: YoutubeIcon, label: "YouTube" },
               ].map(({ Icon, label }) => (
                 <a
                   key={label}
@@ -128,7 +154,7 @@ export function Footer() {
                   aria-label={label}
                   className="text-pearl/60 transition-colors hover:text-gold"
                 >
-                  <Icon className="h-4 w-4" strokeWidth={1.4} />
+                  <Icon className="h-4 w-4" />
                 </a>
               ))}
             </div>
@@ -145,7 +171,6 @@ export function Footer() {
                     <li key={link.label}>
                       <Link
                         to={link.to}
-                        search={"search" in link ? (link.search as never) : undefined}
                         className="text-sm text-pearl/70 transition-colors hover:text-gold"
                       >
                         {link.label}

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
@@ -10,13 +9,13 @@ import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { label: "Overview", to: "/account" as const },
-  { label: "Orders", to: "/account/orders" as const },
-  { label: "Wishlist", to: "/wishlist" as const },
-  { label: "Addresses", to: "/account/addresses" as const },
-  { label: "Coupons", to: "/account/coupons" as const },
-  { label: "Profile", to: "/account/profile" as const },
-  { label: "Settings", to: "/account/settings" as const },
+  { label: "Overview", to: "/account" },
+  { label: "Orders", to: "/account/orders" },
+  { label: "Wishlist", to: "/wishlist" },
+  { label: "Addresses", to: "/account/addresses" },
+  { label: "Coupons", to: "/account/coupons" },
+  { label: "Profile", to: "/account/profile" },
+  { label: "Settings", to: "/account/settings" },
 ];
 
 export function AccountGate() {
@@ -37,12 +36,12 @@ export function AccountGate() {
           </p>
           <div className="mt-8 flex w-full flex-col gap-3">
             <Button asChild variant="luxe" size="luxe">
-              <Link to="/login" search={{ redirect: "/account" }}>
+              <Link to="/login?redirect=/account">
                 Login
               </Link>
             </Button>
             <Button asChild variant="luxeOutline" size="luxe">
-              <Link to="/register" search={{ redirect: "/account" }}>
+              <Link to="/register?redirect=/account">
                 Create Account
               </Link>
             </Button>
@@ -63,12 +62,13 @@ export function AccountLayout({
   children: ReactNode;
 }) {
   const { logout } = useStore();
-  const router = useRouter();
-  const currentPath = router.state.location.pathname;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPath = location.pathname;
 
   function handleSignOut() {
     logout();
-    router.navigate({ to: "/" });
+    navigate("/");
   }
 
   return (
