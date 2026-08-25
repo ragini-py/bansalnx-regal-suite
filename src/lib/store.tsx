@@ -644,9 +644,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       patch((prev) => ({
         ...prev,
         welcomeOfferSeen: true,
-        claimedCoupons: Array.from(new Set([...prev.claimedCoupons, "FIRSTATELIER"])),
+        claimedCoupons: Array.from(new Set([...prev.claimedCoupons, "FIRSTORDER"])),
       }));
-      return "FIRSTATELIER";
+      return "FIRSTORDER";
     },
     claimedCoupons: state.claimedCoupons,
   };

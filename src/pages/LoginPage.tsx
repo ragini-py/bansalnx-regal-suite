@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,7 +93,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <SiteLayout>
+      <div className="grid min-h-[85vh] lg:grid-cols-2">
       <div className="relative hidden lg:block">
         <img src={hero} alt="" className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-ink/40" />
@@ -199,5 +201,6 @@ export function LoginPage() {
         </div>
       </div>
     </div>
+    </SiteLayout>
   );
 }

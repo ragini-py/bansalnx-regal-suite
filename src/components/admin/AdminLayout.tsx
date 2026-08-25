@@ -53,7 +53,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
   const { hasPermission } = useStore();
   const items = NAV_ITEMS.filter((item) => !item.permission || hasPermission(item.permission));
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-1 px-3 py-3">
       {items.map((item) => {
         const active = pathname === item.to;
         const Icon = item.icon;
@@ -63,14 +63,14 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
             to={item.to}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 text-sm transition-colors",
+              "flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg transition-all",
               active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-semibold"
+                : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900",
             )}
           >
-            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="uppercase tracking-[0.08em] text-[12px]">{item.label}</span>
+            <Icon className={cn("h-4 w-4 shrink-0", active ? "text-amber-700" : "text-slate-400")} aria-hidden="true" />
+            <span>{item.label}</span>
           </Link>
         );
       })}
@@ -80,15 +80,16 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
 
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2 border-b border-sidebar-border px-5 py-6">
-        <BrandMark size="sm" tone="onDark" />
+    <div className="flex h-full flex-col bg-slate-50/80 border-r border-slate-200 text-slate-800">
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5 bg-white">
+        <BrandMark size="sm" />
       </div>
-      <div className="flex-1 overflow-y-auto px-3 py-4">
+      <div className="flex-1 overflow-y-auto">
         <NavList pathname={pathname} onNavigate={onNavigate} />
       </div>
-      <div className="border-t border-sidebar-border px-5 py-4 text-[11px] uppercase tracking-[0.15em] text-sidebar-foreground/50">
-        Bansal-nx Admin
+      <div className="border-t border-slate-200 px-5 py-4 text-xs text-slate-500 bg-white">
+        <p className="font-semibold text-slate-700">Store Administration</p>
+        <p className="text-[11px] text-slate-400 mt-0.5">Bansal·nx Suite</p>
       </div>
     </div>
   );
@@ -102,13 +103,13 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-slate-50/40">
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col">
         <SidebarContent pathname={pathname} />
       </div>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background px-4 py-3 sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 backdrop-blur-md px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -116,25 +117,25 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 border-none bg-sidebar p-0 text-sidebar-foreground">
+              <SheetContent side="left" className="w-64 border-r border-slate-200 bg-slate-50 p-0 text-slate-800">
                 <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
-            <h1 className="font-display text-lg text-foreground sm:text-xl">{title ?? "Admin"}</h1>
+            <h1 className="font-display font-semibold text-base sm:text-lg text-slate-900">{title ?? "Admin"}</h1>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
             {isAdmin && user && (
               <div className="hidden text-right sm:block">
-                <p className="text-sm font-medium leading-tight text-foreground">
+                <p className="text-xs font-semibold leading-tight text-slate-800">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <p className="text-[10px] uppercase font-medium tracking-wider text-slate-500">
                   {roleLabel(user.role)}
                 </p>
               </div>
             )}
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50" asChild>
               <Link to="/">
                 <ExternalLink className="h-3.5 w-3.5" /> View store
               </Link>
@@ -143,6 +144,7 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 onClick={() => {
                   logout();
                   navigate("/");

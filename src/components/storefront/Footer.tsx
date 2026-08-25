@@ -93,54 +93,54 @@ export function Footer() {
     window.setTimeout(() => {
       setSending(false);
       setEmail("");
-      toast.success("You're on the list", {
+      toast.success("You're subscribed", {
         description: "We'll write when a new collection arrives.",
       });
     }, 700);
   }
 
   return (
-    <footer className="mt-24 border-t border-border bg-ink text-pearl">
-      <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 lg:px-12">
+    <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-800">
+      <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
           <div>
-            <BrandMark size="md" tone="onDark" />
-            <p className="mt-6 max-w-xs text-[10px] uppercase tracking-[0.3em] text-pearl/60">
+            <BrandMark size="md" />
+            <p className="mt-4 max-w-xs text-xs font-semibold uppercase tracking-wider text-slate-500">
               {settings.tagline}
             </p>
-            <p className="mt-6 max-w-sm text-sm leading-relaxed text-pearl/60">
-              Made to order in India. Hand-embroidered by our karigars in small numbers.
+            <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600">
+              Made to order in India. Hand-embroidered by master karigars in limited bespoke editions.
             </p>
-            <form onSubmit={subscribe} className="mt-8 max-w-sm" noValidate>
+            <form onSubmit={subscribe} className="mt-6 max-w-sm" noValidate>
               <label
                 htmlFor="footer-email"
-                className="text-[10px] uppercase tracking-[0.28em] text-pearl/70"
+                className="text-xs font-medium text-slate-700"
               >
-                Newsletter
+                Join Our Newsletter
               </label>
-              <div className="mt-3 flex">
+              <div className="mt-2 flex gap-2">
                 <input
                   id="footer-email"
                   type="email"
                   value={email}
                   maxLength={255}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
+                  placeholder="Your email address"
                   aria-invalid={!!error}
                   aria-describedby={error ? "footer-email-error" : undefined}
-                  className="h-11 w-full border border-pearl/25 bg-transparent px-4 text-sm text-pearl placeholder:text-pearl/40 focus:border-gold focus:outline-none"
+                  className="h-10 w-full border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 rounded-md placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
                 />
-                <Button type="submit" variant="gold" size="luxeSm" disabled={sending} className="h-11">
+                <Button type="submit" variant="luxe" size="sm" disabled={sending} className="h-10 shrink-0 font-medium">
                   {sending ? "…" : "Subscribe"}
                 </Button>
               </div>
               {error && (
-                <p id="footer-email-error" className="mt-2 text-xs text-destructive">
+                <p id="footer-email-error" className="mt-1.5 text-xs text-destructive">
                   {error}
                 </p>
               )}
             </form>
-            <div className="mt-8 flex gap-5">
+            <div className="mt-6 flex gap-4">
               {[
                 { Icon: InstagramIcon, label: "Instagram" },
                 { Icon: FacebookIcon, label: "Facebook" },
@@ -152,7 +152,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={label}
-                  className="text-pearl/60 transition-colors hover:text-gold"
+                  className="text-slate-400 transition-colors hover:text-slate-900"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -160,18 +160,18 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {columns.map((column) => (
               <nav key={column.title} aria-label={column.title}>
-                <h3 className="text-[10px] uppercase tracking-[0.28em] text-pearl/70">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
                   {column.title}
                 </h3>
-                <ul className="mt-5 space-y-3">
+                <ul className="mt-4 space-y-2.5">
                   {column.links.map((link) => (
                     <li key={link.label}>
                       <Link
                         to={link.to}
-                        className="text-sm text-pearl/70 transition-colors hover:text-gold"
+                        className="text-xs sm:text-sm text-slate-600 transition-colors hover:text-slate-900 font-medium"
                       >
                         {link.label}
                       </Link>
@@ -183,8 +183,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-pearl/15 pt-8 text-[11px] text-pearl/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Bansal-nx. All rights reserved.</p>
+        <div className="mt-12 flex flex-col gap-3 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Bansal·nx. All rights reserved.</p>
           <p>
             {settings.supportEmail} · {settings.supportPhone}
           </p>

@@ -9,29 +9,29 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background shadow-sm hover:bg-secondary hover:text-foreground",
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        /* Luxury storefront variants — design-system owned, no ad hoc colours */
-        luxe: "rounded-none bg-primary text-primary-foreground uppercase tracking-[0.22em] text-[11px] hover:bg-gold hover:text-ink transition-all duration-500",
+        /* Minimalist luxury storefront variants */
+        luxe: "bg-slate-900 text-white font-medium text-xs sm:text-sm hover:bg-slate-800 transition-colors shadow-sm rounded-md",
         luxeOutline:
-          "rounded-none border border-primary/25 bg-transparent text-foreground uppercase tracking-[0.22em] text-[11px] hover:border-gold hover:text-gold-deep transition-all duration-500",
+          "border border-slate-300 bg-white text-slate-800 font-medium text-xs sm:text-sm hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm rounded-md",
         onImage:
-          "rounded-none border border-ivory/70 bg-ivory/10 text-ivory uppercase tracking-[0.22em] text-[11px] backdrop-blur-sm hover:bg-ivory hover:text-ink transition-all duration-500",
-        gold: "rounded-none bg-gold text-ink uppercase tracking-[0.22em] text-[11px] hover:bg-gold-deep hover:text-ivory transition-all duration-500",
+          "border border-white/60 bg-white/20 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-slate-900 transition-colors rounded-md",
+        gold: "bg-amber-700 text-white font-medium text-xs sm:text-sm hover:bg-amber-800 transition-colors shadow-sm rounded-md",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
+        lg: "h-10 rounded-md px-6 text-sm",
         icon: "h-9 w-9",
-        luxe: "h-12 px-8",
-        luxeLg: "h-14 px-12",
-        luxeSm: "h-10 px-6",
+        luxe: "h-11 px-6",
+        luxeLg: "h-12 px-8",
+        luxeSm: "h-9 px-4",
       },
     },
     defaultVariants: {

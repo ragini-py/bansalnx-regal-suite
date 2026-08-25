@@ -234,7 +234,7 @@ export function ProductsPage() {
           />
         }
         title={search.q ? `Results for “${search.q}”` : "Shop All"}
-        description="Every piece is made to order in our Jaipur atelier. Allow four to six weeks for ceremonial styles."
+        description="Every piece is handcrafted to perfection in Jaipur. Allow four to six weeks for custom ceremonial styles."
         meta={
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             {results.length} {results.length === 1 ? "piece" : "pieces"}
@@ -322,7 +322,7 @@ export function ProductsPage() {
             ) : (
               <EmptyState
                 title="Nothing matches that yet"
-                description="Try removing a filter or exploring the full catalogue — the atelier adds new pieces weekly."
+                description="Try removing a filter or exploring the full catalogue — we add new pieces weekly."
                 action={
                   <Button variant="luxe" size="luxe" onClick={clearAll}>
                     Clear filters

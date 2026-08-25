@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 
+import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,12 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-16 sm:px-10">
+    <SiteLayout>
+      <PageHeader
+        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Reset Password" }]} />}
+        title="Reset Password"
+      />
+      <div className="flex min-h-[60vh] items-center justify-center bg-secondary/20 px-5 py-16 sm:px-10">
       <div className="w-full max-w-sm border border-border bg-background px-6 py-10 sm:px-10">
         <div className="flex justify-center">
           <BrandMark size="md" />
@@ -95,5 +101,6 @@ export function ForgotPasswordPage() {
         </p>
       </div>
     </div>
+    </SiteLayout>
   );
 }

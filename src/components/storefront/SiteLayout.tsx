@@ -37,14 +37,14 @@ export function PageHeader({
   meta?: ReactNode | undefined;
 }) {
   return (
-    <div className="border-b border-border bg-secondary/40">
-      <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
+    <div className="border-b border-slate-200 bg-slate-50/50">
+      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
         {breadcrumb}
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <h1 className="text-3xl leading-tight sm:text-4xl lg:text-[2.9rem]">{title}</h1>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-slate-900 tracking-tight">{title}</h1>
             {description && (
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500">{description}</p>
             )}
           </div>
           {meta}
@@ -57,11 +57,11 @@ export function PageHeader({
 export function Breadcrumbs({ items }: { items: { label: string; href?: ReactNode }[] }) {
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <ol className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
         {items.map((item, i) => (
           <li key={item.label} className="flex items-center gap-2">
-            {item.href ?? <span aria-current="page">{item.label}</span>}
-            {i < items.length - 1 && <span aria-hidden="true">/</span>}
+            {item.href ?? <span aria-current="page" className="text-slate-800 font-semibold">{item.label}</span>}
+            {i < items.length - 1 && <span aria-hidden="true" className="text-slate-300">/</span>}
           </li>
         ))}
       </ol>

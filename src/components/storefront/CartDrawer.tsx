@@ -36,10 +36,10 @@ export function CartDrawer() {
             <div className="w-full">
               <EmptyState
                 icon={<ShoppingBag className="h-7 w-7" strokeWidth={1} />}
-                title="Your bag is waiting."
-                description="Nothing here yet. Explore the atelier and add a piece you'll keep."
+                title="Your bag is empty"
+                description="Nothing here yet. Explore our collection and add a handcrafted piece you'll cherish."
                 action={
-                  <Button asChild variant="luxe" size="luxe" onClick={() => setCartDrawerOpen(false)}>
+                  <Button asChild variant="luxe" size="lg" onClick={() => setCartDrawerOpen(false)}>
                     <Link to="/products">Shop the collection</Link>
                   </Button>
                 }

@@ -59,10 +59,10 @@ export function CartPage() {
         {cartLines.length === 0 ? (
           <EmptyState
             icon={<ShoppingBag className="h-8 w-8" strokeWidth={1} />}
-            title="Your bag is waiting."
-            description="Nothing here yet. Explore the atelier and add a piece you'll keep for a lifetime."
+            title="Your bag is empty"
+            description="Nothing here yet. Explore our handcrafted collection and add a piece you'll cherish."
             action={
-              <Button asChild variant="luxe" size="luxe">
+              <Button asChild variant="luxe" size="lg">
                 <Link to="/products">Shop the Collection</Link>
               </Button>
             }

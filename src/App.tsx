@@ -22,6 +22,7 @@ import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { AccountPage } from "@/pages/AccountPage";
 import { AccountOrdersPage } from "@/pages/AccountOrdersPage";
 import { AdminPage } from "@/pages/AdminPage";
+import { DashboardPage } from "@/pages/DashboardPage";
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
 import { TrackPage } from "@/pages/TrackPage";
 import { WishlistPage } from "@/pages/WishlistPage";
@@ -61,13 +62,24 @@ export function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          
+          {/* Unified Dashboard Entry Point */}
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/*" element={<DashboardPage />} />
+
+          {/* Account Routes */}
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/orders" element={<AccountOrdersPage />} />
           <Route path="/account/orders/:id" element={<OrderConfirmationPage />} />
-          <Route path="/account/coupons" element={<AccountPage />} />
-          <Route path="/account/addresses" element={<AccountPage />} />
+          <Route path="/account/coupons" element={<AccountPage initialTab="coupons" />} />
+          <Route path="/account/addresses" element={<AccountPage initialTab="addresses" />} />
+          <Route path="/account/wishlist" element={<AccountPage initialTab="wishlist" />} />
+
+          {/* Admin Management Routes */}
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/*" element={<AdminPage />} />
+
+          {/* Utility Routes */}
           <Route path="/order/:id" element={<OrderConfirmationPage />} />
           <Route path="/track" element={<TrackPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />

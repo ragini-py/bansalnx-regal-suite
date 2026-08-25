@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2, ShoppingBag, XCircle } from "lucide-react";
 import { z } from "zod";
 
+import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { EmptyState } from "@/components/common/SectionHeading";
-import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,33 +39,6 @@ const emptyAddressForm: AddressForm = {
 };
 
 type PaymentState = "idle" | "processing" | "failed";
-
-function ShellHeader() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
-        <Link to="/">
-          <BrandMark size="sm" />
-        </Link>
-        <Link
-          to="/cart"
-          className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground link-underline"
-        >
-          Return to bag
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function CheckoutShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <ShellHeader />
-      <main className="flex-1">{children}</main>
-    </div>
-  );
-}
 
 export function CheckoutPage() {
   const {
@@ -178,12 +151,16 @@ export function CheckoutPage() {
 
   if (!isAuthenticated) {
     return (
-      <CheckoutShell>
-        <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-5 text-center">
-          <BrandMark size="md" />
-          <h1 className="mt-8 font-display text-3xl">Sign in to check out</h1>
+      <SiteLayout>
+        <PageHeader
+          breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]} />}
+          title="Secure Checkout"
+          description="Sign in to complete your luxury bespoke purchase."
+        />
+        <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center px-5 py-16 text-center">
+          <h2 className="font-display text-2xl">Sign in to complete checkout</h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Create an account or sign in to complete your order and track it with ease.
+            Sign in to apply saved addresses, track your order, and access exclusive privileges.
           </p>
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
             <Button
@@ -214,18 +191,22 @@ export function CheckoutPage() {
             </Button>
           </div>
         </div>
-      </CheckoutShell>
+      </SiteLayout>
     );
   }
 
   if (cartLines.length === 0) {
     return (
-      <CheckoutShell>
+      <SiteLayout>
+        <PageHeader
+          breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]} />}
+          title="Checkout"
+        />
         <div className="mx-auto max-w-lg px-5 py-24">
           <EmptyState
             icon={<ShoppingBag className="h-8 w-8" strokeWidth={1} />}
             title="Your bag is empty"
-            description="Add something beautiful before you check out."
+            description="Add handcrafted pieces before proceeding to checkout."
             action={
               <Button asChild variant="luxe" size="luxe">
                 <Link to="/products">Shop the Collection</Link>
@@ -233,14 +214,18 @@ export function CheckoutPage() {
             }
           />
         </div>
-      </CheckoutShell>
+      </SiteLayout>
     );
   }
 
   return (
-    <CheckoutShell>
+    <SiteLayout>
+      <PageHeader
+        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Cart", href: <Link to="/cart">Cart</Link> }, { label: "Checkout" }]} />}
+        title="Secure Checkout"
+        description="Encrypted 256-bit checkout · Delhivery Insured Shipping"
+      />
       <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 lg:px-12">
-        <h1 className="font-display text-3xl">Checkout</h1>
 
         <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
           <div className="space-y-10">
@@ -527,7 +512,7 @@ export function CheckoutPage() {
           </div>
         </div>
       )}
-    </CheckoutShell>
+    </SiteLayout>
   );
 }
 

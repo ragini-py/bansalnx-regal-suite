@@ -118,14 +118,14 @@ export function ContactPage() {
           </form>
 
           <div>
-            <h2 className="text-2xl">The atelier</h2>
+            <h2 className="text-2xl font-bold text-slate-900 font-sans">Our Studio</h2>
             <dl className="mt-6 space-y-6 text-sm leading-relaxed">
               <div className="flex gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
                 <div>
-                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Address</dt>
-                  <dd className="mt-1">
-                    Bansal-nx Atelier, C-Scheme,
+                  <dt className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Address</dt>
+                  <dd className="mt-1 text-slate-700">
+                    Bansal·nx Studio, C-Scheme,
                     <br />
                     Jaipur, Rajasthan 302001, India
                   </dd>

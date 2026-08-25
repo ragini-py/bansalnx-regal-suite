@@ -12,7 +12,7 @@ import type {
 export const storeSettings: StoreSettings = {
   brandName: "Bansal-nx",
   tagline: "CRAFTED FOR THE EXTRAORDINARY YOU",
-  supportEmail: "atelier@bansal-nx.com",
+  supportEmail: "support@bansal-nx.com",
   supportPhone: "+91 98110 45500",
   codEnabled: true,
   razorpayEnabled: true,
@@ -84,7 +84,7 @@ export function permissionsForRole(role: User["role"]): PermissionKey[] {
 export const coupons: Coupon[] = [
   {
     id: "cpn-1",
-    code: "FIRSTATELIER",
+    code: "FIRSTORDER",
     type: "percent",
     value: 10,
     minOrder: 10000,
@@ -320,7 +320,7 @@ export const orders: Order[] = [
           status: "ready_for_pickup",
           label: "Ready for Pickup",
           at: "2026-08-16T10:10:00.000Z",
-          location: "Jaipur Atelier",
+          location: "Jaipur Studio",
         },
         {
           status: "shipped",
@@ -564,7 +564,7 @@ export const homepageContent: HomepageContent = {
     eyebrow: "Autumn Ceremony 2026",
     heading: "An heirloom in the making",
     subheading:
-      "Hand-embroidered silks and handloom weaves, made to order in our atelier for the women who wear them.",
+      "Hand-embroidered silks and handloom weaves, made to order in our Jaipur studio for the women who wear them.",
     primaryCta: "SHOP NOW",
     secondaryCta: "EXPLORE COLLECTIONS",
   },

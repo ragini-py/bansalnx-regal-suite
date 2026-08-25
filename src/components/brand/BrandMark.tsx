@@ -59,13 +59,13 @@ export function BrandMark({
 
   return (
     <span className={cn("inline-flex items-center gap-2.5", toneClass, className)}>
-      <span className={cn(glyph, "shrink-0 text-gold")}>
+      <span className={cn(glyph, "shrink-0 text-amber-700")}>
         <PeacockGlyph />
       </span>
       <span className="flex flex-col leading-none">
-        <span className={cn("font-display font-normal tracking-[0.06em]", word)}>Bansal-nx</span>
+        <span className={cn("font-display font-bold tracking-tight text-slate-900", word)}>Bansal<span className="text-amber-700 font-medium">·nx</span></span>
         {withTagline && (
-          <span className="mt-1.5 text-[9px] uppercase tracking-[0.3em] opacity-70">
+          <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-slate-500">
             Crafted for the extraordinary you
           </span>
         )}

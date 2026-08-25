@@ -41,8 +41,8 @@ export function AboutPage() {
             <div className="mt-6 space-y-5 text-sm leading-relaxed text-muted-foreground">
               <p>
                 Bansal-nx began in Jaipur — a city where centuries of embroidery, block-printing and
-                hand-loom weaving live in the same lanes as its bazaars. We started as a small
-                atelier working with a handful of karigars, and that intimacy remains the spine of
+                hand-loom weaving live in the same lanes as its bazaars. We started as a dedicated
+                design studio working with a handful of karigars, and that intimacy remains the spine of
                 everything we make.
               </p>
               <p>
@@ -78,14 +78,14 @@ export function AboutPage() {
             />
           </div>
           <div className="flex flex-col justify-center">
-            <p className="eyebrow text-gold">The atelier</p>
+            <p className="eyebrow text-gold">The Studio</p>
             <h2 className="mt-4 text-3xl leading-tight sm:text-4xl">
               CRAFTED FOR THE EXTRAORDINARY YOU
             </h2>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
               This is more than a tagline — it's a standard. We hold every silhouette, embroidery
               and finish to the same question: would this be worthy of a moment that matters?
-              Anything less doesn't leave the atelier.
+              Anything less doesn't leave our doors.
             </p>
           </div>
         </div>

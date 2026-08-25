@@ -80,21 +80,21 @@ export function AccountLayout({
         title={title}
         description={description}
       />
-      <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
-        <div className="grid gap-8 lg:grid-cols-[220px_1fr] lg:gap-12">
-          <nav aria-label="Account navigation" className="lg:border lg:border-border/70">
-            <ul className="flex gap-1 overflow-x-auto whitespace-nowrap border-b border-border/70 lg:flex-col lg:overflow-visible lg:border-b-0">
+      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
+        <div className="grid gap-8 lg:grid-cols-[220px_1fr] lg:gap-10">
+          <nav aria-label="Account navigation" className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-fit">
+            <ul className="flex gap-1 overflow-x-auto whitespace-nowrap lg:flex-col lg:overflow-visible">
               {NAV_ITEMS.map((item) => {
                 const active = currentPath === item.to;
                 return (
-                  <li key={item.to} className="shrink-0 lg:w-full lg:border-b lg:border-border/70 lg:last:border-b-0">
+                  <li key={item.to} className="shrink-0 lg:w-full">
                     <Link
                       to={item.to}
                       data-active={active || undefined}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "block px-4 py-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground",
-                        "data-[active]:border-b-2 data-[active]:border-gold data-[active]:text-foreground lg:data-[active]:border-b-0 lg:data-[active]:border-l-2 lg:data-[active]:bg-secondary/40",
+                        "block px-3.5 py-2 text-xs font-medium rounded-lg transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                        "data-[active]:bg-slate-900 data-[active]:text-white data-[active]:font-semibold data-[active]:shadow-xs",
                       )}
                     >
                       {item.label}
@@ -103,12 +103,12 @@ export function AccountLayout({
                 );
               })}
             </ul>
-            <div className="hidden p-4 lg:block">
+            <div className="hidden pt-3 mt-3 border-t border-slate-100 lg:block">
               <Button
                 type="button"
-                variant="luxeOutline"
-                size="luxeSm"
-                className="w-full gap-2"
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-xs font-medium text-slate-600 hover:text-slate-900 border-slate-200"
                 onClick={handleSignOut}
               >
                 <LogOut className="h-3.5 w-3.5" aria-hidden="true" />

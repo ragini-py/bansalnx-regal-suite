@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 
+import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,26 +63,37 @@ export function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-16 sm:px-10">
-        <div className="w-full max-w-sm border border-border bg-background px-6 py-10 text-center sm:px-10">
-          <BrandMark size="md" className="mx-auto" />
-          <h1 className="mt-6 text-2xl">Invalid or expired link</h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            This password reset link is invalid or has expired. Please request a new one.
-          </p>
-          <Link
-            to="/forgot-password"
-            className="mt-8 inline-block text-sm text-foreground link-underline"
-          >
-            Request a new link
-          </Link>
+      <SiteLayout>
+        <PageHeader
+          breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Reset Password" }]} />}
+          title="Reset Password"
+        />
+        <div className="flex min-h-[60vh] items-center justify-center bg-secondary/20 px-5 py-16 sm:px-10">
+          <div className="w-full max-w-sm border border-border bg-background px-6 py-10 text-center sm:px-10">
+            <BrandMark size="md" className="mx-auto" />
+            <h1 className="mt-6 text-2xl">Invalid or expired link</h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              This password reset link is invalid or has expired. Please request a new one.
+            </p>
+            <Link
+              to="/forgot-password"
+              className="mt-8 inline-block text-sm text-foreground link-underline"
+            >
+              Request a new link
+            </Link>
+          </div>
         </div>
-      </div>
+      </SiteLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-5 py-16 sm:px-10">
+    <SiteLayout>
+      <PageHeader
+        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Reset Password" }]} />}
+        title="Set New Password"
+      />
+      <div className="flex min-h-[60vh] items-center justify-center bg-secondary/20 px-5 py-16 sm:px-10">
       <div className="w-full max-w-sm border border-border bg-background px-6 py-10 sm:px-10">
         <div className="flex justify-center">
           <BrandMark size="md" />
@@ -166,5 +178,6 @@ export function ResetPasswordPage() {
         )}
       </div>
     </div>
+    </SiteLayout>
   );
 }
