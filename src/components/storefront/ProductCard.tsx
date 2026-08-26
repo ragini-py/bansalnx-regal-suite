@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { isVariantAvailable } from "@/data/catalog";
 import type { Product } from "@/data/types";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -28,12 +29,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const location = useLocation();
   const [promptOpen, setPromptOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "M");
   const [selectedColour, setSelectedColour] = useState(product.colours[0] ?? "");
+  const [selectedSize, setSelectedSize] = useState("");
 
   const saved = isWishlisted(product.id);
   const off = discountPercent(product.mrp, product.price);
   const soldOut = product.variants.every((v) => v.availability === "unavailable");
+  const selectedAvailable = selectedSize ? isVariantAvailable(product, selectedSize, selectedColour) : false;
 
   function onWishlist(event: React.MouseEvent) {
     event.preventDefault();
@@ -56,6 +58,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (!selectedSize || !selectedAvailable) return;
     addToCart({
       productId: product.id,
       size: selectedSize,
@@ -183,7 +186,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                         <button
                           key={c}
                           type="button"
-                          onClick={() => setSelectedColour(c)}
+                          onClick={() => {
+                            setSelectedColour(c);
+                            setSelectedSize("");
+                          }}
                           className={cn(
                             "border px-2.5 py-1 text-xs transition-colors",
                             selectedColour === c ? "border-gold bg-gold text-ink font-medium" : "border-border hover:border-foreground/50",
@@ -197,27 +203,35 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Select Size</p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
-                      {product.sizes.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setSelectedSize(s)}
-                          className={cn(
-                            "border px-2.5 py-1 text-xs transition-colors",
-                            selectedSize === s ? "border-gold bg-gold text-ink font-medium" : "border-border hover:border-foreground/50",
-                          )}
-                        >
-                          {s}
-                        </button>
-                      ))}
+                      {product.sizes.map((s) => {
+                        const available = isVariantAvailable(product, s, selectedColour);
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setSelectedSize(s)}
+                            disabled={!available}
+                            title={available ? undefined : "Currently unavailable"}
+                            className={cn(
+                              "border px-2.5 py-1 text-xs transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-40",
+                              selectedSize === s ? "border-gold bg-gold text-ink font-medium" : "border-border hover:border-foreground/50",
+                            )}
+                          >
+                            {s}
+                          </button>
+                        );
+                      })}
                     </div>
+                    {selectedSize && !selectedAvailable && (
+                      <p className="mt-1.5 text-xs text-destructive">This combination is unavailable.</p>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="pt-2 flex gap-3">
-                <Button variant="luxe" className="flex-1" onClick={handleQuickAdd}>
-                  Add to Bag — {formatINR(product.price)}
+                <Button variant="luxe" className="flex-1" onClick={handleQuickAdd} disabled={!selectedSize || !selectedAvailable}>
+                  {selectedSize ? `Add to Bag — ${formatINR(product.price)}` : "Select a size"}
                 </Button>
                 <Button asChild variant="luxeOutline">
                   <Link to={`/products/${product.slug}`}>Full Details</Link>

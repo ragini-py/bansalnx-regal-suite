@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Check,
   ChevronRight,
@@ -12,7 +12,7 @@ import {
   Truck,
   ZoomIn,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Reveal } from "@/components/common/Reveal";
@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const {
     products,
     isAuthenticated,
@@ -63,6 +64,8 @@ export function ProductDetailPage() {
   const [promptIntent, setPromptIntent] = useState<"wishlist" | "cart">("cart");
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [zoomOpen, setZoomOpen] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const wasSwipe = useRef(false);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -128,6 +131,41 @@ export function ProductDetailPage() {
     setCartDrawerOpen(true);
   };
 
+  const handleBuyNow = () => {
+    if (!size) {
+      setSizeError(true);
+      toast.error("Please choose a size first");
+      return;
+    }
+    addToCart({ productId: product.id, size, colour, quantity });
+    navigate("/checkout");
+  };
+
+  const handleGalleryTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+    wasSwipe.current = false;
+  };
+
+  const handleGalleryTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+    const delta = endX - touchStartX.current;
+    if (Math.abs(delta) > 40) {
+      wasSwipe.current = true;
+      const count = product.images.length;
+      setActiveImage((i) => (delta < 0 ? (i + 1) % count : (i - 1 + count) % count));
+    }
+    touchStartX.current = null;
+  };
+
+  const handleGalleryClick = () => {
+    if (wasSwipe.current) {
+      wasSwipe.current = false;
+      return;
+    }
+    setZoomOpen(true);
+  };
+
   return (
     <SiteLayout>
       <div className="mx-auto max-w-[1400px] px-5 pb-32 pt-8 sm:px-8 sm:pb-24 lg:pb-20 lg:px-12">
@@ -150,8 +188,10 @@ export function ProductDetailPage() {
           {/* Gallery */}
           <div>
             <div
-              className="group relative aspect-3/4 overflow-hidden bg-secondary cursor-zoom-in"
-              onClick={() => setZoomOpen(true)}
+              className="group relative aspect-3/4 overflow-hidden bg-secondary cursor-zoom-in touch-pan-y"
+              onClick={handleGalleryClick}
+              onTouchStart={handleGalleryTouchStart}
+              onTouchEnd={handleGalleryTouchEnd}
             >
               <img
                 src={product.images[activeImage]}
@@ -173,6 +213,20 @@ export function ProductDetailPage() {
                       ? "Bestseller"
                       : "Exclusive"}
                 </span>
+              )}
+              {product.images.length > 1 && (
+                <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 sm:hidden">
+                  {product.images.map((_, i) => (
+                    <span
+                      key={i}
+                      aria-hidden="true"
+                      className={cn(
+                        "h-1.5 rounded-full transition-all",
+                        i === activeImage ? "w-5 bg-white" : "w-1.5 bg-white/50",
+                      )}
+                    />
+                  ))}
+                </div>
               )}
             </div>
 
@@ -341,26 +395,36 @@ export function ProductDetailPage() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col gap-3 sm:flex-row pt-2">
-              <Button
-                variant="luxe"
-                size="luxeLg"
-                className="flex-1 text-xs"
-                onClick={handleAddToCart}
-                disabled={!!size && !selectedAvailable}
-              >
-                Add to Bag — {formatINR(product.price * quantity)}
-              </Button>
-              <Button
-                variant="luxeOutline"
-                size="luxeLg"
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  variant="luxe"
+                  size="luxeLg"
+                  className="flex-1 text-xs"
+                  onClick={handleAddToCart}
+                  disabled={!!size && !selectedAvailable}
+                >
+                  Add to Bag — {formatINR(product.price * quantity)}
+                </Button>
+                <Button
+                  variant="luxeOutline"
+                  size="luxeLg"
+                  className="flex-1 text-xs"
+                  onClick={handleBuyNow}
+                  disabled={!!size && !selectedAvailable}
+                >
+                  Buy Now
+                </Button>
+              </div>
+              <button
+                type="button"
                 onClick={handleWishlist}
                 aria-pressed={wished}
-                className="sm:w-auto"
+                className="flex w-full items-center justify-center gap-2 py-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
               >
-                <Heart className={cn("mr-2 h-4 w-4", wished && "fill-gold text-gold")} />
-                {wished ? "Saved" : "Wishlist"}
-              </Button>
+                <Heart className={cn("h-3.5 w-3.5", wished && "fill-gold text-gold")} />
+                {wished ? "Saved to Wishlist" : "Save to Wishlist"}
+              </button>
             </div>
 
             {/* Store trust badges */}

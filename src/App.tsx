@@ -24,7 +24,6 @@ import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { AccountPage } from "@/pages/AccountPage";
 import { AccountOrdersPage } from "@/pages/AccountOrdersPage";
 import { AdminPage } from "@/pages/AdminPage";
-import { DashboardPage } from "@/pages/DashboardPage";
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
 import { TrackPage } from "@/pages/TrackPage";
 import { WishlistPage } from "@/pages/WishlistPage";
@@ -64,10 +63,6 @@ export function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          
-          {/* Unified Dashboard Entry Point */}
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/dashboard/*" element={<DashboardPage />} />
 
           {/* Account Routes */}
           <Route path="/account" element={<AccountPage />} />

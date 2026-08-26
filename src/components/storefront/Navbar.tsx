@@ -156,6 +156,9 @@ export function Navbar() {
   const location = useLocation();
   const pathname = location.pathname;
 
+  const accountHref = isAdmin ? "/admin" : isAuthenticated ? "/account" : "/login";
+  const accountLabel = isAdmin ? "Admin" : isAuthenticated ? (user?.firstName ?? "Account") : "Sign In";
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -228,28 +231,20 @@ export function Navbar() {
               <CountBadge count={wishlist.length} />
             </Link>
 
-            {/* Direct Dashboard Link */}
+            {/* Account / Admin Link */}
             <Link
-              to="/dashboard"
-              aria-label="Dashboard"
+              to={accountHref}
+              aria-label={accountLabel}
               className="relative flex items-center gap-1.5 border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-700 rounded-md transition-colors hover:bg-slate-100 hover:text-slate-900"
             >
               {isAdmin ? (
-                <>
-                  <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
-                  <span className="hidden md:inline font-semibold">Admin</span>
-                </>
-              ) : isAuthenticated ? (
-                <>
-                  <User className="h-3.5 w-3.5 text-amber-700" />
-                  <span className="hidden md:inline font-medium">{user?.firstName ?? "Account"}</span>
-                </>
+                <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
               ) : (
-                <>
-                  <User className="h-3.5 w-3.5 text-slate-500" />
-                  <span className="hidden md:inline font-medium">Dashboard</span>
-                </>
+                <User className={cn("h-3.5 w-3.5", isAuthenticated ? "text-amber-700" : "text-slate-500")} />
               )}
+              <span className={cn("hidden md:inline", isAuthenticated ? "font-semibold" : "font-medium")}>
+                {accountLabel}
+              </span>
             </Link>
 
             <button
@@ -297,14 +292,16 @@ export function Navbar() {
                 ))}
                 <li>
                   <Link
-                    to="/dashboard"
+                    to={accountHref}
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center justify-between py-1 text-gold-deep font-medium"
                   >
-                    <span>{isAdmin ? "👑 Admin Management" : isAuthenticated ? "👤 My Account" : "✨ Unified Dashboard"}</span>
-                    <Badge variant="outline" className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none">
-                      {isAdmin ? "Admin" : isAuthenticated ? "Client" : "Portal"}
-                    </Badge>
+                    <span>{isAdmin ? "Admin Management" : isAuthenticated ? "My Account" : "Sign In"}</span>
+                    {isAuthenticated && (
+                      <Badge variant="outline" className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none">
+                        {isAdmin ? "Admin" : "Client"}
+                      </Badge>
+                    )}
                   </Link>
                 </li>
                 <li>

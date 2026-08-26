@@ -1,6 +1,8 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Mail, Sparkles, Star } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
 
 import { Reveal } from "@/components/common/Reveal";
 import { SectionHeading } from "@/components/common/SectionHeading";
@@ -11,6 +13,8 @@ import { imagery } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Collection, Product } from "@/data/types";
 import { cn } from "@/lib/utils";
+
+const newsletterEmailSchema = z.string().trim().email().max(255);
 
 const HERO_SLIDES = [
   {
@@ -30,8 +34,8 @@ const HERO_SLIDES = [
     subheading: "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
     primaryCta: "Discover Bridal",
     primaryTo: "/collections/the-wedding-pavilion",
-    secondaryCta: "View Lookbook",
-    secondaryTo: "/products",
+    secondaryCta: "Browse All Collections",
+    secondaryTo: "/collections",
   },
   {
     image: imagery.collection2,
@@ -64,6 +68,18 @@ export function HomePage() {
   return (
     <SiteLayout>
       <HeroSlider />
+
+      {/* Featured Products */}
+      {featuredProducts.length > 0 && (
+        <ProductBlock
+          eyebrow="Handpicked"
+          title="Featured Products"
+          description="A curated edit of the pieces defining this season at Bansal-nx."
+          items={featuredProducts}
+          href="/products?sort=featured"
+          cta="Shop featured pieces"
+        />
+      )}
 
       {/* Featured Collections Showcase */}
       {featuredCollections.length > 0 && (
@@ -105,6 +121,9 @@ export function HomePage() {
 
       {/* Client Testimonials */}
       <Testimonials />
+
+      {/* Newsletter */}
+      <Newsletter />
 
       {/* Brand Story */}
       <Story />
@@ -408,6 +427,69 @@ function Testimonials() {
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  function subscribe(event: React.FormEvent) {
+    event.preventDefault();
+    const parsed = newsletterEmailSchema.safeParse(email);
+    if (!parsed.success) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError(null);
+    setSending(true);
+    window.setTimeout(() => {
+      setSending(false);
+      setEmail("");
+      toast.success("You're subscribed", {
+        description: "We'll write when a new collection arrives.",
+      });
+    }, 700);
+  }
+
+  return (
+    <section className="border-t border-slate-200 bg-slate-900 py-16 sm:py-24">
+      <div className="mx-auto max-w-2xl px-5 text-center sm:px-8">
+        <Mail className="mx-auto h-7 w-7 text-amber-300" aria-hidden="true" />
+        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-amber-300">Stay in the know</p>
+        <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white">
+          Join the Bansal-nx Circle
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-slate-300">
+          Be first to know about new collections, private trunk shows, and member-only offers.
+        </p>
+        <form onSubmit={subscribe} className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center" noValidate>
+          <label htmlFor="home-newsletter-email" className="sr-only">
+            Email address
+          </label>
+          <input
+            id="home-newsletter-email"
+            type="email"
+            value={email}
+            maxLength={255}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email address"
+            aria-invalid={!!error}
+            aria-describedby={error ? "home-newsletter-error" : undefined}
+            className="h-11 w-full max-w-sm border border-white/20 bg-white/5 px-4 text-sm text-white rounded-md placeholder:text-slate-400 focus:border-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-300"
+          />
+          <Button type="submit" variant="luxe" size="lg" disabled={sending} className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shrink-0">
+            {sending ? "…" : "Subscribe"}
+          </Button>
+        </form>
+        {error && (
+          <p id="home-newsletter-error" className="mt-2 text-xs text-rose-300">
+            {error}
+          </p>
+        )}
       </div>
     </section>
   );
