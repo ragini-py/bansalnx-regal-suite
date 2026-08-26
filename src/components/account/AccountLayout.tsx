@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { label: "Addresses", to: "/account/addresses" },
   { label: "Coupons", to: "/account/coupons" },
   { label: "Profile", to: "/account/profile" },
-  { label: "Settings", to: "/account/settings" },
 ];
 
 export function AccountGate() {

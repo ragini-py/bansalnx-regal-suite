@@ -142,13 +142,13 @@ export function Footer() {
             </form>
             <div className="mt-6 flex gap-4">
               {[
-                { Icon: InstagramIcon, label: "Instagram" },
-                { Icon: FacebookIcon, label: "Facebook" },
-                { Icon: YoutubeIcon, label: "YouTube" },
-              ].map(({ Icon, label }) => (
+                { Icon: InstagramIcon, label: "Instagram", href: "https://www.instagram.com/bansalnx" },
+                { Icon: FacebookIcon, label: "Facebook", href: "https://www.facebook.com/bansalnx" },
+                { Icon: YoutubeIcon, label: "YouTube", href: "https://www.youtube.com/@bansalnx" },
+              ].map(({ Icon, label, href }) => (
                 <a
                   key={label}
-                  href="https://www.instagram.com"
+                  href={href}
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={label}

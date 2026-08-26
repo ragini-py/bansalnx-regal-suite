@@ -21,12 +21,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
-const DEMO_ACCOUNTS = [
-  "customer@bansal-nx.com",
-  "admin@bansal-nx.com",
-  "orders@bansal-nx.com",
-  "content@bansal-nx.com",
-];
+const DEMO_ACCOUNTS = ["customer@bansal-nx.com", "admin@bansal-nx.com"];
 
 export function LoginPage() {
   const [searchParams] = useSearchParams();

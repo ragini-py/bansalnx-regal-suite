@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CheckCircle2, Mail, PackageSearch } from "lucide-react";
+import { toast } from "sonner";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { EmptyState } from "@/components/common/SectionHeading";
 import { PeacockGlyph } from "@/components/brand/BrandMark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { formatDate, formatDateTime, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { Order } from "@/data/types";
@@ -29,8 +39,19 @@ function paymentStatusBadge(order: Order) {
 
 export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
-  const { orders } = useStore();
+  const { orders, requestReturn } = useStore();
   const order = orders.find((o) => o.id === id);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+
+  function handleRequestReturn(e: React.FormEvent) {
+    e.preventDefault();
+    if (!order || !returnReason.trim()) return;
+    requestReturn(order.id, returnReason.trim());
+    toast.success("Return request submitted — our concierge team will review within 24 hours.");
+    setReturnOpen(false);
+    setReturnReason("");
+  }
 
   if (!order) {
     return (
@@ -137,6 +158,29 @@ export function OrderConfirmationPage() {
           </p>
         </div>
 
+        {order.status === "delivered" && (
+          <div className="mt-8 border border-border p-6">
+            <p className="eyebrow">Returns &amp; Exchanges</p>
+            {order.returnRequest ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Badge variant="outline" className="rounded-none border-gold/50 text-gold-deep capitalize">
+                  Return: {order.returnRequest.status}
+                </Badge>
+                <p className="text-xs text-muted-foreground">Reason: {order.returnRequest.reason}</p>
+              </div>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Not quite right? You can request a return or size exchange within 7 days of delivery.
+                </p>
+                <Button variant="luxeOutline" size="sm" className="mt-4" onClick={() => setReturnOpen(true)}>
+                  Request Return
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
         <div className="mt-8 flex items-start gap-4 border border-dashed border-border bg-muted/30 p-6">
           <Mail className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
           <div className="text-sm text-muted-foreground">
@@ -163,6 +207,34 @@ export function OrderConfirmationPage() {
           </Button>
         </div>
       </div>
+
+      {returnOpen && (
+        <Dialog open={returnOpen} onOpenChange={setReturnOpen}>
+          <DialogContent className="max-w-md rounded-none border border-border bg-background p-6">
+            <DialogHeader>
+              <DialogTitle className="font-display text-xl">Request Order Return</DialogTitle>
+              <DialogDescription>Order {order.id} · 7-day return window</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleRequestReturn} className="mt-4 space-y-4">
+              <div>
+                <Label htmlFor="return-reason">Reason for Return or Size Exchange</Label>
+                <textarea
+                  id="return-reason"
+                  rows={4}
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  placeholder="e.g. Size fitting issue, request size L replacement"
+                  className="mt-1 w-full border border-border bg-transparent p-3 text-sm focus:border-gold focus:outline-none"
+                  required
+                />
+              </div>
+              <Button type="submit" variant="luxe" className="w-full">
+                Submit Return Request
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </SiteLayout>
   );
 }

@@ -1,28 +1,17 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   AlertTriangle,
-  ArrowUpRight,
-  Check,
-  CheckCircle2,
   ChevronRight,
   ClipboardList,
   CreditCard,
   ExternalLink,
-  Layers,
-  LayoutDashboard,
-  Package,
-  PackageCheck,
   PackageSearch,
   Plus,
-  RefreshCw,
   Search,
-  Settings as SettingsIcon,
   Ticket,
   Trash2,
   Truck,
-  UserCheck,
-  Users,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -55,51 +44,37 @@ import { cn } from "@/lib/utils";
 
 type AdminTab = "overview" | "orders" | "products" | "coupons" | "shipping" | "settings";
 
-export function AdminPage({ initialTab }: { initialTab?: AdminTab }) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get("tab") as AdminTab) || initialTab || "overview";
+const TAB_TITLES: Record<AdminTab, string> = {
+  overview: "Admin Dashboard",
+  orders: "Orders & Fulfilment",
+  products: "Products",
+  coupons: "Coupons & Offers",
+  shipping: "Logistics & Delhivery",
+  settings: "Store Settings",
+};
 
-  function setTab(tab: AdminTab) {
-    setSearchParams({ tab });
+function tabFromPathname(pathname: string): AdminTab {
+  const segment = pathname.replace(/^\/admin\/?/, "").split("/")[0];
+  if (segment === "orders" || segment === "products" || segment === "coupons" || segment === "shipping" || segment === "settings") {
+    return segment;
+  }
+  return "overview";
+}
+
+export function AdminPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = tabFromPathname(location.pathname);
+
+  function goToTab(tab: AdminTab) {
+    navigate(tab === "overview" ? "/admin" : `/admin/${tab}`);
   }
 
   return (
     <AdminGuard>
-      <AdminLayout title="Admin Management Portal">
+      <AdminLayout title={TAB_TITLES[activeTab]}>
         <div className="space-y-8">
-          {/* Top Quick-Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-4">
-            {[
-              { id: "overview", label: "Overview", icon: LayoutDashboard },
-              { id: "orders", label: "Orders & Fulfilment", icon: ClipboardList, permission: "orders" },
-              { id: "products", label: "Products & Stock", icon: Package, permission: "products" },
-              { id: "coupons", label: "Coupons & Offers", icon: Ticket, permission: "coupons" },
-              { id: "shipping", label: "Logistics & Delhivery", icon: Truck, permission: "shipping" },
-              { id: "settings", label: "Store Settings", icon: SettingsIcon, permission: "settings" },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setTab(tab.id as AdminTab)}
-                  className={cn(
-                    "flex items-center gap-2 border px-3.5 py-2 text-xs font-medium rounded-lg transition-all cursor-pointer",
-                    active
-                      ? "border-slate-900 bg-slate-900 text-white shadow-sm font-semibold"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Sub-Views */}
-          {activeTab === "overview" && <OverviewTab onNavigateTab={setTab} />}
+          {activeTab === "overview" && <OverviewTab onNavigateTab={goToTab} />}
           {activeTab === "orders" && <OrdersManagerTab />}
           {activeTab === "products" && <ProductsManagerTab />}
           {activeTab === "coupons" && <CouponsManagerTab />}
@@ -590,8 +565,8 @@ function ProductsManagerTab() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="font-display text-2xl">Products &amp; Inventory</h2>
-          <p className="text-xs text-muted-foreground">Edit pricing, stock levels, and store catalog visibility.</p>
+          <h2 className="font-display text-2xl">Products</h2>
+          <p className="text-xs text-muted-foreground">Edit pricing and store catalog visibility.</p>
         </div>
       </div>
 

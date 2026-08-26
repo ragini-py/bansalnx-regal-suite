@@ -41,9 +41,9 @@ export const permissionLabels: Record<PermissionKey, string> = {
 
 export const roles: RoleDefinition[] = [
   {
-    key: "super_admin",
-    label: "Super Admin",
-    description: "Unrestricted access to every area of the admin.",
+    key: "admin",
+    label: "Admin",
+    description: "Full access to the store administration console.",
     permissions: [
       "products",
       "collections",
@@ -56,24 +56,6 @@ export const roles: RoleDefinition[] = [
       "settings",
       "team",
     ],
-  },
-  {
-    key: "manager",
-    label: "Admin / Manager",
-    description: "Catalogue, coupons, orders and shipping. No payments or settings.",
-    permissions: ["products", "collections", "coupons", "orders", "shipping", "customers"],
-  },
-  {
-    key: "content_manager",
-    label: "Content Manager",
-    description: "Homepage content, editorial imagery, banners and collection presentation.",
-    permissions: ["content", "collections", "products"],
-  },
-  {
-    key: "order_manager",
-    label: "Order Manager",
-    description: "Orders, shipping and returns/refunds only.",
-    permissions: ["orders", "shipping"],
   },
 ];
 
@@ -195,33 +177,9 @@ export const users: User[] = [
     email: "admin@bansal-nx.com",
     phone: "+91 98110 45500",
     password: "password",
-    role: "super_admin",
+    role: "admin",
     status: "active",
     createdAt: "2025-11-01T10:00:00.000Z",
-    addresses: [],
-  },
-  {
-    id: "usr-3",
-    firstName: "Meera",
-    lastName: "Iyer",
-    email: "orders@bansal-nx.com",
-    phone: "+91 90040 87651",
-    password: "password",
-    role: "order_manager",
-    status: "active",
-    createdAt: "2026-01-08T10:00:00.000Z",
-    addresses: [],
-  },
-  {
-    id: "usr-4",
-    firstName: "Kabir",
-    lastName: "Sethi",
-    email: "content@bansal-nx.com",
-    phone: "+91 99871 22004",
-    password: "password",
-    role: "content_manager",
-    status: "active",
-    createdAt: "2026-01-22T10:00:00.000Z",
     addresses: [],
   },
   {

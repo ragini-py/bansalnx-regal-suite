@@ -31,6 +31,7 @@ interface ProductSearch {
 
 const sortOptions = [
   { value: "featured", label: "Featured" },
+  { value: "best-selling", label: "Best sellers" },
   { value: "newest", label: "Newest first" },
   { value: "price-asc", label: "Price: low to high" },
   { value: "price-desc", label: "Price: high to low" },
@@ -88,6 +89,9 @@ export function ProductsPage() {
 
     const sorted = [...list];
     switch (search.sort) {
+      case "best-selling":
+        sorted.sort((a, b) => Number(b.bestseller) - Number(a.bestseller));
+        break;
       case "newest":
         sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         break;

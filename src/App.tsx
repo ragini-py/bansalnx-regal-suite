@@ -15,6 +15,8 @@ import { FaqsPage } from "@/pages/FaqsPage";
 import { ContactPage } from "@/pages/ContactPage";
 import { ReturnsPage } from "@/pages/ReturnsPage";
 import { ShippingPage } from "@/pages/ShippingPage";
+import { TermsPage } from "@/pages/TermsPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
@@ -56,8 +58,8 @@ export function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/shipping" element={<ShippingPage />} />
-          <Route path="/terms" element={<ReturnsPage />} />
-          <Route path="/privacy" element={<ShippingPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -71,9 +73,9 @@ export function App() {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/orders" element={<AccountOrdersPage />} />
           <Route path="/account/orders/:id" element={<OrderConfirmationPage />} />
-          <Route path="/account/coupons" element={<AccountPage initialTab="coupons" />} />
-          <Route path="/account/addresses" element={<AccountPage initialTab="addresses" />} />
-          <Route path="/account/wishlist" element={<AccountPage initialTab="wishlist" />} />
+          <Route path="/account/coupons" element={<AccountPage />} />
+          <Route path="/account/addresses" element={<AccountPage />} />
+          <Route path="/account/profile" element={<AccountPage />} />
 
           {/* Admin Management Routes */}
           <Route path="/admin" element={<AdminPage />} />

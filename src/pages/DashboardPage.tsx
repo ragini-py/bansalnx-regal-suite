@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeftRight,
   ExternalLink,
-  Lock,
   LogOut,
-  Shield,
   ShieldCheck,
   Store,
   User,
-  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -100,26 +96,6 @@ export function DashboardPage() {
                   className="justify-start gap-2 text-xs font-medium border-amber-300 bg-amber-50/50 hover:bg-amber-100/60 text-amber-900"
                 >
                   <ShieldCheck className="h-3.5 w-3.5 text-amber-700" /> Admin Console
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={loading}
-                  onClick={() => handleDemoLogin("orders@bansal-nx.com")}
-                  className="justify-start gap-2 text-xs font-medium border-slate-200 bg-white hover:bg-slate-100 text-slate-800"
-                >
-                  <Users className="h-3.5 w-3.5 text-blue-600" /> Orders Manager
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={loading}
-                  onClick={() => handleDemoLogin("content@bansal-nx.com")}
-                  className="justify-start gap-2 text-xs font-medium border-slate-200 bg-white hover:bg-slate-100 text-slate-800"
-                >
-                  <Store className="h-3.5 w-3.5 text-emerald-600" /> Content Manager
                 </Button>
               </div>
             </div>

@@ -91,7 +91,7 @@ export type PermissionKey =
   | "settings"
   | "team";
 
-export type AdminRole = "super_admin" | "manager" | "content_manager" | "order_manager";
+export type AdminRole = "admin";
 
 export interface RoleDefinition {
   key: AdminRole;

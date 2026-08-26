@@ -3,13 +3,9 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
-  Layers,
   Ticket,
   ClipboardList,
-  CreditCard,
   Truck,
-  Users,
-  FileText,
   ShieldCheck,
   Settings as SettingsIcon,
   Menu,
@@ -36,14 +32,9 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/products", label: "Products", icon: Package, permission: "products" },
-  { to: "/admin/collections", label: "Collections", icon: Layers, permission: "collections" },
   { to: "/admin/coupons", label: "Coupons", icon: Ticket, permission: "coupons" },
   { to: "/admin/orders", label: "Orders", icon: ClipboardList, permission: "orders" },
-  { to: "/admin/payments", label: "Payments", icon: CreditCard, permission: "payments" },
   { to: "/admin/shipping", label: "Shipping", icon: Truck, permission: "shipping" },
-  { to: "/admin/customers", label: "Customers", icon: Users, permission: "customers" },
-  { to: "/admin/content", label: "Content", icon: FileText, permission: "content" },
-  { to: "/admin/team", label: "Team", icon: ShieldCheck, permission: "team" },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, permission: "settings" },
 ];
 
