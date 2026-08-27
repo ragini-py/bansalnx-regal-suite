@@ -21,7 +21,8 @@ const HERO_SLIDES = [
     image: imagery.hero,
     eyebrow: "Bespoke Royal Couture",
     heading: "Crafted for the Extraordinary You",
-    subheading: "Hand-embroidered lehengas, bridal sarees, and raw silk ensembles created in our Jaipur studio.",
+    subheading:
+      "Hand-embroidered lehengas, bridal sarees, and raw silk ensembles created in our Jaipur studio.",
     primaryCta: "Shop New Arrivals",
     primaryTo: "/products?sort=newest",
     secondaryCta: "Explore Collections",
@@ -31,7 +32,8 @@ const HERO_SLIDES = [
     image: imagery.collection1,
     eyebrow: "The Wedding Pavilion Edit",
     heading: "Timeless Bridal Opulence",
-    subheading: "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
+    subheading:
+      "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
     primaryCta: "Discover Bridal",
     primaryTo: "/collections/the-wedding-pavilion",
     secondaryCta: "Browse All Collections",
@@ -53,8 +55,11 @@ export function HomePage() {
   const { content, products, collections } = useStore();
 
   const live = products.filter((p) => p.published);
+  // Matched by slug, not id — ids come from the backend now and vary per
+  // deployment/seed run, while slugs are the stable, human-authored keys
+  // shared between this mocked homepage config and the real catalog.
   const featuredProducts = content.featuredProductIds
-    .map((id) => live.find((p) => p.id === id))
+    .map((slug) => live.find((p) => p.slug === slug))
     .filter((p): p is Product => !!p);
   const newArrivals = live
     .filter((p) => p.newArrival)
@@ -62,7 +67,7 @@ export function HomePage() {
     .slice(0, 4);
   const bestsellers = live.filter((p) => p.bestseller).slice(0, 4);
   const featuredCollections = content.featuredCollectionIds
-    .map((id) => collections.find((c) => c.id === id))
+    .map((slug) => collections.find((c) => c.slug === slug))
     .filter((c): c is Collection => !!c && c.published);
 
   return (
@@ -82,9 +87,7 @@ export function HomePage() {
       )}
 
       {/* Featured Collections Showcase */}
-      {featuredCollections.length > 0 && (
-        <CollectionsBlock collections={featuredCollections} />
-      )}
+      {featuredCollections.length > 0 && <CollectionsBlock collections={featuredCollections} />}
 
       {/* New Arrivals Section */}
       {newArrivals.length > 0 && (
@@ -158,8 +161,14 @@ function HeroSlider() {
             alt={s.heading}
             className="h-full w-full object-cover object-center scale-100 transition-transform duration-[8000ms]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent" aria-hidden="true" />
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-slate-950/80 to-transparent" aria-hidden="true" />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-slate-950/80 to-transparent"
+            aria-hidden="true"
+          />
         </div>
       ))}
 
@@ -175,10 +184,20 @@ function HeroSlider() {
             {slide.subheading}
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-            <Button asChild variant="luxe" size="lg" className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md">
+            <Button
+              asChild
+              variant="luxe"
+              size="lg"
+              className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md"
+            >
               <Link to={slide.primaryTo}>{slide.primaryCta}</Link>
             </Button>
-            <Button asChild variant="onImage" size="lg" className="border-white/30 text-white hover:bg-white/10 font-medium">
+            <Button
+              asChild
+              variant="onImage"
+              size="lg"
+              className="border-white/30 text-white hover:bg-white/10 font-medium"
+            >
               <Link to={slide.secondaryTo}>{slide.secondaryCta}</Link>
             </Button>
           </div>
@@ -203,7 +222,9 @@ function HeroSlider() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setCurrent((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
+              onClick={() =>
+                setCurrent((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+              }
               aria-label="Previous slide"
               className="grid h-9 w-9 place-items-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition-colors"
             >
@@ -235,7 +256,10 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {collections.slice(0, 3).map((collection, i) => (
           <Reveal key={collection.id} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
-            <Link to={`/collections/${collection.slug}`} className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+            <Link
+              to={`/collections/${collection.slug}`}
+              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+            >
               <div className="relative aspect-3/4 overflow-hidden bg-slate-100">
                 <img
                   src={collection.coverImage}
@@ -243,13 +267,20 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" aria-hidden="true" />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"
+                  aria-hidden="true"
+                />
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                  <p className="text-xs uppercase font-semibold tracking-wider text-amber-300">{collection.productIds.length} Creations</p>
+                  <p className="text-xs uppercase font-semibold tracking-wider text-amber-300">
+                    {collection.productIds.length} Creations
+                  </p>
                   <h3 className="mt-1 font-display font-bold text-2xl text-white sm:text-3xl">
                     {collection.name}
                   </h3>
-                  <p className="mt-2 text-xs text-slate-200 line-clamp-2">{collection.description}</p>
+                  <p className="mt-2 text-xs text-slate-200 line-clamp-2">
+                    {collection.description}
+                  </p>
                   <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-amber-200 transition-colors">
                     Explore Collection <ArrowRight className="h-3.5 w-3.5" />
                   </span>
@@ -306,14 +337,22 @@ function Editorial() {
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />
         <div className="relative mx-auto max-w-2xl">
-          <p className="text-xs uppercase font-bold tracking-wider text-amber-300">Bespoke Excellence</p>
+          <p className="text-xs uppercase font-bold tracking-wider text-amber-300">
+            Bespoke Excellence
+          </p>
           <h2 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-snug">
             &ldquo;Every thread carries the heartbeat of Rajasthan&rsquo;s finest karigars.&rdquo;
           </h2>
           <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-300">
-            From hand-drawn motifs to the final zardozi stitch, our garments are crafted with perfection.
+            From hand-drawn motifs to the final zardozi stitch, our garments are crafted with
+            perfection.
           </p>
-          <Button asChild variant="luxe" size="lg" className="mt-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md">
+          <Button
+            asChild
+            variant="luxe"
+            size="lg"
+            className="mt-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md"
+          >
             <Link to="/about">Our Heritage &amp; Craft</Link>
           </Button>
         </div>
@@ -327,18 +366,30 @@ function Promo() {
     <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12">
       <div className="relative overflow-hidden border border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 p-8 sm:p-12 rounded-2xl text-slate-900 shadow-sm">
         <div className="relative z-10 max-w-xl">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Exclusive Client Privilege</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
+            Exclusive Client Privilege
+          </p>
           <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900">
             Complimentary Fitting &amp; Express Delivery
           </h2>
           <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
-            Enjoy complimentary made-to-measure sizing adjustments on all bridal lehengas and sherwanis with code <span className="font-mono text-amber-800 font-bold bg-amber-100/70 px-2 py-0.5 rounded">WELCOME10</span>.
+            Enjoy complimentary made-to-measure sizing adjustments on all bridal lehengas and
+            sherwanis with code{" "}
+            <span className="font-mono text-amber-800 font-bold bg-amber-100/70 px-2 py-0.5 rounded">
+              WELCOME10
+            </span>
+            .
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild variant="luxe" size="lg">
               <Link to="/products">Claim Privilege</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+            >
               <Link to="/contact">Book Private Consultation</Link>
             </Button>
           </div>
@@ -353,23 +404,36 @@ function Craft() {
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12 border-t border-slate-200">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
         <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm">
-          <img src={imagery.craft} alt="Artisan embroidering silk fabric" loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={imagery.craft}
+            alt="Artisan embroidering silk fabric"
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         </div>
         <div className="space-y-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Mastery &amp; Lineage</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
+            Mastery &amp; Lineage
+          </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">
             Generations of Jaipur Artistry
           </h2>
           <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
-            We preserve centuries-old embroidery techniques: Gota Patti from Jaipur, Zardozi from Lucknow, and Marodi needlework. Each garment requires upwards of 80 hours of meticulous hand-needlework.
+            We preserve centuries-old embroidery techniques: Gota Patti from Jaipur, Zardozi from
+            Lucknow, and Marodi needlework. Each garment requires upwards of 80 hours of meticulous
+            hand-needlework.
           </p>
           <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-200">
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">80+ Hours</p>
+              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">
+                80+ Hours
+              </p>
               <p className="mt-1 text-xs text-slate-500 font-medium">Hand-embroidery per piece</p>
             </div>
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">100% Pure</p>
+              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">
+                100% Pure
+              </p>
               <p className="mt-1 text-xs text-slate-500 font-medium">Mulberry &amp; raw silks</p>
             </div>
           </div>
@@ -411,14 +475,19 @@ function Testimonials() {
         />
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {reviews.map((r, i) => (
-            <div key={i} className="border border-slate-200 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between">
+            <div
+              key={i}
+              className="border border-slate-200 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between"
+            >
               <div>
                 <div className="flex gap-1 text-amber-500 mb-3">
                   {[...Array(r.rating)].map((_, idx) => (
                     <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 italic">&ldquo;{r.text}&rdquo;</p>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 italic">
+                  &ldquo;{r.text}&rdquo;
+                </p>
               </div>
               <div className="mt-6 pt-4 border-t border-slate-100">
                 <p className="text-xs font-semibold text-slate-900">{r.author}</p>
@@ -459,14 +528,20 @@ function Newsletter() {
     <section className="border-t border-slate-200 bg-slate-900 py-16 sm:py-24">
       <div className="mx-auto max-w-2xl px-5 text-center sm:px-8">
         <Mail className="mx-auto h-7 w-7 text-amber-300" aria-hidden="true" />
-        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-amber-300">Stay in the know</p>
+        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-amber-300">
+          Stay in the know
+        </p>
         <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white">
           Join the Bansal-nx Circle
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-slate-300">
           Be first to know about new collections, private trunk shows, and member-only offers.
         </p>
-        <form onSubmit={subscribe} className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center" noValidate>
+        <form
+          onSubmit={subscribe}
+          className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
+          noValidate
+        >
           <label htmlFor="home-newsletter-email" className="sr-only">
             Email address
           </label>
@@ -481,7 +556,13 @@ function Newsletter() {
             aria-describedby={error ? "home-newsletter-error" : undefined}
             className="h-11 w-full max-w-sm border border-white/20 bg-white/5 px-4 text-sm text-white rounded-md placeholder:text-slate-400 focus:border-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-300"
           />
-          <Button type="submit" variant="luxe" size="lg" disabled={sending} className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shrink-0">
+          <Button
+            type="submit"
+            variant="luxe"
+            size="lg"
+            disabled={sending}
+            className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shrink-0"
+          >
             {sending ? "…" : "Subscribe"}
           </Button>
         </form>
@@ -504,7 +585,8 @@ function Story() {
           Crafted for the Extraordinary You
         </h2>
         <p className="text-sm leading-relaxed text-slate-600">
-          Bansal-nx was established with one singular vision: to create heirloom royal garments that elevate your most monumental moments. No shortcuts, no compromises.
+          Bansal-nx was established with one singular vision: to create heirloom royal garments that
+          elevate your most monumental moments. No shortcuts, no compromises.
         </p>
         <Button asChild variant="luxe" size="lg" className="font-semibold">
           <Link to="/products">Explore Full Catalog</Link>

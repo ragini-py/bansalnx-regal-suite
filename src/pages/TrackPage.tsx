@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { trackingStages } from "@/data/mock";
 import { useStore } from "@/lib/store";
+import { trackOrderRequest } from "@/lib/api/orders";
 import type { Order, OrderStatus } from "@/data/types";
 import { cn } from "@/lib/utils";
 
@@ -18,38 +19,40 @@ const EXCEPTION_STATUSES: OrderStatus[] = ["cancelled", "delivery_failed", "ndr"
 export function TrackPage() {
   const [searchParams] = useSearchParams();
   const idParam = searchParams.get("id") || undefined;
-  const { orders, settings } = useStore();
+  const { settings } = useStore();
 
   const [orderId, setOrderId] = useState(idParam ?? "");
   const [email, setEmail] = useState("");
   const [result, setResult] = useState<Order | null | undefined>(undefined);
   const [searched, setSearched] = useState(false);
 
-  function lookup(id: string, mail: string) {
-    const match = orders.find(
-      (o) => o.id.toLowerCase() === id.trim().toLowerCase() && (!mail.trim() || o.email.toLowerCase() === mail.trim().toLowerCase()),
-    );
-    setResult(match ?? null);
+  // Public lookup by id (+ optional email) — this page is reachable without
+  // signing in, so it can't read the account's own order list.
+  async function lookup(id: string, mail: string) {
+    try {
+      const order = await trackOrderRequest(id.trim(), mail.trim() || undefined);
+      setResult(order);
+    } catch {
+      setResult(null);
+    }
     setSearched(true);
   }
 
   useEffect(() => {
     if (idParam) {
       setOrderId(idParam);
-      lookup(idParam, "");
+      void lookup(idParam, "");
     }
   }, [idParam]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!orderId.trim()) return;
-    lookup(orderId, email);
+    void lookup(orderId, email);
   }
 
   const exception = result && EXCEPTION_STATUSES.includes(result.status);
-  const currentIndex = result
-    ? trackingStages.findIndex((s) => s.status === result.status)
-    : -1;
+  const currentIndex = result ? trackingStages.findIndex((s) => s.status === result.status) : -1;
 
   return (
     <SiteLayout>
@@ -60,14 +63,30 @@ export function TrackPage() {
       />
 
       <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 border border-border p-6 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 gap-4 border border-border p-6 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        >
           <div>
             <Label htmlFor="order-id">Order number</Label>
-            <Input id="order-id" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="BNX-24081" className="mt-1 rounded-none" />
+            <Input
+              id="order-id"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="BNX-24081"
+              className="mt-1 rounded-none"
+            />
           </div>
           <div>
             <Label htmlFor="order-email">Email</Label>
-            <Input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="mt-1 rounded-none" />
+            <Input
+              id="order-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="mt-1 rounded-none"
+            />
           </div>
           <Button type="submit" variant="luxe" size="luxe">
             <Search className="h-4 w-4" /> Track
@@ -88,7 +107,9 @@ export function TrackPage() {
           <div className="mt-10 space-y-8">
             <div className="grid grid-cols-2 gap-4 border border-border p-6 text-sm sm:grid-cols-4">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Courier</p>
+                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Courier
+                </p>
                 <p className="mt-1">{result.shipment.courier ?? "Not yet assigned"}</p>
               </div>
               <div>
@@ -96,17 +117,25 @@ export function TrackPage() {
                 <p className="mt-1">{result.shipment.awb ?? "Pending"}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Shipment ID</p>
+                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Shipment ID
+                </p>
                 <p className="mt-1">{result.shipment.shipmentId ?? "Pending"}</p>
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Attempts</p>
+                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Attempts
+                </p>
                 <p className="mt-1">{result.shipment.attempts}</p>
               </div>
               <div className="col-span-2 sm:col-span-4">
-                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Estimated delivery</p>
+                <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                  Estimated delivery
+                </p>
                 <p className="mt-1">
-                  {result.shipment.estimatedDelivery ? formatDate(result.shipment.estimatedDelivery) : "To be confirmed"}
+                  {result.shipment.estimatedDelivery
+                    ? formatDate(result.shipment.estimatedDelivery)
+                    : "To be confirmed"}
                 </p>
               </div>
               {!settings.delhiveryConnected && (
@@ -125,7 +154,9 @@ export function TrackPage() {
                   </p>
                 </div>
                 {result.shipment.ndrReason && (
-                  <p className="mt-3 text-sm text-muted-foreground">Reason: {result.shipment.ndrReason}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Reason: {result.shipment.ndrReason}
+                  </p>
                 )}
                 <p className="mt-2 text-sm text-muted-foreground">
                   Our team has been notified and will reach out with next steps.
@@ -146,12 +177,18 @@ export function TrackPage() {
                           isCurrent && "ring-2 ring-gold/40",
                         )}
                       >
-                        {completed && <CheckCircle2 className="h-3 w-3 text-ink" strokeWidth={2.5} />}
+                        {completed && (
+                          <CheckCircle2 className="h-3 w-3 text-ink" strokeWidth={2.5} />
+                        )}
                       </span>
                       <p
                         className={cn(
                           "text-sm",
-                          isCurrent ? "font-medium text-foreground" : completed ? "text-foreground" : "text-muted-foreground",
+                          isCurrent
+                            ? "font-medium text-foreground"
+                            : completed
+                              ? "text-foreground"
+                              : "text-muted-foreground",
                         )}
                       >
                         {stage.label}

@@ -120,7 +120,7 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
-  password: string; // mock-only; real auth never stores plaintext client-side
+  password?: string; // mock-seed-data only; a real (backend-authenticated) user never has this client-side
   role: "customer" | AdminRole;
   status: "active" | "blocked";
   createdAt: string;
@@ -136,13 +136,7 @@ export interface CartLine {
 }
 
 export type PaymentMethod = "razorpay" | "cod";
-export type PaymentStatus =
-  | "pending"
-  | "processing"
-  | "paid"
-  | "failed"
-  | "cancelled"
-  | "refunded";
+export type PaymentStatus = "pending" | "processing" | "paid" | "failed" | "cancelled" | "refunded";
 
 export type OrderStatus =
   | "confirmed"

@@ -22,7 +22,11 @@ import type { Order } from "@/data/types";
 
 function paymentStatusBadge(order: Order) {
   if (order.payment.method === "cod") {
-    return <Badge variant="outline" className="rounded-none border-gold/50 text-gold-deep">COD — Payment Pending</Badge>;
+    return (
+      <Badge variant="outline" className="rounded-none border-gold/50 text-gold-deep">
+        COD — Payment Pending
+      </Badge>
+    );
   }
   if (order.payment.status === "processing") {
     return (
@@ -32,25 +36,39 @@ function paymentStatusBadge(order: Order) {
     );
   }
   if (order.payment.status === "paid") {
-    return <Badge variant="outline" className="rounded-none border-emerald/50 text-emerald">Paid</Badge>;
+    return (
+      <Badge variant="outline" className="rounded-none border-emerald/50 text-emerald">
+        Paid
+      </Badge>
+    );
   }
-  return <Badge variant="outline" className="rounded-none">{order.payment.status}</Badge>;
+  return (
+    <Badge variant="outline" className="rounded-none">
+      {order.payment.status}
+    </Badge>
+  );
 }
 
 export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
-  const { orders, requestReturn } = useStore();
-  const order = orders.find((o) => o.id === id);
+  // My own order — not the admin-only `orders` list, which is empty for a
+  // regular customer.
+  const { myOrders, requestReturn } = useStore();
+  const order = myOrders.find((o) => o.id === id);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnReason, setReturnReason] = useState("");
 
-  function handleRequestReturn(e: React.FormEvent) {
+  async function handleRequestReturn(e: React.FormEvent) {
     e.preventDefault();
     if (!order || !returnReason.trim()) return;
-    requestReturn(order.id, returnReason.trim());
-    toast.success("Return request submitted — our concierge team will review within 24 hours.");
-    setReturnOpen(false);
-    setReturnReason("");
+    try {
+      await requestReturn(order.id, returnReason.trim());
+      toast.success("Return request submitted — our concierge team will review within 24 hours.");
+      setReturnOpen(false);
+      setReturnReason("");
+    } catch {
+      toast.error("Couldn't submit the return request. Please try again.");
+    }
   }
 
   if (!order) {
@@ -76,7 +94,12 @@ export function OrderConfirmationPage() {
     <SiteLayout>
       <PageHeader
         breadcrumb={
-          <Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Order Confirmed" }]} />
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: <Link to="/">Home</Link> },
+              { label: "Order Confirmed" },
+            ]}
+          />
         }
         title="Thank you"
         description={`Order ${order.id} has been placed.`}
@@ -100,13 +123,17 @@ export function OrderConfirmationPage() {
         <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
           <div className="border border-border p-6">
             <p className="eyebrow">Payment</p>
-            <p className="mt-3 text-sm capitalize">{order.payment.method === "cod" ? "Cash on Delivery" : "Razorpay"}</p>
+            <p className="mt-3 text-sm capitalize">
+              {order.payment.method === "cod" ? "Cash on Delivery" : "Razorpay"}
+            </p>
             <div className="mt-2">{paymentStatusBadge(order)}</div>
           </div>
           <div className="border border-border p-6">
             <p className="eyebrow">Estimated Delivery</p>
             <p className="mt-3 text-sm">
-              {order.shipment.estimatedDelivery ? formatDate(order.shipment.estimatedDelivery) : "To be confirmed"}
+              {order.shipment.estimatedDelivery
+                ? formatDate(order.shipment.estimatedDelivery)
+                : "To be confirmed"}
             </p>
           </div>
         </div>
@@ -151,10 +178,12 @@ export function OrderConfirmationPage() {
 
         <div className="mt-8 border border-border p-6">
           <p className="eyebrow">Delivery Address</p>
-          <p className="mt-3 text-sm">{order.address.fullName} · {order.address.phone}</p>
+          <p className="mt-3 text-sm">
+            {order.address.fullName} · {order.address.phone}
+          </p>
           <p className="text-sm text-muted-foreground">
-            {order.address.line1}, {order.address.locality}, {order.address.city}, {order.address.state}{" "}
-            {order.address.pincode}, {order.address.country}
+            {order.address.line1}, {order.address.locality}, {order.address.city},{" "}
+            {order.address.state} {order.address.pincode}, {order.address.country}
           </p>
         </div>
 
@@ -163,17 +192,28 @@ export function OrderConfirmationPage() {
             <p className="eyebrow">Returns &amp; Exchanges</p>
             {order.returnRequest ? (
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <Badge variant="outline" className="rounded-none border-gold/50 text-gold-deep capitalize">
+                <Badge
+                  variant="outline"
+                  className="rounded-none border-gold/50 text-gold-deep capitalize"
+                >
                   Return: {order.returnRequest.status}
                 </Badge>
-                <p className="text-xs text-muted-foreground">Reason: {order.returnRequest.reason}</p>
+                <p className="text-xs text-muted-foreground">
+                  Reason: {order.returnRequest.reason}
+                </p>
               </div>
             ) : (
               <>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Not quite right? You can request a return or size exchange within 7 days of delivery.
+                  Not quite right? You can request a return or size exchange within 7 days of
+                  delivery.
                 </p>
-                <Button variant="luxeOutline" size="sm" className="mt-4" onClick={() => setReturnOpen(true)}>
+                <Button
+                  variant="luxeOutline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => setReturnOpen(true)}
+                >
                   Request Return
                 </Button>
               </>
@@ -185,12 +225,15 @@ export function OrderConfirmationPage() {
           <Mail className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
           <div className="text-sm text-muted-foreground">
             <p>
-              A confirmation email is queued for <strong className="text-foreground">{order.email}</strong>. It will include the
-              customer name, order number, products/variants/quantities, subtotal, discount, shipping, total,
-              payment method and status, delivery address, estimated delivery, and View/Track order buttons.
+              A confirmation email is queued for{" "}
+              <strong className="text-foreground">{order.email}</strong>. It will include the
+              customer name, order number, products/variants/quantities, subtotal, discount,
+              shipping, total, payment method and status, delivery address, estimated delivery, and
+              View/Track order buttons.
             </p>
             <p className="mt-2 text-[11px] uppercase tracking-[0.15em]">
-              The transactional email provider is not yet connected — this is an integration-ready state.
+              The transactional email provider is not yet connected — this is an integration-ready
+              state.
             </p>
           </div>
         </div>

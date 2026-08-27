@@ -551,8 +551,15 @@ export const homepageContent: HomepageContent = {
     { key: "bestsellers", label: "Best Sellers", visible: true },
     { key: "newsletter", label: "Newsletter", visible: true },
   ],
-  featuredCollectionIds: ["col-1", "col-2", "col-3"],
-  featuredProductIds: ["prd-2", "prd-4", "prd-7", "prd-3"],
+  // Slugs, not ids — matched against the live (backend) catalog by slug in
+  // HomePage.tsx, since real product/collection ids are DB-generated.
+  featuredCollectionIds: ["the-ceremony-edit", "quiet-hours", "heritage-classics"],
+  featuredProductIds: [
+    "emerald-zari-anarkali",
+    "royal-velvet-lehenga",
+    "sapphire-silk-gown",
+    "champagne-tissue-saree",
+  ],
 };
 
 export const orderStatusLabels: Record<Order["status"], string> = {

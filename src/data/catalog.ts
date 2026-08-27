@@ -26,11 +26,7 @@ export const imagery = {
 
 const SIZES = ["XS", "S", "M", "L", "XL"];
 
-function variants(
-  id: string,
-  colours: string[],
-  unavailable: string[] = [],
-): ProductVariant[] {
+function variants(id: string, colours: string[], unavailable: string[] = []): ProductVariant[] {
   return colours.flatMap((colour) =>
     SIZES.map((size) => ({
       id: `${id}-${colour.toLowerCase().replace(/\s+/g, "-")}-${size}`,
@@ -73,7 +69,11 @@ export const products: Product[] = [
       "Includes skirt, blouse and dupatta",
       "Made to order in our Jaipur studio",
     ],
-    care: ["Dry clean only", "Store in the muslin bag provided", "Avoid direct sunlight and perfume"],
+    care: [
+      "Dry clean only",
+      "Store in the muslin bag provided",
+      "Avoid direct sunlight and perfume",
+    ],
     sizes: SIZES,
     colours: ["Blush", "Ivory"],
     variants: variants("prd-1", ["Blush", "Ivory"], ["Blush:M", "Ivory:XL", "Ivory:XS"]),
@@ -339,7 +339,10 @@ export const products: Product[] = [
     shortDescription: "Handloom brocade lehenga in leaf green with a scalloped hem.",
     description:
       "Handloom brocade woven with a repeating botanical motif, cut into a full lehenga with a scalloped, zari-bound hem. Weighted for movement, kept clean at the waist.",
-    details: ["Handloom brocade with zari-bound scalloped hem", "Includes lehenga, blouse, dupatta"],
+    details: [
+      "Handloom brocade with zari-bound scalloped hem",
+      "Includes lehenga, blouse, dupatta",
+    ],
     care: ["Dry clean only"],
     sizes: SIZES,
     colours: ["Leaf Green"],
@@ -459,7 +462,6 @@ export const collections: Collection[] = [
 ];
 
 export const allSizes = ["XS", "S", "M", "L", "XL", "Free Size"];
-export const allColours = Array.from(new Set(products.flatMap((p) => p.colours))).sort();
 
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);

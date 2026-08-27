@@ -121,9 +121,20 @@ export function CheckoutPage() {
     if (useNewAddress) {
       if (!validateAddressForm()) return;
       const parsed = addressSchema.parse(addressForm);
-      address = saveNewAddress
-        ? addAddress({ label: "Delivery", ...parsed, isDefault: (user?.addresses.length ?? 0) === 0 })
-        : { id: "guest-address", label: "Delivery", ...parsed, isDefault: false };
+      if (saveNewAddress) {
+        try {
+          address = await addAddress({
+            label: "Delivery",
+            ...parsed,
+            isDefault: (user?.addresses.length ?? 0) === 0,
+          });
+        } catch {
+          setFormError("Couldn't save that address. Please try again.");
+          return;
+        }
+      } else {
+        address = { id: "guest-address", label: "Delivery", ...parsed, isDefault: false };
+      }
     } else {
       address = user?.addresses.find((a) => a.id === selectedAddressId) ?? null;
       if (!address) {
@@ -139,9 +150,14 @@ export function CheckoutPage() {
     setPaymentState("processing");
     await new Promise((resolve) => setTimeout(resolve, 1600));
 
-    const order = placeOrder({ address: address!, paymentMethod, email, phone });
-    setPaymentState("idle");
-    navigate(`/order/${order.id}`);
+    try {
+      const order = await placeOrder({ address: address!, paymentMethod, email, phone });
+      setPaymentState("idle");
+      navigate(`/order/${order.id}`);
+    } catch {
+      setPaymentState("failed");
+      setFormError("Couldn't place your order. Please try again.");
+    }
   }
 
   function simulateFailure() {
@@ -153,7 +169,11 @@ export function CheckoutPage() {
     return (
       <SiteLayout>
         <PageHeader
-          breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]} />}
+          breadcrumb={
+            <Breadcrumbs
+              items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]}
+            />
+          }
           title="Secure Checkout"
           description="Sign in to complete your luxury bespoke purchase."
         />
@@ -168,26 +188,18 @@ export function CheckoutPage() {
               variant="luxe"
               size="luxe"
               className="flex-1"
-              onClick={() =>
-                setPendingIntent({ type: "checkout", returnTo: "/checkout" })
-              }
+              onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
             >
-              <Link to="/login?redirect=/checkout">
-                Login
-              </Link>
+              <Link to="/login?redirect=/checkout">Login</Link>
             </Button>
             <Button
               asChild
               variant="luxeOutline"
               size="luxe"
               className="flex-1"
-              onClick={() =>
-                setPendingIntent({ type: "checkout", returnTo: "/checkout" })
-              }
+              onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
             >
-              <Link to="/register?redirect=/checkout">
-                Create Account
-              </Link>
+              <Link to="/register?redirect=/checkout">Create Account</Link>
             </Button>
           </div>
         </div>
@@ -199,7 +211,11 @@ export function CheckoutPage() {
     return (
       <SiteLayout>
         <PageHeader
-          breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]} />}
+          breadcrumb={
+            <Breadcrumbs
+              items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Checkout" }]}
+            />
+          }
           title="Checkout"
         />
         <div className="mx-auto max-w-lg px-5 py-24">
@@ -221,36 +237,59 @@ export function CheckoutPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Cart", href: <Link to="/cart">Cart</Link> }, { label: "Checkout" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: <Link to="/">Home</Link> },
+              { label: "Cart", href: <Link to="/cart">Cart</Link> },
+              { label: "Checkout" },
+            ]}
+          />
+        }
         title="Secure Checkout"
         description="Encrypted 256-bit checkout · Delhivery Insured Shipping"
       />
       <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 lg:px-12">
-
         <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
           <div className="space-y-10">
             {/* Contact */}
             <section aria-labelledby="contact-heading">
-              <h2 id="contact-heading" className="eyebrow">Contact</h2>
+              <h2 id="contact-heading" className="eyebrow">
+                Contact
+              </h2>
               <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 rounded-none" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1 rounded-none"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 rounded-none" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="mt-1 rounded-none"
+                  />
                 </div>
               </div>
             </section>
 
             {/* Delivery address */}
             <section aria-labelledby="address-heading">
-              <h2 id="address-heading" className="eyebrow">Delivery Address</h2>
+              <h2 id="address-heading" className="eyebrow">
+                Delivery Address
+              </h2>
               <div className="mt-4 space-y-3">
                 {(user?.addresses.length ?? 0) > 0 && (
                   <RadioGroup
-                    value={useNewAddress ? "new" : selectedAddressId ?? ""}
+                    value={useNewAddress ? "new" : (selectedAddressId ?? "")}
                     onValueChange={(val) => {
                       if (val === "new") {
                         setUseNewAddress(true);
@@ -268,9 +307,15 @@ export function CheckoutPage() {
                       >
                         <RadioGroupItem value={addr.id} id={`addr-${addr.id}`} className="mt-1" />
                         <div className="text-sm">
-                          <p className="uppercase tracking-[0.15em] text-[11px] text-muted-foreground">{addr.label}</p>
-                          <p className="mt-1">{addr.fullName} · {addr.phone}</p>
-                          <p className="text-muted-foreground">{addr.line1}, {addr.locality}, {addr.city}, {addr.state} {addr.pincode}</p>
+                          <p className="uppercase tracking-[0.15em] text-[11px] text-muted-foreground">
+                            {addr.label}
+                          </p>
+                          <p className="mt-1">
+                            {addr.fullName} · {addr.phone}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {addr.line1}, {addr.locality}, {addr.city}, {addr.state} {addr.pincode}
+                          </p>
                         </div>
                       </label>
                     ))}
@@ -287,28 +332,64 @@ export function CheckoutPage() {
                 {useNewAddress && (
                   <div className="grid grid-cols-1 gap-4 border border-border p-5 sm:grid-cols-2">
                     <Field label="Full name" error={addressErrors.fullName}>
-                      <Input value={addressForm.fullName} onChange={(e) => setAddressForm((p) => ({ ...p, fullName: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.fullName}
+                        onChange={(e) =>
+                          setAddressForm((p) => ({ ...p, fullName: e.target.value }))
+                        }
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="Phone" error={addressErrors.phone}>
-                      <Input value={addressForm.phone} onChange={(e) => setAddressForm((p) => ({ ...p, phone: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.phone}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, phone: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="Address line" error={addressErrors.line1} full>
-                      <Input value={addressForm.line1} onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.line1}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, line1: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="Locality" error={addressErrors.locality}>
-                      <Input value={addressForm.locality} onChange={(e) => setAddressForm((p) => ({ ...p, locality: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.locality}
+                        onChange={(e) =>
+                          setAddressForm((p) => ({ ...p, locality: e.target.value }))
+                        }
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="City" error={addressErrors.city}>
-                      <Input value={addressForm.city} onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.city}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="State" error={addressErrors.state}>
-                      <Input value={addressForm.state} onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.state}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="Pincode" error={addressErrors.pincode}>
-                      <Input value={addressForm.pincode} onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.pincode}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <Field label="Country" error={addressErrors.country}>
-                      <Input value={addressForm.country} onChange={(e) => setAddressForm((p) => ({ ...p, country: e.target.value }))} className="rounded-none" />
+                      <Input
+                        value={addressForm.country}
+                        onChange={(e) => setAddressForm((p) => ({ ...p, country: e.target.value }))}
+                        className="rounded-none"
+                      />
                     </Field>
                     <label className="flex items-center gap-2 text-xs text-muted-foreground sm:col-span-2">
                       <input
@@ -326,7 +407,9 @@ export function CheckoutPage() {
 
             {/* Delivery method */}
             <section aria-labelledby="delivery-heading">
-              <h2 id="delivery-heading" className="eyebrow">Delivery Method</h2>
+              <h2 id="delivery-heading" className="eyebrow">
+                Delivery Method
+              </h2>
               <div className="mt-4 border border-gold/50 bg-gold/5 p-4">
                 <p className="text-sm">Standard delivery — 5–8 business days</p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
@@ -337,7 +420,9 @@ export function CheckoutPage() {
 
             {/* Coupon */}
             <section aria-labelledby="coupon-heading">
-              <h2 id="coupon-heading" className="eyebrow">Coupon</h2>
+              <h2 id="coupon-heading" className="eyebrow">
+                Coupon
+              </h2>
               <div className="mt-4">
                 {appliedCoupon ? (
                   <div className="flex items-center justify-between border border-gold/40 bg-gold/5 px-3 py-2">
@@ -352,8 +437,18 @@ export function CheckoutPage() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <Input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" className="rounded-none" />
-                    <Button type="button" variant="luxeOutline" size="luxeSm" onClick={handleApplyCoupon}>
+                    <Input
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      placeholder="Enter code"
+                      className="rounded-none"
+                    />
+                    <Button
+                      type="button"
+                      variant="luxeOutline"
+                      size="luxeSm"
+                      onClick={handleApplyCoupon}
+                    >
                       Apply
                     </Button>
                   </div>
@@ -364,13 +459,18 @@ export function CheckoutPage() {
 
             {/* Payment method */}
             <section aria-labelledby="payment-heading">
-              <h2 id="payment-heading" className="eyebrow">Payment Method</h2>
+              <h2 id="payment-heading" className="eyebrow">
+                Payment Method
+              </h2>
               <RadioGroup
                 value={paymentMethod}
                 onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                 className="mt-4"
               >
-                <label htmlFor="pay-razorpay" className="flex cursor-pointer items-start gap-3 border border-border p-4 has-[[data-state=checked]]:border-gold">
+                <label
+                  htmlFor="pay-razorpay"
+                  className="flex cursor-pointer items-start gap-3 border border-border p-4 has-[[data-state=checked]]:border-gold"
+                >
                   <RadioGroupItem value="razorpay" id="pay-razorpay" className="mt-1" />
                   <div className="text-sm">
                     <p>Razorpay</p>
@@ -410,7 +510,11 @@ export function CheckoutPage() {
               <ul className="mt-6 space-y-4">
                 {cartLines.map((line) => (
                   <li key={line.variantId} className="flex gap-3">
-                    <img src={line.product.images[0]} alt={line.product.name} className="h-16 w-13 shrink-0 object-cover" />
+                    <img
+                      src={line.product.images[0]}
+                      alt={line.product.name}
+                      className="h-16 w-13 shrink-0 object-cover"
+                    />
                     <div className="min-w-0 flex-1 text-sm">
                       <p className="truncate">{line.product.name}</p>
                       <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
@@ -473,20 +577,28 @@ export function CheckoutPage() {
       </div>
 
       {paymentState === "processing" && (
-        <div role="status" aria-live="polite" className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm">
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm"
+        >
           <div className="mx-4 max-w-sm border border-border bg-background p-8 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-gold" />
             <h3 className="mt-5 font-display text-xl">Processing your payment</h3>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              The Razorpay checkout would open here. Success is confirmed server-side once
-              payment settles — never asserted from the browser.
+              The Razorpay checkout would open here. Success is confirmed server-side once payment
+              settles — never asserted from the browser.
             </p>
           </div>
         </div>
       )}
 
       {paymentState === "failed" && (
-        <div role="alertdialog" aria-live="assertive" className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm">
+        <div
+          role="alertdialog"
+          aria-live="assertive"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-sm"
+        >
           <div className="mx-4 max-w-sm border border-destructive/40 bg-background p-8 text-center">
             <XCircle className="mx-auto h-8 w-8 text-destructive" />
             <h3 className="mt-5 font-display text-xl">We couldn't complete your payment.</h3>
@@ -494,7 +606,12 @@ export function CheckoutPage() {
               This is a demo failure state. No charge was made.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button variant="luxe" size="luxeSm" className="flex-1" onClick={() => setPaymentState("idle")}>
+              <Button
+                variant="luxe"
+                size="luxeSm"
+                className="flex-1"
+                onClick={() => setPaymentState("idle")}
+              >
                 Try Again
               </Button>
               <Button

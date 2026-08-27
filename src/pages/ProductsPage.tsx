@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { allColours, allSizes, categories } from "@/data/catalog";
+import { allSizes, categories } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Product } from "@/data/types";
 
@@ -42,28 +42,38 @@ export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { products, collections } = useStore();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const allColours = useMemo(
+    () => Array.from(new Set(products.flatMap((p) => p.colours))).sort(),
+    [products],
+  );
 
-  const search: ProductSearch = useMemo(() => ({
-    q: searchParams.get("q") || undefined,
-    sort: searchParams.get("sort") || undefined,
-    category: searchParams.get("category") || undefined,
-    collection: searchParams.get("collection") || undefined,
-    size: searchParams.get("size") || undefined,
-    colour: searchParams.get("colour") || undefined,
-  }), [searchParams]);
+  const search: ProductSearch = useMemo(
+    () => ({
+      q: searchParams.get("q") || undefined,
+      sort: searchParams.get("sort") || undefined,
+      category: searchParams.get("category") || undefined,
+      collection: searchParams.get("collection") || undefined,
+      size: searchParams.get("size") || undefined,
+      colour: searchParams.get("colour") || undefined,
+    }),
+    [searchParams],
+  );
 
   const setSearch = (patch: Partial<ProductSearch>) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      Object.entries(patch).forEach(([key, val]) => {
-        if (val) {
-          next.set(key, val);
-        } else {
-          next.delete(key);
-        }
-      });
-      return next;
-    }, { replace: true });
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(patch).forEach(([key, val]) => {
+          if (val) {
+            next.set(key, val);
+          } else {
+            next.delete(key);
+          }
+        });
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const selectedSizes = search.size ? search.size.split(",") : [];
@@ -108,7 +118,17 @@ export function ProductsPage() {
         sorted.sort((a, b) => Number(b.featured) - Number(a.featured));
     }
     return sorted;
-  }, [products, search.q, search.category, search.collection, search.sort, search.size, search.colour, selectedSizes, selectedColours]);
+  }, [
+    products,
+    search.q,
+    search.category,
+    search.collection,
+    search.sort,
+    search.size,
+    search.colour,
+    selectedSizes,
+    selectedColours,
+  ]);
 
   const activeCount =
     (search.category ? 1 : 0) +
@@ -118,9 +138,7 @@ export function ProductsPage() {
 
   const toggleList = (key: "size" | "colour", value: string) => {
     const current = key === "size" ? selectedSizes : selectedColours;
-    const next = current.includes(value)
-      ? current.filter((v) => v !== value)
-      : [...current, value];
+    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
     setSearch({ [key]: next.length ? next.join(",") : undefined });
   };
 
@@ -232,7 +250,14 @@ export function ProductsPage() {
         breadcrumb={
           <Breadcrumbs
             items={[
-              { label: "Home", href: <Link to="/" className="link-underline">Home</Link> },
+              {
+                label: "Home",
+                href: (
+                  <Link to="/" className="link-underline">
+                    Home
+                  </Link>
+                ),
+              },
               { label: "Shop All" },
             ]}
           />

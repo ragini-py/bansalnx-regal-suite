@@ -55,7 +55,13 @@ const TAB_TITLES: Record<AdminTab, string> = {
 
 function tabFromPathname(pathname: string): AdminTab {
   const segment = pathname.replace(/^\/admin\/?/, "").split("/")[0];
-  if (segment === "orders" || segment === "products" || segment === "coupons" || segment === "shipping" || segment === "settings") {
+  if (
+    segment === "orders" ||
+    segment === "products" ||
+    segment === "coupons" ||
+    segment === "shipping" ||
+    segment === "settings"
+  ) {
     return segment;
   }
   return "overview";
@@ -95,9 +101,13 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
   const awaitingFulfilment = orders.filter((o) =>
     ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status),
   );
-  const inTransit = orders.filter((o) => ["shipped", "in_transit", "out_for_delivery"].includes(o.status));
+  const inTransit = orders.filter((o) =>
+    ["shipped", "in_transit", "out_for_delivery"].includes(o.status),
+  );
   const delivered = orders.filter((o) => o.status === "delivered");
-  const exceptions = orders.filter((o) => ["ndr", "rto", "delivery_failed", "lost"].includes(o.status));
+  const exceptions = orders.filter((o) =>
+    ["ndr", "rto", "delivery_failed", "lost"].includes(o.status),
+  );
 
   const needsAttention = orders.filter(
     (o) =>
@@ -120,8 +130,12 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
       <div className="relative overflow-hidden border border-slate-200/90 bg-gradient-to-r from-white via-amber-50/20 to-slate-50 p-6 rounded-xl shadow-sm text-slate-900">
         <div className="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Executive Overview</p>
-            <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold text-slate-900">Bansal·nx Operational Suite</h2>
+            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+              Executive Overview
+            </p>
+            <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold text-slate-900">
+              Bansal·nx Operational Suite
+            </h2>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Live orders, logistics pipelines, and store controls in real time.
             </p>
@@ -153,7 +167,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               <CreditCard className="h-4 w-4" />
             </div>
           </div>
-          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">{formatINR(totalRevenue)}</p>
+          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">
+            {formatINR(totalRevenue)}
+          </p>
           <p className="mt-1 text-xs text-slate-400">{orders.length} lifetime orders</p>
         </div>
         <div className="border border-slate-200 bg-white p-5 rounded-xl shadow-sm">
@@ -163,7 +179,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               <PackageSearch className="h-4 w-4" />
             </div>
           </div>
-          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">{awaitingFulfilment.length}</p>
+          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">
+            {awaitingFulfilment.length}
+          </p>
           <p className="mt-1 text-xs text-slate-400">Ready for dispatch</p>
         </div>
         <div className="border border-slate-200 bg-white p-5 rounded-xl shadow-sm">
@@ -173,7 +191,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               <Truck className="h-4 w-4" />
             </div>
           </div>
-          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">{inTransit.length}</p>
+          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">
+            {inTransit.length}
+          </p>
           <p className="mt-1 text-xs text-slate-400">Delhivery network</p>
         </div>
         <div className="border border-slate-200 bg-white p-5 rounded-xl shadow-sm">
@@ -183,7 +203,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               <AlertTriangle className="h-4 w-4" />
             </div>
           </div>
-          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-rose-600">{exceptions.length}</p>
+          <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-rose-600">
+            {exceptions.length}
+          </p>
           <p className="mt-1 text-xs text-slate-400">Require attention</p>
         </div>
       </div>
@@ -207,6 +229,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               Manage All
             </Button>
           </div>
+          <p className="px-5 pt-3 text-[11px] uppercase tracking-wider text-muted-foreground sm:hidden">
+            Swipe table to see more →
+          </p>
           <Table>
             <TableHeader>
               <TableRow>
@@ -223,17 +248,19 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                   <TableCell className="font-medium">{o.id}</TableCell>
                   <TableCell>{o.customerName}</TableCell>
                   <TableCell>
-                    {["ndr", "rto"].includes(o.status) && <StatusBadge status="warning" label={`NDR: ${o.status.toUpperCase()}`} />}
-                    {o.payment.status === "failed" && <StatusBadge status="destructive" label="Payment Failed" />}
-                    {o.returnRequest && <StatusBadge status="info" label={`Return: ${o.returnRequest.status}`} />}
+                    {["ndr", "rto"].includes(o.status) && (
+                      <StatusBadge status="warning" label={`NDR: ${o.status.toUpperCase()}`} />
+                    )}
+                    {o.payment.status === "failed" && (
+                      <StatusBadge status="destructive" label="Payment Failed" />
+                    )}
+                    {o.returnRequest && (
+                      <StatusBadge status="info" label={`Return: ${o.returnRequest.status}`} />
+                    )}
                   </TableCell>
                   <TableCell>{formatINR(o.total)}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="luxeOutline"
-                      size="sm"
-                      onClick={() => onNavigateTab("orders")}
-                    >
+                    <Button variant="luxeOutline" size="sm" onClick={() => onNavigateTab("orders")}>
                       Resolve
                     </Button>
                   </TableCell>
@@ -247,11 +274,21 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
       {/* Recent Orders Overview */}
       <div className="border border-slate-200 bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 bg-slate-50/50">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Recent Orders</h3>
-          <Button variant="ghost" size="sm" onClick={() => onNavigateTab("orders")} className="text-xs font-semibold text-amber-700 hover:text-amber-800">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+            Recent Orders
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigateTab("orders")}
+            className="text-xs font-semibold text-amber-700 hover:text-amber-800"
+          >
             View All ({orders.length}) <ChevronRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
+        <p className="px-5 pt-3 text-[11px] uppercase tracking-wider text-slate-400 sm:hidden">
+          Swipe table to see more →
+        </p>
         <Table>
           <TableHeader>
             <TableRow className="border-b border-slate-100 bg-slate-50/30">
@@ -265,16 +302,26 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
           </TableHeader>
           <TableBody>
             {recentOrders.map((o) => (
-              <TableRow key={o.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+              <TableRow
+                key={o.id}
+                className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+              >
                 <TableCell className="font-semibold text-slate-900 text-xs">{o.id}</TableCell>
-                <TableCell className="text-xs font-medium text-slate-700">{o.customerName}</TableCell>
+                <TableCell className="text-xs font-medium text-slate-700">
+                  {o.customerName}
+                </TableCell>
                 <TableCell className="text-xs text-slate-500">{formatDate(o.createdAt)}</TableCell>
                 <TableCell className="max-w-[200px] truncate text-xs text-slate-500">
                   {o.lines.map((l) => l.name).join(", ")}
                 </TableCell>
-                <TableCell className="text-xs font-bold text-slate-900">{formatINR(o.total)}</TableCell>
+                <TableCell className="text-xs font-bold text-slate-900">
+                  {formatINR(o.total)}
+                </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="rounded-full capitalize font-medium text-xs border-slate-200 bg-slate-50 text-slate-700">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full capitalize font-medium text-xs border-slate-200 bg-slate-50 text-slate-700"
+                  >
                     {orderStatusLabels[o.status] || o.status}
                   </Badge>
                 </TableCell>
@@ -286,29 +333,42 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
 
       {/* Integrations Grid */}
       <div className="border border-slate-200 bg-white p-6 rounded-xl shadow-sm">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Integration Pipelines</h3>
-        <p className="mt-1 text-xs text-slate-500">Operational status of integrated merchant and delivery providers.</p>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+          Integration Pipelines
+        </h3>
+        <p className="mt-1 text-xs text-slate-500">
+          Operational status of integrated merchant and delivery providers.
+        </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-lg">
             <div>
               <p className="text-xs font-semibold text-slate-900">Razorpay Gateway</p>
               <p className="text-[11px] text-slate-500">UPI, Cards, Netbanking</p>
             </div>
-            <StatusBadge status={settings.razorpayConnected ? "success" : "muted"} label={settings.razorpayConnected ? "Active" : "Ready"} />
+            <StatusBadge
+              status={settings.razorpayConnected ? "success" : "muted"}
+              label={settings.razorpayConnected ? "Active" : "Ready"}
+            />
           </div>
           <div className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-lg">
             <div>
               <p className="text-xs font-semibold text-slate-900">Delhivery Logistics</p>
               <p className="text-[11px] text-slate-500">Surface & Express AWB</p>
             </div>
-            <StatusBadge status={settings.delhiveryConnected ? "success" : "muted"} label={settings.delhiveryConnected ? "Active" : "Ready"} />
+            <StatusBadge
+              status={settings.delhiveryConnected ? "success" : "muted"}
+              label={settings.delhiveryConnected ? "Active" : "Ready"}
+            />
           </div>
           <div className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-lg">
             <div>
               <p className="text-xs font-semibold text-slate-900">Transactional Email</p>
               <p className="text-[11px] text-slate-500">Order & Dispatch Alerts</p>
             </div>
-            <StatusBadge status={settings.emailProviderConnected ? "success" : "muted"} label={settings.emailProviderConnected ? "Active" : "Ready"} />
+            <StatusBadge
+              status={settings.emailProviderConnected ? "success" : "muted"}
+              label={settings.emailProviderConnected ? "Active" : "Ready"}
+            />
           </div>
         </div>
       </div>
@@ -326,36 +386,53 @@ function OrdersManagerTab() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const filteredOrders = orders.filter((o) => {
-    if (filter === "awaiting" && !["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status)) return false;
-    if (filter === "transit" && !["shipped", "in_transit", "out_for_delivery"].includes(o.status)) return false;
+    if (
+      filter === "awaiting" &&
+      !["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status)
+    )
+      return false;
+    if (filter === "transit" && !["shipped", "in_transit", "out_for_delivery"].includes(o.status))
+      return false;
     if (filter === "delivered" && o.status !== "delivered") return false;
     if (filter === "returns" && !o.returnRequest) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      return o.id.toLowerCase().includes(q) || o.customerName.toLowerCase().includes(q) || o.email.toLowerCase().includes(q);
+      return (
+        o.id.toLowerCase().includes(q) ||
+        o.customerName.toLowerCase().includes(q) ||
+        o.email.toLowerCase().includes(q)
+      );
     }
     return true;
   });
 
-  function handleStatusChange(orderId: string, newStatus: OrderStatus) {
-    updateOrder(orderId, { status: newStatus });
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : null);
+  async function handleStatusChange(orderId: string, newStatus: OrderStatus) {
+    try {
+      await updateOrder(orderId, { status: newStatus });
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+      }
+      toast.success(`Order ${orderId} updated to ${orderStatusLabels[newStatus]}`);
+    } catch {
+      toast.error("Couldn't update that order. Please try again.");
     }
-    toast.success(`Order ${orderId} updated to ${orderStatusLabels[newStatus]}`);
   }
 
-  function handleApproveReturn(orderId: string) {
-    updateOrder(orderId, {
-      returnRequest: {
-        reason: selectedOrder?.returnRequest?.reason ?? "Customer requested return",
-        status: "approved",
-        requestedAt: selectedOrder?.returnRequest?.requestedAt ?? new Date().toISOString(),
-        refundAmount: selectedOrder?.total ?? 0,
-      },
-    });
-    toast.success(`Return approved for order ${orderId}`);
-    setSelectedOrder(null);
+  async function handleApproveReturn(orderId: string) {
+    try {
+      await updateOrder(orderId, {
+        returnRequest: {
+          reason: selectedOrder?.returnRequest?.reason ?? "Customer requested return",
+          status: "approved",
+          requestedAt: selectedOrder?.returnRequest?.requestedAt ?? new Date().toISOString(),
+          refundAmount: selectedOrder?.total ?? 0,
+        },
+      });
+      toast.success(`Return approved for order ${orderId}`);
+      setSelectedOrder(null);
+    } catch {
+      toast.error("Couldn't approve that return. Please try again.");
+    }
   }
 
   return (
@@ -363,7 +440,9 @@ function OrdersManagerTab() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-display text-2xl">Order Fulfilment & Management</h2>
-          <p className="text-xs text-muted-foreground">Manage order lifecycles, fulfillments, returns, and refunds.</p>
+          <p className="text-xs text-muted-foreground">
+            Manage order lifecycles, fulfillments, returns, and refunds.
+          </p>
         </div>
         <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -380,10 +459,30 @@ function OrdersManagerTab() {
       <div className="flex flex-wrap gap-2">
         {[
           { id: "all", label: "All Orders", count: orders.length },
-          { id: "awaiting", label: "Awaiting Fulfilment", count: orders.filter((o) => ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status)).length },
-          { id: "transit", label: "In Transit", count: orders.filter((o) => ["shipped", "in_transit", "out_for_delivery"].includes(o.status)).length },
-          { id: "delivered", label: "Delivered", count: orders.filter((o) => o.status === "delivered").length },
-          { id: "returns", label: "Return Requests", count: orders.filter((o) => Boolean(o.returnRequest)).length },
+          {
+            id: "awaiting",
+            label: "Awaiting Fulfilment",
+            count: orders.filter((o) =>
+              ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status),
+            ).length,
+          },
+          {
+            id: "transit",
+            label: "In Transit",
+            count: orders.filter((o) =>
+              ["shipped", "in_transit", "out_for_delivery"].includes(o.status),
+            ).length,
+          },
+          {
+            id: "delivered",
+            label: "Delivered",
+            count: orders.filter((o) => o.status === "delivered").length,
+          },
+          {
+            id: "returns",
+            label: "Return Requests",
+            count: orders.filter((o) => Boolean(o.returnRequest)).length,
+          },
         ].map((f) => (
           <button
             key={f.id}
@@ -412,7 +511,9 @@ function OrdersManagerTab() {
               <TableHead className="text-xs font-semibold text-slate-500">Total</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Payment</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Actions</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -424,7 +525,10 @@ function OrdersManagerTab() {
               </TableRow>
             ) : (
               filteredOrders.map((o) => (
-                <TableRow key={o.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                <TableRow
+                  key={o.id}
+                  className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                >
                   <TableCell className="font-semibold text-slate-900 text-xs">{o.id}</TableCell>
                   <TableCell>
                     <div>
@@ -432,10 +536,17 @@ function OrdersManagerTab() {
                       <p className="text-[11px] text-slate-500">{o.email}</p>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-slate-500">{formatDateTime(o.createdAt)}</TableCell>
-                  <TableCell className="text-xs font-bold text-slate-900">{formatINR(o.total)}</TableCell>
+                  <TableCell className="text-xs text-slate-500">
+                    {formatDateTime(o.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-xs font-bold text-slate-900">
+                    {formatINR(o.total)}
+                  </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="rounded-full capitalize text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full capitalize text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700"
+                    >
                       {o.payment.status} ({o.payment.method})
                     </Badge>
                   </TableCell>
@@ -444,16 +555,24 @@ function OrdersManagerTab() {
                       variant="outline"
                       className={cn(
                         "rounded-full text-[11px] font-semibold capitalize",
-                        o.status === "delivered" && "border-emerald-200 bg-emerald-50 text-emerald-700",
-                        ["ndr", "rto", "cancelled"].includes(o.status) && "border-rose-200 bg-rose-50 text-rose-700",
-                        !["delivered", "ndr", "rto", "cancelled"].includes(o.status) && "border-slate-200 bg-slate-50 text-slate-700",
+                        o.status === "delivered" &&
+                          "border-emerald-200 bg-emerald-50 text-emerald-700",
+                        ["ndr", "rto", "cancelled"].includes(o.status) &&
+                          "border-rose-200 bg-rose-50 text-rose-700",
+                        !["delivered", "ndr", "rto", "cancelled"].includes(o.status) &&
+                          "border-slate-200 bg-slate-50 text-slate-700",
                       )}
                     >
                       {orderStatusLabels[o.status] || o.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => setSelectedOrder(o)} className="text-xs font-medium border-slate-200 hover:bg-slate-100">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedOrder(o)}
+                      className="text-xs font-medium border-slate-200 hover:bg-slate-100"
+                    >
                       Inspect
                     </Button>
                   </TableCell>
@@ -466,19 +585,27 @@ function OrdersManagerTab() {
 
       {/* Order Detail & Action Modal */}
       {selectedOrder && (
-        <Dialog open={Boolean(selectedOrder)} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <Dialog
+          open={Boolean(selectedOrder)}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+        >
           <DialogContent className="max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
             <DialogHeader>
-              <DialogTitle className="font-sans font-bold text-xl text-slate-900">Order {selectedOrder.id}</DialogTitle>
+              <DialogTitle className="font-sans font-bold text-xl text-slate-900">
+                Order {selectedOrder.id}
+              </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
-                Customer: {selectedOrder.customerName} ({selectedOrder.email}) · Placed on {formatDateTime(selectedOrder.createdAt)}
+                Customer: {selectedOrder.customerName} ({selectedOrder.email}) · Placed on{" "}
+                {formatDateTime(selectedOrder.createdAt)}
               </DialogDescription>
             </DialogHeader>
 
             <div className="mt-4 space-y-6">
               {/* Order Items */}
               <div className="border border-border p-4">
-                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Order Lines</p>
+                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                  Order Lines
+                </p>
                 <ul className="mt-3 divide-y divide-border">
                   {selectedOrder.lines.map((line, idx) => (
                     <li key={idx} className="flex items-center justify-between py-2 text-sm">
@@ -486,7 +613,9 @@ function OrdersManagerTab() {
                         <img src={line.image} alt={line.name} className="h-10 w-8 object-cover" />
                         <div>
                           <p className="font-medium">{line.name}</p>
-                          <p className="text-xs text-muted-foreground">{line.size} · {line.colour} · Qty {line.quantity}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {line.size} · {line.colour} · Qty {line.quantity}
+                          </p>
                         </div>
                       </div>
                       <span>{formatINR(line.price * line.quantity)}</span>
@@ -501,9 +630,21 @@ function OrdersManagerTab() {
 
               {/* Status Updater */}
               <div className="border border-border p-4">
-                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Update Fulfillment Status</p>
+                <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                  Update Fulfillment Status
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(["confirmed", "processing", "packed", "ready_for_pickup", "shipped", "delivered", "cancelled"] as OrderStatus[]).map((st) => (
+                  {(
+                    [
+                      "confirmed",
+                      "processing",
+                      "packed",
+                      "ready_for_pickup",
+                      "shipped",
+                      "delivered",
+                      "cancelled",
+                    ] as OrderStatus[]
+                  ).map((st) => (
                     <button
                       key={st}
                       type="button"
@@ -524,11 +665,19 @@ function OrdersManagerTab() {
               {/* Return Request Management */}
               {selectedOrder.returnRequest && (
                 <div className="border border-gold/50 bg-gold/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.15em] text-gold-deep font-medium">Return Request Pending</p>
+                  <p className="text-xs uppercase tracking-[0.15em] text-gold-deep font-medium">
+                    Return Request Pending
+                  </p>
                   <p className="mt-1 text-sm">Reason: {selectedOrder.returnRequest.reason}</p>
-                  <p className="text-xs text-muted-foreground">Current status: {selectedOrder.returnRequest.status}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Current status: {selectedOrder.returnRequest.status}
+                  </p>
                   <div className="mt-3 flex gap-2">
-                    <Button variant="luxe" size="sm" onClick={() => handleApproveReturn(selectedOrder.id)}>
+                    <Button
+                      variant="luxe"
+                      size="sm"
+                      onClick={() => handleApproveReturn(selectedOrder.id)}
+                    >
                       Approve Return &amp; Schedule Reverse Pickup
                     </Button>
                   </div>
@@ -549,16 +698,24 @@ function ProductsManagerTab() {
   const { products, saveProduct } = useStore();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  function handleToggleAvailability(prod: Product) {
+  async function handleToggleAvailability(prod: Product) {
     const nextPublished = !prod.published;
-    saveProduct({ ...prod, published: nextPublished });
-    toast.success(`${prod.name} ${nextPublished ? "published to store" : "unpublished"}`);
+    try {
+      await saveProduct({ ...prod, published: nextPublished });
+      toast.success(`${prod.name} ${nextPublished ? "published to store" : "unpublished"}`);
+    } catch {
+      toast.error("Couldn't update that product. Please try again.");
+    }
   }
 
-  function handleSavePrice(prod: Product, newPrice: number) {
-    saveProduct({ ...prod, price: newPrice });
-    toast.success(`Updated price for ${prod.name}`);
-    setEditingProduct(null);
+  async function handleSavePrice(prod: Product, newPrice: number) {
+    try {
+      await saveProduct({ ...prod, price: newPrice });
+      toast.success(`Updated price for ${prod.name}`);
+      setEditingProduct(null);
+    } catch {
+      toast.error("Couldn't update the price. Please try again.");
+    }
   }
 
   return (
@@ -566,7 +723,9 @@ function ProductsManagerTab() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-display text-2xl">Products</h2>
-          <p className="text-xs text-muted-foreground">Edit pricing and store catalog visibility.</p>
+          <p className="text-xs text-muted-foreground">
+            Edit pricing and store catalog visibility.
+          </p>
         </div>
       </div>
 
@@ -597,7 +756,9 @@ function ProductsManagerTab() {
                 </TableCell>
                 <TableCell className="capitalize text-xs">{p.category}</TableCell>
                 <TableCell className="text-sm font-medium">{formatINR(p.price)}</TableCell>
-                <TableCell className="text-xs text-muted-foreground line-through">{formatINR(p.mrp)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground line-through">
+                  {formatINR(p.mrp)}
+                </TableCell>
                 <TableCell className="text-xs">{p.variants.length} SKU(s)</TableCell>
                 <TableCell>
                   <button
@@ -625,7 +786,10 @@ function ProductsManagerTab() {
       </div>
 
       {editingProduct && (
-        <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
+        <Dialog
+          open={Boolean(editingProduct)}
+          onOpenChange={(open) => !open && setEditingProduct(null)}
+        >
           <DialogContent className="max-w-md rounded-none border border-border bg-background p-6">
             <DialogHeader>
               <DialogTitle className="font-display text-xl">Edit Product Pricing</DialogTitle>
@@ -700,7 +864,9 @@ function CouponsManagerTab() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-display text-2xl">Promotional Coupons &amp; Offers</h2>
-          <p className="text-xs text-muted-foreground">Manage active discount campaigns and customer promotional codes.</p>
+          <p className="text-xs text-muted-foreground">
+            Manage active discount campaigns and customer promotional codes.
+          </p>
         </div>
         <Button variant="luxe" size="sm" onClick={() => setCreateOpen(true)}>
           <Plus className="h-4 w-4" /> Create Coupon
@@ -726,15 +892,30 @@ function CouponsManagerTab() {
                 <TableCell className="font-medium text-gold-deep">
                   {c.type === "percent" ? `${c.value}% OFF` : `₹${c.value} OFF`}
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground">{formatINR(c.minOrder ?? 0)}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{formatDate(c.expiresAt)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {formatINR(c.minOrder ?? 0)}
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {formatDate(c.expiresAt)}
+                </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={cn("rounded-none text-xs", c.active ? "border-emerald/50 text-emerald" : "text-muted-foreground")}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "rounded-none text-xs",
+                      c.active ? "border-emerald/50 text-emerald" : "text-muted-foreground",
+                    )}
+                  >
                     {c.active ? "Active" : "Expired"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => deleteCoupon(c.id)} className="text-destructive hover:bg-destructive/10">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteCoupon(c.id)}
+                    className="text-destructive hover:bg-destructive/10"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -794,61 +975,81 @@ function ShippingManagerTab() {
   const { orders, updateOrder } = useStore();
   const shippedOrders = orders.filter((o) => Boolean(o.shipment));
 
-  function handleSimulateDispatch(orderId: string) {
+  async function handleSimulateDispatch(orderId: string) {
     const awb = `DLV${Math.floor(100000000 + Math.random() * 900000000)}`;
-    updateOrder(orderId, {
-      status: "shipped",
-      shipment: {
-        courier: "Delhivery",
-        awb,
-        shipmentId: `SHP-${Date.now().toString().slice(-6)}`,
-        trackingUrl: null,
-        estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-        attempts: 0,
-        ndrReason: null,
-        rto: false,
-        events: [
-          {
-            status: "shipped",
-            at: new Date().toISOString(),
-            label: "Package picked up by Delhivery Courier",
-            location: "Jaipur Hub",
-          },
-        ],
-      },
-    });
-    toast.success(`Generated Delhivery AWB: ${awb}`);
+    try {
+      await updateOrder(orderId, {
+        status: "shipped",
+        shipment: {
+          courier: "Delhivery",
+          awb,
+          shipmentId: `SHP-${Date.now().toString().slice(-6)}`,
+          trackingUrl: null,
+          estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          attempts: 0,
+          ndrReason: null,
+          rto: false,
+          events: [
+            {
+              status: "shipped",
+              at: new Date().toISOString(),
+              label: "Package picked up by Delhivery Courier",
+              location: "Jaipur Hub",
+            },
+          ],
+        },
+      });
+      toast.success(`Generated Delhivery AWB: ${awb}`);
+    } catch {
+      toast.error("Couldn't generate the AWB. Please try again.");
+    }
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl">Delhivery Logistics &amp; Shipping</h2>
-        <p className="text-xs text-muted-foreground">Simulate carrier manifests, AWB creation, and tracking events.</p>
+        <p className="text-xs text-muted-foreground">
+          Simulate carrier manifests, AWB creation, and tracking events.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="border border-border/80 bg-card p-5">
-          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Carrier Status</p>
+          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+            Carrier Status
+          </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-lg font-medium">Delhivery Surface Express</span>
-            <Badge variant="outline" className="border-emerald/50 text-emerald rounded-none">Active</Badge>
+            <Badge variant="outline" className="border-emerald/50 text-emerald rounded-none">
+              Active
+            </Badge>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Origin Hub: Jaipur Central Facility, Rajasthan (302001)</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Origin Hub: Jaipur Central Facility, Rajasthan (302001)
+          </p>
         </div>
         <div className="border border-border/80 bg-card p-5">
-          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Tracking Engine</p>
+          <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+            Tracking Engine
+          </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-lg font-medium">Webhook Real-time Sync</span>
-            <Badge variant="outline" className="border-gold/50 text-gold-deep rounded-none">Integration Ready</Badge>
+            <Badge variant="outline" className="border-gold/50 text-gold-deep rounded-none">
+              Integration Ready
+            </Badge>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Auto-updates customer tracking timeline on scan</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Auto-updates customer tracking timeline on scan
+          </p>
         </div>
       </div>
 
       <div className="border border-border/80 bg-card">
         <div className="border-b border-border px-5 py-4">
-          <h3 className="text-sm font-medium uppercase tracking-[0.1em] text-foreground">Manifest &amp; AWB Dispatch Queue</h3>
+          <h3 className="text-sm font-medium uppercase tracking-[0.1em] text-foreground">
+            Manifest &amp; AWB Dispatch Queue
+          </h3>
         </div>
         <Table>
           <TableHeader>
@@ -865,9 +1066,13 @@ function ShippingManagerTab() {
               <TableRow key={o.id}>
                 <TableCell className="font-medium text-foreground">{o.id}</TableCell>
                 <TableCell>{o.customerName}</TableCell>
-                <TableCell className="font-mono text-xs text-gold-deep">{o.shipment.awb ?? "Not generated"}</TableCell>
+                <TableCell className="font-mono text-xs text-gold-deep">
+                  {o.shipment.awb ?? "Not generated"}
+                </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="rounded-none text-xs capitalize">{o.status}</Badge>
+                  <Badge variant="outline" className="rounded-none text-xs capitalize">
+                    {o.status}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   {!o.shipment.awb ? (
@@ -896,7 +1101,9 @@ function ShippingManagerTab() {
    ========================================================================= */
 function SettingsManagerTab() {
   const { settings, updateSettings } = useStore();
-  const [shippingThreshold, setShippingThreshold] = useState(String(settings.freeShippingThreshold));
+  const [shippingThreshold, setShippingThreshold] = useState(
+    String(settings.freeShippingThreshold),
+  );
   const [shippingFee, setShippingFee] = useState(String(settings.shippingFee));
   const [codMax, setCodMax] = useState(String(settings.codMaxOrderValue));
 
@@ -914,7 +1121,9 @@ function SettingsManagerTab() {
     <div className="max-w-2xl space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-slate-900">Store Configuration</h2>
-        <p className="text-xs text-slate-500">Adjust shipping rules, payment limits, and store policies.</p>
+        <p className="text-xs text-slate-500">
+          Adjust shipping rules, payment limits, and store policies.
+        </p>
       </div>
 
       <form onSubmit={handleSave} className="border border-border/80 bg-card p-6 space-y-5">
@@ -927,7 +1136,9 @@ function SettingsManagerTab() {
             onChange={(e) => setShippingThreshold(e.target.value)}
             className="mt-1 rounded-none"
           />
-          <p className="mt-1 text-[11px] text-muted-foreground">Orders equal to or exceeding this amount receive complimentary shipping.</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Orders equal to or exceeding this amount receive complimentary shipping.
+          </p>
         </div>
 
         <div>
@@ -950,7 +1161,9 @@ function SettingsManagerTab() {
             onChange={(e) => setCodMax(e.target.value)}
             className="mt-1 rounded-none"
           />
-          <p className="mt-1 text-[11px] text-muted-foreground">Orders above this threshold will require online prepay.</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Orders above this threshold will require online prepay.
+          </p>
         </div>
 
         <Button type="submit" variant="luxe" className="w-full">

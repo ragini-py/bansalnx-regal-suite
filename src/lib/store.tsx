@@ -17,15 +17,31 @@ import {
   type ReactNode,
 } from "react";
 
-import { collections as seedCollections, getProductById, products as seedProducts } from "@/data/catalog";
+import { getProductById } from "@/data/catalog";
 import {
   coupons as seedCoupons,
   homepageContent as seedContent,
-  orders as seedOrders,
   permissionsForRole,
   storeSettings as seedSettings,
   users as seedUsers,
 } from "@/data/mock";
+import {
+  extractApiErrorMessage,
+  loginRequest,
+  logoutRequest,
+  meRequest,
+  refreshRequest,
+  registerRequest,
+} from "@/lib/api/auth";
+import { getCollections, getProducts, updateProductRequest } from "@/lib/api/catalog";
+import { addAddressRequest, removeAddressRequest } from "@/lib/api/users";
+import {
+  createOrderRequest,
+  getAllOrders,
+  getMyOrders,
+  requestReturnRequest,
+  updateOrderRequest,
+} from "@/lib/api/orders";
 import type {
   Address,
   CartLine,
@@ -52,13 +68,9 @@ export interface PendingIntent {
 
 interface PersistedState {
   users: User[];
-  currentUserId: string | null;
   wishlist: string[];
   cart: CartLine[];
-  orders: Order[];
   coupons: Coupon[];
-  products: Product[];
-  collections: Collection[];
   content: HomepageContent;
   settings: StoreSettings;
   welcomeOfferSeen: boolean;
@@ -68,13 +80,9 @@ interface PersistedState {
 function initialState(): PersistedState {
   return {
     users: seedUsers,
-    currentUserId: null,
     wishlist: [],
     cart: [],
-    orders: seedOrders,
     coupons: seedCoupons,
-    products: seedProducts,
-    collections: seedCollections,
     content: seedContent,
     settings: seedSettings,
     welcomeOfferSeen: false,
@@ -116,16 +124,18 @@ interface StoreValue {
   users: User[];
   isAuthenticated: boolean;
   isAdmin: boolean;
+  /** True once the initial silent session check (against the backend) has resolved. */
+  authReady: boolean;
   permissions: PermissionKey[];
   hasPermission: (p: PermissionKey) => boolean;
-  login: (email: string, password: string) => { ok: boolean; error?: string; user?: User };
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; user?: User }>;
   register: (input: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
     password: string;
-  }) => { ok: boolean; error?: string; user?: User };
+  }) => Promise<{ ok: boolean; error?: string; user?: User }>;
   logout: () => void;
   /* intent preservation */
   pendingIntent: PendingIntent | null;
@@ -138,7 +148,12 @@ interface StoreValue {
   cart: CartLine[];
   cartLines: CartLineView[];
   cartCount: number;
-  addToCart: (input: { productId: string; size: string; colour: string; quantity?: number }) => void;
+  addToCart: (input: {
+    productId: string;
+    size: string;
+    colour: string;
+    quantity?: number;
+  }) => void;
   updateQuantity: (variantId: string, quantity: number) => void;
   removeFromCart: (variantId: string) => void;
   clearCart: () => void;
@@ -157,20 +172,20 @@ interface StoreValue {
     paymentMethod: PaymentMethod;
     email: string;
     phone: string;
-  }) => Order;
-  updateOrder: (id: string, patch: Partial<Order>) => void;
-  requestReturn: (id: string, reason: string) => void;
+  }) => Promise<Order>;
+  updateOrder: (id: string, patch: Partial<Order>) => Promise<void>;
+  requestReturn: (id: string, reason: string) => Promise<void>;
   cancelOrder: (id: string) => void;
   /* addresses */
-  addAddress: (address: Omit<Address, "id">) => Address;
-  removeAddress: (id: string) => void;
+  addAddress: (address: Omit<Address, "id">) => Promise<Address>;
+  removeAddress: (id: string) => Promise<void>;
   /* admin data */
   products: Product[];
   collections: Collection[];
   coupons: Coupon[];
   content: HomepageContent;
   settings: StoreSettings;
-  saveProduct: (product: Product) => void;
+  saveProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   saveCollection: (collection: Collection) => void;
   deleteCollection: (id: string) => void;
@@ -195,6 +210,62 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
 
+  /* real auth (bansalnx-backend) — separate from the mock/localStorage state above */
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+
+  /* real catalog (bansalnx-backend) — fetched fresh each session, never persisted to localStorage */
+  const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getProducts(), getCollections()])
+      .then(([p, c]) => {
+        if (cancelled) return;
+        setProducts(p);
+        setCollections(c);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) console.error("Failed to load catalog:", err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* real orders (bansalnx-backend) — `orders` is the admin-only full list, `myOrders` the caller's own */
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [myOrders, setMyOrders] = useState<Order[]>([]);
+  const authUserId = authUser?.id;
+  const authUserRole = authUser?.role;
+
+  useEffect(() => {
+    if (!authUserId) {
+      setOrders([]);
+      setMyOrders([]);
+      return;
+    }
+    let cancelled = false;
+    getMyOrders()
+      .then((o) => {
+        if (!cancelled) setMyOrders(o);
+      })
+      .catch((err: unknown) => console.error("Failed to load orders:", err));
+    if (authUserRole !== "customer") {
+      getAllOrders()
+        .then((o) => {
+          if (!cancelled) setOrders(o);
+        })
+        .catch((err: unknown) => console.error("Failed to load orders:", err));
+    } else {
+      setOrders([]);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [authUserId, authUserRole]);
+
   useEffect(() => {
     setState(load());
     setHydrated(true);
@@ -209,63 +280,61 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state, hydrated]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = await refreshRequest();
+      if (cancelled) return;
+      if (token) {
+        try {
+          const me = await meRequest();
+          if (!cancelled) setAuthUser(me);
+        } catch {
+          if (!cancelled) setAuthUser(null);
+        }
+      }
+      if (!cancelled) setAuthReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const patch = useCallback((fn: (prev: PersistedState) => PersistedState) => {
     setState(fn);
   }, []);
 
-  const user = useMemo(
-    () => state.users.find((u) => u.id === state.currentUserId) ?? null,
-    [state.users, state.currentUserId],
-  );
+  const user = authUser;
 
   const permissions = useMemo(
     () => (user && user.role !== "customer" ? permissionsForRole(user.role) : []),
     [user],
   );
 
-  const login = useCallback<StoreValue["login"]>(
-    (email, password) => {
-      const found = state.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-      if (!found) return { ok: false, error: "We couldn't find an account with that email." };
-      if (found.password !== password) return { ok: false, error: "That password isn't correct." };
-      if (found.status === "blocked")
-        return { ok: false, error: "This account has been suspended. Please contact us." };
-      patch((prev) => ({ ...prev, currentUserId: found.id }));
-      return { ok: true, user: found };
-    },
-    [state.users, patch],
-  );
+  const login = useCallback<StoreValue["login"]>(async (email, password) => {
+    try {
+      const loggedInUser = await loginRequest({ email: email.trim(), password });
+      setAuthUser(loggedInUser);
+      return { ok: true, user: loggedInUser };
+    } catch (err) {
+      return { ok: false, error: extractApiErrorMessage(err, "Unable to sign in.") };
+    }
+  }, []);
 
-  const register = useCallback<StoreValue["register"]>(
-    (input) => {
-      const exists = state.users.some(
-        (u) => u.email.toLowerCase() === input.email.trim().toLowerCase(),
-      );
-      if (exists) return { ok: false, error: "An account with this email already exists." };
-      const newUser: User = {
-        id: `usr-${Date.now()}`,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        email: input.email.trim(),
-        phone: input.phone,
-        password: input.password,
-        role: "customer",
-        status: "active",
-        createdAt: new Date().toISOString(),
-        addresses: [],
-      };
-      patch((prev) => ({
-        ...prev,
-        users: [...prev.users, newUser],
-        currentUserId: newUser.id,
-      }));
+  const register = useCallback<StoreValue["register"]>(async (input) => {
+    try {
+      const newUser = await registerRequest({ ...input, email: input.email.trim() });
+      setAuthUser(newUser);
       return { ok: true, user: newUser };
-    },
-    [state.users, patch],
-  );
+    } catch (err) {
+      return { ok: false, error: extractApiErrorMessage(err, "Unable to create your account.") };
+    }
+  }, []);
 
   const logout = useCallback(() => {
-    patch((prev) => ({ ...prev, currentUserId: null, cart: [], wishlist: [] }));
+    setAuthUser(null);
+    void logoutRequest();
+    patch((prev) => ({ ...prev, cart: [], wishlist: [] }));
     setAppliedCouponCode(null);
   }, [patch]);
 
@@ -329,7 +398,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const cartLines = useMemo<CartLineView[]>(() => {
     return state.cart.flatMap((line) => {
-      const product = state.products.find((p) => p.id === line.productId) ?? getProductById(line.productId);
+      const product =
+        products.find((p) => p.id === line.productId) ?? getProductById(line.productId);
       if (!product) return [];
       const variant = product.variants.find(
         (v) => v.size === line.size && v.colour === line.colour,
@@ -343,7 +413,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         },
       ];
     });
-  }, [state.cart, state.products]);
+  }, [state.cart, products]);
 
   const appliedCoupon = useMemo(
     () => state.coupons.find((c) => c.code === appliedCouponCode) ?? null,
@@ -357,9 +427,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const applyCoupon = useCallback<StoreValue["applyCoupon"]>(
     (code) => {
-      const coupon = state.coupons.find(
-        (c) => c.code.toLowerCase() === code.trim().toLowerCase(),
-      );
+      const coupon = state.coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
       if (!coupon || !coupon.active) return { ok: false, error: "That code isn't valid." };
       if (new Date(coupon.expiresAt) < new Date())
         return { ok: false, error: "That code has expired." };
@@ -404,7 +472,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const placeOrder = useCallback<StoreValue["placeOrder"]>(
-    ({ address, paymentMethod, email, phone }) => {
+    async ({ address, paymentMethod, email, phone }) => {
       const t = totals(paymentMethod);
       const lines: OrderLine[] = cartLines.map((line) => ({
         productId: line.productId,
@@ -417,15 +485,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         price: line.product.price,
         mrp: line.product.mrp,
       }));
-      const now = new Date();
-      const eta = new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000);
-      const order: Order = {
-        id: `BNX-${Math.floor(10000 + Math.random() * 89999)}`,
-        userId: user?.id ?? "guest",
+      const eta = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000);
+      const order = await createOrderRequest({
         customerName: user ? `${user.firstName} ${user.lastName}` : address.fullName,
         email,
         phone,
-        createdAt: now.toISOString(),
         lines,
         subtotal: t.subtotal,
         discount: t.discount,
@@ -441,7 +505,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           status: paymentMethod === "cod" ? "pending" : "processing",
           amount: t.total,
           razorpayPaymentId:
-            paymentMethod === "razorpay" ? `pay_MOCK${Math.random().toString(36).slice(2, 8)}` : null,
+            paymentMethod === "razorpay"
+              ? `pay_MOCK${Math.random().toString(36).slice(2, 8)}`
+              : null,
           transactionId: null,
           paidAt: null,
           refundStatus: "none",
@@ -457,108 +523,67 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           attempts: 0,
           ndrReason: null,
           rto: false,
-          events: [{ status: "confirmed", label: "Order Confirmed", at: now.toISOString() }],
+          events: [{ status: "confirmed", label: "Order Confirmed", at: new Date().toISOString() }],
         },
         returnRequest: null,
-      };
-      patch((prev) => ({ ...prev, orders: [order, ...prev.orders], cart: [] }));
+      });
+      setMyOrders((prev) => [order, ...prev]);
+      patch((prev) => ({ ...prev, cart: [] }));
       setAppliedCouponCode(null);
       return order;
     },
     [cartLines, totals, appliedCoupon, user, patch],
   );
 
-  const updateOrder = useCallback<StoreValue["updateOrder"]>(
-    (id, orderPatch) => {
-      patch((prev) => ({
-        ...prev,
-        orders: prev.orders.map((o) => (o.id === id ? { ...o, ...orderPatch } : o)),
-      }));
-    },
-    [patch],
-  );
+  const updateOrder = useCallback<StoreValue["updateOrder"]>(async (id, orderPatch) => {
+    const updated = await updateOrderRequest(id, orderPatch);
+    setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+  }, []);
 
-  const requestReturn = useCallback<StoreValue["requestReturn"]>(
-    (id, reason) => {
-      patch((prev) => ({
-        ...prev,
-        orders: prev.orders.map((o) =>
-          o.id === id
-            ? {
-                ...o,
-                returnRequest: {
-                  status: "requested",
-                  reason,
-                  requestedAt: new Date().toISOString(),
-                  refundAmount: o.total,
-                },
-              }
-            : o,
-        ),
-      }));
-    },
-    [patch],
-  );
+  const requestReturn = useCallback<StoreValue["requestReturn"]>(async (id, reason) => {
+    const updated = await requestReturnRequest(id, reason);
+    setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+  }, []);
 
-  const cancelOrder = useCallback<StoreValue["cancelOrder"]>(
-    (id) => {
-      patch((prev) => ({
-        ...prev,
-        orders: prev.orders.map((o) =>
-          o.id === id
-            ? {
-                ...o,
-                status: "cancelled",
-                payment: {
-                  ...o.payment,
-                  status: o.payment.status === "paid" ? "refunded" : "cancelled",
-                },
-                shipment: {
-                  ...o.shipment,
-                  events: [
-                    ...o.shipment.events,
-                    {
-                      status: "cancelled" as const,
-                      label: "Cancelled",
-                      at: new Date().toISOString(),
-                    },
-                  ],
-                },
-              }
-            : o,
-        ),
-      }));
-    },
-    [patch],
-  );
+  // Not backend-wired — no admin UI calls this today (see saveCollection et
+  // al. for the same rule): stays a local-only mutation on whichever order
+  // list currently holds it.
+  const cancelOrder = useCallback<StoreValue["cancelOrder"]>((id) => {
+    const cancel = (o: Order): Order =>
+      o.id === id
+        ? {
+            ...o,
+            status: "cancelled",
+            payment: {
+              ...o.payment,
+              status: o.payment.status === "paid" ? "refunded" : "cancelled",
+            },
+            shipment: {
+              ...o.shipment,
+              events: [
+                ...o.shipment.events,
+                { status: "cancelled" as const, label: "Cancelled", at: new Date().toISOString() },
+              ],
+            },
+          }
+        : o;
+    setOrders((prev) => prev.map(cancel));
+    setMyOrders((prev) => prev.map(cancel));
+  }, []);
 
-  const addAddress = useCallback<StoreValue["addAddress"]>(
-    (address) => {
-      const created: Address = { ...address, id: `adr-${Date.now()}` };
-      patch((prev) => ({
-        ...prev,
-        users: prev.users.map((u) =>
-          u.id === prev.currentUserId ? { ...u, addresses: [...u.addresses, created] } : u,
-        ),
-      }));
-      return created;
-    },
-    [patch],
-  );
+  const addAddress = useCallback<StoreValue["addAddress"]>(async (address) => {
+    const updatedUser = await addAddressRequest(address);
+    setAuthUser(updatedUser);
+    // The backend always appends the new address, so it's the last entry.
+    return updatedUser.addresses.at(-1)!;
+  }, []);
 
-  const removeAddress = useCallback<StoreValue["removeAddress"]>(
-    (id) => {
-      patch((prev) => ({
-        ...prev,
-        users: prev.users.map((u) =>
-          u.id === prev.currentUserId
-            ? { ...u, addresses: u.addresses.filter((a) => a.id !== id) }
-            : u,
-        ),
-      }));
-    },
-    [patch],
-  );
+  const removeAddress = useCallback<StoreValue["removeAddress"]>(async (id) => {
+    const updatedUser = await removeAddressRequest(id);
+    setAuthUser(updatedUser);
+  }, []);
 
   const value: StoreValue = {
     hydrated,
@@ -566,6 +591,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     users: state.users,
     isAuthenticated: !!user,
     isAdmin: !!user && user.role !== "customer",
+    authReady,
     permissions,
     hasPermission: (p) => permissions.includes(p),
     login,
@@ -589,37 +615,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     applyCoupon,
     removeCoupon: () => setAppliedCouponCode(null),
     totals,
-    orders: state.orders,
-    myOrders: state.orders.filter((o) => o.userId === user?.id),
+    orders,
+    myOrders,
     placeOrder,
     updateOrder,
     requestReturn,
     cancelOrder,
     addAddress,
     removeAddress,
-    products: state.products,
-    collections: state.collections,
+    products,
+    collections,
     coupons: state.coupons,
     content: state.content,
     settings: state.settings,
-    saveProduct: (product) =>
-      patch((prev) => ({
-        ...prev,
-        products: prev.products.some((p) => p.id === product.id)
-          ? prev.products.map((p) => (p.id === product.id ? product : p))
-          : [product, ...prev.products],
-      })),
-    deleteProduct: (id) =>
-      patch((prev) => ({ ...prev, products: prev.products.filter((p) => p.id !== id) })),
+    // Only the update path is backend-wired (matches what AdminPage's
+    // ProductsManagerTab actually does — publish toggle + price edit, always
+    // on an existing product). Create/delete for products, and all of
+    // collections, aren't exposed in any admin UI yet, so they stay
+    // local-only rather than adding endpoints nothing calls.
+    saveProduct: async (product) => {
+      const updated = await updateProductRequest(product);
+      setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    },
+    deleteProduct: (id) => setProducts((prev) => prev.filter((p) => p.id !== id)),
     saveCollection: (collection) =>
-      patch((prev) => ({
-        ...prev,
-        collections: prev.collections.some((c) => c.id === collection.id)
-          ? prev.collections.map((c) => (c.id === collection.id ? collection : c))
-          : [...prev.collections, collection],
-      })),
-    deleteCollection: (id) =>
-      patch((prev) => ({ ...prev, collections: prev.collections.filter((c) => c.id !== id) })),
+      setCollections((prev) =>
+        prev.some((c) => c.id === collection.id)
+          ? prev.map((c) => (c.id === collection.id ? collection : c))
+          : [...prev, collection],
+      ),
+    deleteCollection: (id) => setCollections((prev) => prev.filter((c) => c.id !== id)),
     saveCoupon: (coupon) =>
       patch((prev) => ({
         ...prev,
