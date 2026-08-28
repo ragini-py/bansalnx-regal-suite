@@ -243,7 +243,11 @@ export function OrderConfirmationPage() {
             <Link to="/account/orders">View Order</Link>
           </Button>
           <Button asChild variant="luxeOutline" size="luxe" className="flex-1">
-            <Link to={`/track?id=${encodeURIComponent(order.id)}`}>Track Order</Link>
+            <Link
+              to={`/track?id=${encodeURIComponent(order.id)}&email=${encodeURIComponent(order.email)}`}
+            >
+              Track Order
+            </Link>
           </Button>
           <Button asChild variant="luxeOutline" size="luxe" className="flex-1">
             <Link to="/products">Continue Shopping</Link>

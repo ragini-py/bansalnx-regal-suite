@@ -834,7 +834,7 @@ function CouponsManagerTab() {
   const [newCode, setNewCode] = useState("");
   const [newDiscount, setNewDiscount] = useState("15");
 
-  function handleCreateCoupon(e: React.FormEvent) {
+  async function handleCreateCoupon(e: React.FormEvent) {
     e.preventDefault();
     if (!newCode.trim()) return;
     const coupon: Coupon = {
@@ -853,10 +853,14 @@ function CouponsManagerTab() {
       active: true,
       timesUsed: 0,
     };
-    saveCoupon(coupon);
-    toast.success(`Coupon ${coupon.code} created`);
-    setCreateOpen(false);
-    setNewCode("");
+    try {
+      await saveCoupon(coupon);
+      toast.success(`Coupon ${coupon.code} created`);
+      setCreateOpen(false);
+      setNewCode("");
+    } catch {
+      toast.error("Couldn't create that coupon. Please try again.");
+    }
   }
 
   return (
@@ -913,7 +917,14 @@ function CouponsManagerTab() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => deleteCoupon(c.id)}
+                    onClick={async () => {
+                      try {
+                        await deleteCoupon(c.id);
+                        toast.success(`Coupon ${c.code} deleted`);
+                      } catch {
+                        toast.error("Couldn't delete that coupon. Please try again.");
+                      }
+                    }}
                     className="text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1081,7 +1092,10 @@ function ShippingManagerTab() {
                     </Button>
                   ) : (
                     <Button asChild variant="luxeOutline" size="sm">
-                      <Link to={`/track?id=${o.id}`} target="_blank">
+                      <Link
+                        to={`/track?id=${o.id}&email=${encodeURIComponent(o.email)}`}
+                        target="_blank"
+                      >
                         View Tracking
                       </Link>
                     </Button>

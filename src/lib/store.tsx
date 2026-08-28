@@ -19,7 +19,6 @@ import {
 
 import { getProductById } from "@/data/catalog";
 import {
-  coupons as seedCoupons,
   homepageContent as seedContent,
   permissionsForRole,
   storeSettings as seedSettings,
@@ -42,6 +41,7 @@ import {
   requestReturnRequest,
   updateOrderRequest,
 } from "@/lib/api/orders";
+import { createCouponRequest, deleteCouponRequest, getCoupons } from "@/lib/api/coupons";
 import type {
   Address,
   CartLine,
@@ -70,7 +70,6 @@ interface PersistedState {
   users: User[];
   wishlist: string[];
   cart: CartLine[];
-  coupons: Coupon[];
   content: HomepageContent;
   settings: StoreSettings;
   welcomeOfferSeen: boolean;
@@ -82,7 +81,6 @@ function initialState(): PersistedState {
     users: seedUsers,
     wishlist: [],
     cart: [],
-    coupons: seedCoupons,
     content: seedContent,
     settings: seedSettings,
     welcomeOfferSeen: false,
@@ -189,8 +187,8 @@ interface StoreValue {
   deleteProduct: (id: string) => void;
   saveCollection: (collection: Collection) => void;
   deleteCollection: (id: string) => void;
-  saveCoupon: (coupon: Coupon) => void;
-  deleteCoupon: (id: string) => void;
+  saveCoupon: (coupon: Coupon) => Promise<void>;
+  deleteCoupon: (id: string) => Promise<void>;
   updateContent: (patch: Partial<HomepageContent>) => void;
   updateSettings: (patch: Partial<StoreSettings>) => void;
   updateUser: (id: string, patch: Partial<User>) => void;
@@ -217,14 +215,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /* real catalog (bansalnx-backend) — fetched fresh each session, never persisted to localStorage */
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getProducts(), getCollections()])
-      .then(([p, c]) => {
+    Promise.all([getProducts(), getCollections(), getCoupons()])
+      .then(([p, c, cp]) => {
         if (cancelled) return;
         setProducts(p);
         setCollections(c);
+        setCoupons(cp);
       })
       .catch((err: unknown) => {
         if (!cancelled) console.error("Failed to load catalog:", err);
@@ -416,8 +416,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [state.cart, products]);
 
   const appliedCoupon = useMemo(
-    () => state.coupons.find((c) => c.code === appliedCouponCode) ?? null,
-    [state.coupons, appliedCouponCode],
+    () => coupons.find((c) => c.code === appliedCouponCode) ?? null,
+    [coupons, appliedCouponCode],
   );
 
   const subtotal = useMemo(
@@ -427,7 +427,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const applyCoupon = useCallback<StoreValue["applyCoupon"]>(
     (code) => {
-      const coupon = state.coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
+      const coupon = coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
       if (!coupon || !coupon.active) return { ok: false, error: "That code isn't valid." };
       if (new Date(coupon.expiresAt) < new Date())
         return { ok: false, error: "That code has expired." };
@@ -439,7 +439,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAppliedCouponCode(coupon.code);
       return { ok: true };
     },
-    [state.coupons, subtotal],
+    [coupons, subtotal],
   );
 
   const totals = useCallback<StoreValue["totals"]>(
@@ -625,7 +625,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     removeAddress,
     products,
     collections,
-    coupons: state.coupons,
+    coupons,
     content: state.content,
     settings: state.settings,
     // Only the update path is backend-wired (matches what AdminPage's
@@ -645,15 +645,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           : [...prev, collection],
       ),
     deleteCollection: (id) => setCollections((prev) => prev.filter((c) => c.id !== id)),
-    saveCoupon: (coupon) =>
-      patch((prev) => ({
-        ...prev,
-        coupons: prev.coupons.some((c) => c.id === coupon.id)
-          ? prev.coupons.map((c) => (c.id === coupon.id ? coupon : c))
-          : [coupon, ...prev.coupons],
-      })),
-    deleteCoupon: (id) =>
-      patch((prev) => ({ ...prev, coupons: prev.coupons.filter((c) => c.id !== id) })),
+    // AdminPage's CouponsManagerTab only ever creates (a fresh temp id that
+    // never matches an existing coupon) or deletes — there's no edit-existing
+    // flow, so this always creates rather than truly upserting.
+    saveCoupon: async (coupon) => {
+      const { id: _tempId, timesUsed: _timesUsed, ...input } = coupon;
+      const created = await createCouponRequest(input);
+      setCoupons((prev) => [created, ...prev]);
+    },
+    deleteCoupon: async (id) => {
+      await deleteCouponRequest(id);
+      setCoupons((prev) => prev.filter((c) => c.id !== id));
+    },
     updateContent: (contentPatch) =>
       patch((prev) => ({ ...prev, content: { ...prev.content, ...contentPatch } })),
     updateSettings: (settingsPatch) =>

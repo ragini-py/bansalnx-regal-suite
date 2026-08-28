@@ -19,18 +19,20 @@ const EXCEPTION_STATUSES: OrderStatus[] = ["cancelled", "delivery_failed", "ndr"
 export function TrackPage() {
   const [searchParams] = useSearchParams();
   const idParam = searchParams.get("id") || undefined;
+  const emailParam = searchParams.get("email") || undefined;
   const { settings } = useStore();
 
   const [orderId, setOrderId] = useState(idParam ?? "");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailParam ?? "");
   const [result, setResult] = useState<Order | null | undefined>(undefined);
   const [searched, setSearched] = useState(false);
 
-  // Public lookup by id (+ optional email) — this page is reachable without
-  // signing in, so it can't read the account's own order list.
+  // Public lookup by id + email, both required — this page is reachable
+  // without signing in, so it can't read the account's own order list, and
+  // an order id alone must never be enough to pull someone else's order.
   async function lookup(id: string, mail: string) {
     try {
-      const order = await trackOrderRequest(id.trim(), mail.trim() || undefined);
+      const order = await trackOrderRequest(id.trim(), mail.trim());
       setResult(order);
     } catch {
       setResult(null);
@@ -39,15 +41,16 @@ export function TrackPage() {
   }
 
   useEffect(() => {
-    if (idParam) {
+    if (idParam && emailParam) {
       setOrderId(idParam);
-      void lookup(idParam, "");
+      setEmail(emailParam);
+      void lookup(idParam, emailParam);
     }
-  }, [idParam]);
+  }, [idParam, emailParam]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!orderId.trim()) return;
+    if (!orderId.trim() || !email.trim()) return;
     void lookup(orderId, email);
   }
 
@@ -82,6 +85,7 @@ export function TrackPage() {
             <Input
               id="order-email"
               type="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"

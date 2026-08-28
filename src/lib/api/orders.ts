@@ -32,9 +32,11 @@ export async function requestReturnRequest(id: string, reason: string): Promise<
   return data.order;
 }
 
-export async function trackOrderRequest(id: string, email?: string): Promise<Order> {
-  const params = new URLSearchParams({ id });
-  if (email) params.set("email", email);
+// Both id and email are required by the backend — an order id alone (a Mongo
+// ObjectId, not fully random) must never be enough on its own to pull
+// someone else's order details.
+export async function trackOrderRequest(id: string, email: string): Promise<Order> {
+  const params = new URLSearchParams({ id, email });
   const { data } = await apiClient.get<{ order: Order }>(`/orders/track?${params.toString()}`);
   return data.order;
 }
