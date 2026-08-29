@@ -19,10 +19,14 @@ import {
 } from "react";
 
 import { getProductById } from "@/data/catalog";
+// storeSettings (aliased below) is only a placeholder shown for the brief
+// window before the real GET /api/settings resolves (see the fetch effect
+// below) — its values match the backend's own schema defaults, it's not
+// "mock data" in the seed-layer sense anymore.
 import {
   homepageContent as seedContent,
   permissionsForRole,
-  storeSettings as seedSettings,
+  storeSettings as settingsPlaceholder,
 } from "@/data/mock";
 import {
   extractApiErrorMessage,
@@ -54,6 +58,7 @@ import {
 import { createCouponRequest, deleteCouponRequest, getCoupons } from "@/lib/api/coupons";
 import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
 import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
+import { getSettingsRequest, updateSettingsRequest } from "@/lib/api/settings";
 import type {
   Address,
   CartLine,
@@ -82,7 +87,6 @@ interface PersistedState {
   wishlist: string[];
   cart: CartLine[];
   content: HomepageContent;
-  settings: StoreSettings;
   welcomeOfferSeen: boolean;
   claimedCoupons: string[];
 }
@@ -92,7 +96,6 @@ function initialState(): PersistedState {
     wishlist: [],
     cart: [],
     content: seedContent,
-    settings: seedSettings,
     welcomeOfferSeen: false,
     claimedCoupons: [],
   };
@@ -200,7 +203,7 @@ interface StoreValue {
   saveCoupon: (coupon: Coupon) => Promise<void>;
   deleteCoupon: (id: string) => Promise<void>;
   updateContent: (patch: Partial<HomepageContent>) => void;
-  updateSettings: (patch: Partial<StoreSettings>) => void;
+  updateSettings: (patch: Partial<StoreSettings>) => Promise<void>;
   updateUser: (id: string, patch: Partial<User>) => Promise<void>;
   /* welcome offer */
   welcomeOfferSeen: boolean;
@@ -226,15 +229,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [settings, setSettings] = useState<StoreSettings>(settingsPlaceholder);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getProducts(), getCollections(), getCoupons()])
-      .then(([p, c, cp]) => {
+    Promise.all([getProducts(), getCollections(), getCoupons(), getSettingsRequest()])
+      .then(([p, c, cp, s]) => {
         if (cancelled) return;
         setProducts(p);
         setCollections(c);
         setCoupons(cp);
+        setSettings(s);
       })
       .catch((err: unknown) => {
         if (!cancelled) console.error("Failed to load catalog:", err);
@@ -527,10 +532,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       const afterDiscount = Math.max(subtotal - discount, 0);
       const shippingFee =
-        afterDiscount === 0 || afterDiscount >= state.settings.freeShippingThreshold
+        afterDiscount === 0 || afterDiscount >= settings.freeShippingThreshold
           ? 0
-          : state.settings.shippingFee;
-      const codFee = paymentMethod === "cod" ? state.settings.codFee : 0;
+          : settings.shippingFee;
+      const codFee = paymentMethod === "cod" ? settings.codFee : 0;
       const tax = 0; // GST is included in listed prices; kept as an integration point
       return {
         subtotal,
@@ -541,7 +546,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         total: afterDiscount + shippingFee + codFee + tax,
       };
     },
-    [appliedCoupon, subtotal, state.settings],
+    [appliedCoupon, subtotal, settings],
   );
 
   const placeOrder = useCallback<StoreValue["placeOrder"]>(
@@ -680,7 +685,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     collections,
     coupons,
     content: state.content,
-    settings: state.settings,
+    settings,
     saveProduct: async (product) => {
       const exists = products.some((p) => p.id === product.id);
       if (exists) {
@@ -725,8 +730,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     updateContent: (contentPatch) =>
       patch((prev) => ({ ...prev, content: { ...prev.content, ...contentPatch } })),
-    updateSettings: (settingsPatch) =>
-      patch((prev) => ({ ...prev, settings: { ...prev.settings, ...settingsPatch } })),
+    // Only freeShippingThreshold/shippingFee/codMaxOrderValue are actually
+    // editable via AdminPage's SettingsManagerTab — matches the backend's
+    // admin-editable field set exactly.
+    updateSettings: async (settingsPatch) => {
+      const updated = await updateSettingsRequest(settingsPatch);
+      setSettings(updated);
+    },
     updateUser: async (id, userPatch) => {
       const updated = await updateUserRequest(id, userPatch);
       setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));

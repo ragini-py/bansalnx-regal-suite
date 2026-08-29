@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   AlertTriangle,
@@ -1934,14 +1934,27 @@ function SettingsManagerTab() {
   const [shippingFee, setShippingFee] = useState(String(settings.shippingFee));
   const [codMax, setCodMax] = useState(String(settings.codMaxOrderValue));
 
-  function handleSave(e: React.FormEvent) {
+  // Settings load asynchronously (GET /api/settings) after this tab's
+  // initial render — resync the form once the real values arrive, in case
+  // an admin has changed them from the schema defaults shown as a placeholder.
+  useEffect(() => {
+    setShippingThreshold(String(settings.freeShippingThreshold));
+    setShippingFee(String(settings.shippingFee));
+    setCodMax(String(settings.codMaxOrderValue));
+  }, [settings]);
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    updateSettings({
-      freeShippingThreshold: Number(shippingThreshold),
-      shippingFee: Number(shippingFee),
-      codMaxOrderValue: Number(codMax),
-    });
-    toast.success("Store settings updated successfully");
+    try {
+      await updateSettings({
+        freeShippingThreshold: Number(shippingThreshold),
+        shippingFee: Number(shippingFee),
+        codMaxOrderValue: Number(codMax),
+      });
+      toast.success("Store settings updated successfully");
+    } catch {
+      toast.error("Couldn't update store settings. Please try again.");
+    }
   }
 
   return (
