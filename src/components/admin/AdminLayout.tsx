@@ -6,7 +6,9 @@ import {
   Ticket,
   ClipboardList,
   Truck,
+  Users,
   ShieldCheck,
+  Layers,
   Settings as SettingsIcon,
   Menu,
   LogOut,
@@ -32,8 +34,10 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/products", label: "Products", icon: Package, permission: "products" },
+  { to: "/admin/collections", label: "Collections", icon: Layers, permission: "collections" },
   { to: "/admin/coupons", label: "Coupons", icon: Ticket, permission: "coupons" },
   { to: "/admin/orders", label: "Orders", icon: ClipboardList, permission: "orders" },
+  { to: "/admin/customers", label: "Customers", icon: Users, permission: "customers" },
   { to: "/admin/shipping", label: "Shipping", icon: Truck, permission: "shipping" },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, permission: "settings" },
 ];
@@ -60,7 +64,10 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () =
                 : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900",
             )}
           >
-            <Icon className={cn("h-4 w-4 shrink-0", active ? "text-amber-700" : "text-slate-400")} aria-hidden="true" />
+            <Icon
+              className={cn("h-4 w-4 shrink-0", active ? "text-amber-700" : "text-slate-400")}
+              aria-hidden="true"
+            />
             <span>{item.label}</span>
           </Link>
         );
@@ -104,15 +111,25 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
           <div className="flex items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open navigation">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="lg:hidden"
+                  aria-label="Open navigation"
+                >
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 border-r border-slate-200 bg-slate-50 p-0 text-slate-800">
+              <SheetContent
+                side="left"
+                className="w-64 border-r border-slate-200 bg-slate-50 p-0 text-slate-800"
+              >
                 <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
-            <h1 className="font-display font-semibold text-base sm:text-lg text-slate-900">{title ?? "Admin"}</h1>
+            <h1 className="font-display font-semibold text-base sm:text-lg text-slate-900">
+              {title ?? "Admin"}
+            </h1>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
@@ -126,7 +143,12 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
                 </p>
               </div>
             )}
-            <Button variant="outline" size="sm" className="h-8 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50"
+              asChild
+            >
               <Link to="/">
                 <ExternalLink className="h-3.5 w-3.5" /> View store
               </Link>
@@ -178,9 +200,7 @@ export function AdminGuard({
             You need an admin account to view the Bansal-nx admin console.
           </p>
           <Button asChild variant="luxe" size="luxe" className="mt-6 w-full">
-            <Link to="/login?redirect=/admin">
-              Go to login
-            </Link>
+            <Link to="/login?redirect=/admin">Go to login</Link>
           </Button>
         </div>
       </div>
@@ -192,7 +212,9 @@ export function AdminGuard({
       <AdminLayout title="Access denied">
         <div className="mx-auto max-w-lg border border-border bg-background p-8 text-center">
           <ShieldCheck className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
-          <h2 className="mt-3 text-xl font-display">You don't have permission to view this page.</h2>
+          <h2 className="mt-3 text-xl font-display">
+            You don't have permission to view this page.
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             This page requires the <span className="font-medium text-foreground">{permission}</span>{" "}
             permission. Your role,{" "}
@@ -249,7 +271,10 @@ export function StatusBadge({ status, label }: { status: StatusTone; label: stri
   return (
     <Badge
       variant="outline"
-      className={cn("gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium", TONE_CLASSES[status])}
+      className={cn(
+        "gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium",
+        TONE_CLASSES[status],
+      )}
     >
       {label}
     </Badge>

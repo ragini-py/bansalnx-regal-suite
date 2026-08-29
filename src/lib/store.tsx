@@ -13,6 +13,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -22,7 +23,6 @@ import {
   homepageContent as seedContent,
   permissionsForRole,
   storeSettings as seedSettings,
-  users as seedUsers,
 } from "@/data/mock";
 import {
   extractApiErrorMessage,
@@ -32,9 +32,19 @@ import {
   refreshRequest,
   registerRequest,
 } from "@/lib/api/auth";
-import { getCollections, getProducts, updateProductRequest } from "@/lib/api/catalog";
+import {
+  createCollectionRequest,
+  createProductRequest,
+  deleteCollectionRequest,
+  deleteProductRequest,
+  getCollections,
+  getProducts,
+  updateCollectionRequest,
+  updateProductRequest,
+} from "@/lib/api/catalog";
 import { addAddressRequest, removeAddressRequest } from "@/lib/api/users";
 import {
+  cancelOrderRequest,
   createOrderRequest,
   getAllOrders,
   getMyOrders,
@@ -42,6 +52,8 @@ import {
   updateOrderRequest,
 } from "@/lib/api/orders";
 import { createCouponRequest, deleteCouponRequest, getCoupons } from "@/lib/api/coupons";
+import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
+import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
 import type {
   Address,
   CartLine,
@@ -67,7 +79,6 @@ export interface PendingIntent {
 }
 
 interface PersistedState {
-  users: User[];
   wishlist: string[];
   cart: CartLine[];
   content: HomepageContent;
@@ -78,7 +89,6 @@ interface PersistedState {
 
 function initialState(): PersistedState {
   return {
-    users: seedUsers,
     wishlist: [],
     cart: [],
     content: seedContent,
@@ -173,7 +183,7 @@ interface StoreValue {
   }) => Promise<Order>;
   updateOrder: (id: string, patch: Partial<Order>) => Promise<void>;
   requestReturn: (id: string, reason: string) => Promise<void>;
-  cancelOrder: (id: string) => void;
+  cancelOrder: (id: string) => Promise<void>;
   /* addresses */
   addAddress: (address: Omit<Address, "id">) => Promise<Address>;
   removeAddress: (id: string) => Promise<void>;
@@ -184,14 +194,14 @@ interface StoreValue {
   content: HomepageContent;
   settings: StoreSettings;
   saveProduct: (product: Product) => Promise<void>;
-  deleteProduct: (id: string) => void;
-  saveCollection: (collection: Collection) => void;
-  deleteCollection: (id: string) => void;
+  deleteProduct: (id: string) => Promise<void>;
+  saveCollection: (collection: Collection) => Promise<void>;
+  deleteCollection: (id: string) => Promise<void>;
   saveCoupon: (coupon: Coupon) => Promise<void>;
   deleteCoupon: (id: string) => Promise<void>;
   updateContent: (patch: Partial<HomepageContent>) => void;
   updateSettings: (patch: Partial<StoreSettings>) => void;
-  updateUser: (id: string, patch: Partial<User>) => void;
+  updateUser: (id: string, patch: Partial<User>) => Promise<void>;
   /* welcome offer */
   welcomeOfferSeen: boolean;
   markWelcomeOfferSeen: () => void;
@@ -266,6 +276,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [authUserId, authUserRole]);
 
+  /* real customer list (bansalnx-backend) — admin-only */
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (!authUserId || authUserRole === "customer") {
+      setUsers([]);
+      return;
+    }
+    let cancelled = false;
+    getAllUsers()
+      .then((u) => {
+        if (!cancelled) setUsers(u);
+      })
+      .catch((err: unknown) => console.error("Failed to load users:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [authUserId, authUserRole]);
+
   useEffect(() => {
     setState(load());
     setHydrated(true);
@@ -303,6 +332,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const patch = useCallback((fn: (prev: PersistedState) => PersistedState) => {
     setState(fn);
   }, []);
+
+  // Cart sync (bansalnx-backend) — guests keep a purely local/localStorage
+  // cart exactly as before; once authenticated, it's merged with whatever
+  // that account already has saved server-side (adding quantities for
+  // matching variants), and every change after that is pushed to the
+  // backend so the cart survives across devices/sessions.
+  const cartSyncedRef = useRef(false);
+
+  useEffect(() => {
+    cartSyncedRef.current = false;
+    if (!authUserId) return;
+    let cancelled = false;
+    getCartRequest()
+      .then((serverLines) => {
+        if (cancelled) return;
+        patch((prev) => {
+          const merged = [...serverLines];
+          for (const line of prev.cart) {
+            const existing = merged.find((l) => l.variantId === line.variantId);
+            if (existing) {
+              existing.quantity += line.quantity;
+            } else {
+              merged.push(line);
+            }
+          }
+          return { ...prev, cart: merged };
+        });
+        cartSyncedRef.current = true;
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to sync cart:", err);
+        cartSyncedRef.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUserId, patch]);
+
+  useEffect(() => {
+    if (!authUserId || !cartSyncedRef.current) return;
+    replaceCartRequest(state.cart).catch((err: unknown) =>
+      console.error("Failed to save cart:", err),
+    );
+  }, [state.cart, authUserId]);
 
   const user = authUser;
 
@@ -547,30 +620,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
   }, []);
 
-  // Not backend-wired — no admin UI calls this today (see saveCollection et
-  // al. for the same rule): stays a local-only mutation on whichever order
-  // list currently holds it.
-  const cancelOrder = useCallback<StoreValue["cancelOrder"]>((id) => {
-    const cancel = (o: Order): Order =>
-      o.id === id
-        ? {
-            ...o,
-            status: "cancelled",
-            payment: {
-              ...o.payment,
-              status: o.payment.status === "paid" ? "refunded" : "cancelled",
-            },
-            shipment: {
-              ...o.shipment,
-              events: [
-                ...o.shipment.events,
-                { status: "cancelled" as const, label: "Cancelled", at: new Date().toISOString() },
-              ],
-            },
-          }
-        : o;
-    setOrders((prev) => prev.map(cancel));
-    setMyOrders((prev) => prev.map(cancel));
+  const cancelOrder = useCallback<StoreValue["cancelOrder"]>(async (id) => {
+    const updated = await cancelOrderRequest(id);
+    setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
   }, []);
 
   const addAddress = useCallback<StoreValue["addAddress"]>(async (address) => {
@@ -588,7 +641,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: StoreValue = {
     hydrated,
     user,
-    users: state.users,
+    users,
     isAuthenticated: !!user,
     isAdmin: !!user && user.role !== "customer",
     authReady,
@@ -628,23 +681,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     coupons,
     content: state.content,
     settings: state.settings,
-    // Only the update path is backend-wired (matches what AdminPage's
-    // ProductsManagerTab actually does — publish toggle + price edit, always
-    // on an existing product). Create/delete for products, and all of
-    // collections, aren't exposed in any admin UI yet, so they stay
-    // local-only rather than adding endpoints nothing calls.
     saveProduct: async (product) => {
-      const updated = await updateProductRequest(product);
-      setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      const exists = products.some((p) => p.id === product.id);
+      if (exists) {
+        const updated = await updateProductRequest(product);
+        setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      } else {
+        const { id: _tempId, createdAt: _createdAt, ...input } = product;
+        const created = await createProductRequest(input);
+        setProducts((prev) => [created, ...prev]);
+      }
     },
-    deleteProduct: (id) => setProducts((prev) => prev.filter((p) => p.id !== id)),
-    saveCollection: (collection) =>
-      setCollections((prev) =>
-        prev.some((c) => c.id === collection.id)
-          ? prev.map((c) => (c.id === collection.id ? collection : c))
-          : [...prev, collection],
-      ),
-    deleteCollection: (id) => setCollections((prev) => prev.filter((c) => c.id !== id)),
+    deleteProduct: async (id) => {
+      await deleteProductRequest(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    },
+    saveCollection: async (collection) => {
+      const exists = collections.some((c) => c.id === collection.id);
+      if (exists) {
+        const updated = await updateCollectionRequest(collection);
+        setCollections((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      } else {
+        const { id: _tempId, ...input } = collection;
+        const created = await createCollectionRequest(input);
+        setCollections((prev) => [...prev, created]);
+      }
+    },
+    deleteCollection: async (id) => {
+      await deleteCollectionRequest(id);
+      setCollections((prev) => prev.filter((c) => c.id !== id));
+    },
     // AdminPage's CouponsManagerTab only ever creates (a fresh temp id that
     // never matches an existing coupon) or deletes — there's no edit-existing
     // flow, so this always creates rather than truly upserting.
@@ -661,11 +727,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       patch((prev) => ({ ...prev, content: { ...prev.content, ...contentPatch } })),
     updateSettings: (settingsPatch) =>
       patch((prev) => ({ ...prev, settings: { ...prev.settings, ...settingsPatch } })),
-    updateUser: (id, userPatch) =>
-      patch((prev) => ({
-        ...prev,
-        users: prev.users.map((u) => (u.id === id ? { ...u, ...userPatch } : u)),
-      })),
+    updateUser: async (id, userPatch) => {
+      const updated = await updateUserRequest(id, userPatch);
+      setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+    },
     welcomeOfferSeen: state.welcomeOfferSeen,
     markWelcomeOfferSeen: () => patch((prev) => ({ ...prev, welcomeOfferSeen: true })),
     claimWelcomeCoupon: () => {

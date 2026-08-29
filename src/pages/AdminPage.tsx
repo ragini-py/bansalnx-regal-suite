@@ -19,8 +19,17 @@ import { toast } from "sonner";
 import { AdminGuard, AdminLayout, StatusBadge } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -37,18 +46,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { orderStatusLabels, paymentStatusLabels } from "@/data/mock";
-import type { Order, OrderStatus, Product, Coupon, PermissionKey } from "@/data/types";
+import type { Collection, Order, OrderStatus, Product, Coupon, PermissionKey } from "@/data/types";
 import { formatDate, formatDateTime, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "overview" | "orders" | "products" | "coupons" | "shipping" | "settings";
+type AdminTab =
+  | "overview"
+  | "orders"
+  | "products"
+  | "collections"
+  | "coupons"
+  | "customers"
+  | "shipping"
+  | "settings";
 
 const TAB_TITLES: Record<AdminTab, string> = {
   overview: "Admin Dashboard",
   orders: "Orders & Fulfilment",
   products: "Products",
+  collections: "Collections",
   coupons: "Coupons & Offers",
+  customers: "Customers",
   shipping: "Logistics & Delhivery",
   settings: "Store Settings",
 };
@@ -58,7 +77,9 @@ function tabFromPathname(pathname: string): AdminTab {
   if (
     segment === "orders" ||
     segment === "products" ||
+    segment === "collections" ||
     segment === "coupons" ||
+    segment === "customers" ||
     segment === "shipping" ||
     segment === "settings"
   ) {
@@ -83,7 +104,9 @@ export function AdminPage() {
           {activeTab === "overview" && <OverviewTab onNavigateTab={goToTab} />}
           {activeTab === "orders" && <OrdersManagerTab />}
           {activeTab === "products" && <ProductsManagerTab />}
+          {activeTab === "collections" && <CollectionsManagerTab />}
           {activeTab === "coupons" && <CouponsManagerTab />}
+          {activeTab === "customers" && <CustomersManagerTab />}
           {activeTab === "shipping" && <ShippingManagerTab />}
           {activeTab === "settings" && <SettingsManagerTab />}
         </div>
@@ -694,9 +717,76 @@ function OrdersManagerTab() {
 /* =========================================================================
    3. PRODUCTS & INVENTORY MANAGER TAB
    ========================================================================= */
+function slugify(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function splitList(value: string): string[] {
+  return value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function buildVariants(sizes: string[], colours: string[]): Product["variants"] {
+  return colours.flatMap((colour) =>
+    sizes.map((size) => ({
+      id: `new-${colour}-${size}`,
+      size,
+      colour,
+      availability: "available" as const,
+    })),
+  );
+}
+
+interface ProductFormValues {
+  name: string;
+  slug: string;
+  category: string;
+  price: string;
+  mrp: string;
+  images: string;
+  shortDescription: string;
+  description: string;
+  sizes: string;
+  colours: string;
+  tags: string;
+  badge: "none" | "new" | "bestseller" | "exclusive";
+  featured: boolean;
+  bestseller: boolean;
+  newArrival: boolean;
+  published: boolean;
+}
+
+const emptyProductForm: ProductFormValues = {
+  name: "",
+  slug: "",
+  category: "",
+  price: "",
+  mrp: "",
+  images: "",
+  shortDescription: "",
+  description: "",
+  sizes: "XS, S, M, L, XL",
+  colours: "",
+  tags: "",
+  badge: "none",
+  featured: false,
+  bestseller: false,
+  newArrival: false,
+  published: false,
+};
+
 function ProductsManagerTab() {
-  const { products, saveProduct } = useStore();
+  const { products, saveProduct, deleteProduct } = useStore();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
+  const [saving, setSaving] = useState(false);
 
   async function handleToggleAvailability(prod: Product) {
     const nextPublished = !prod.published;
@@ -718,15 +808,71 @@ function ProductsManagerTab() {
     }
   }
 
+  async function handleDelete(prod: Product) {
+    if (!window.confirm(`Delete "${prod.name}"? This can't be undone.`)) return;
+    try {
+      await deleteProduct(prod.id);
+      toast.success(`${prod.name} deleted`);
+    } catch {
+      toast.error("Couldn't delete that product. Please try again.");
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const sizes = splitList(form.sizes);
+    const colours = splitList(form.colours);
+    if (!form.name.trim() || !sizes.length || !colours.length) return;
+
+    setSaving(true);
+    try {
+      await saveProduct({
+        id: `new-${Date.now()}`,
+        slug: form.slug.trim() || slugify(form.name),
+        name: form.name.trim(),
+        price: Number(form.price) || 0,
+        mrp: Number(form.mrp) || Number(form.price) || 0,
+        currency: "INR",
+        images: splitList(form.images.replace(/\n/g, ",")),
+        category: form.category.trim(),
+        collections: [],
+        tags: splitList(form.tags),
+        badge: form.badge === "none" ? null : form.badge,
+        shortDescription: form.shortDescription.trim(),
+        description: form.description.trim() || form.shortDescription.trim(),
+        details: [],
+        care: [],
+        sizes,
+        colours,
+        variants: buildVariants(sizes, colours),
+        featured: form.featured,
+        bestseller: form.bestseller,
+        newArrival: form.newArrival,
+        published: form.published,
+        createdAt: new Date().toISOString(),
+      });
+      toast.success(`${form.name} created`);
+      setCreateOpen(false);
+      setForm(emptyProductForm);
+    } catch {
+      toast.error("Couldn't create that product. Please check the slug is unique and try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-display text-2xl">Products</h2>
           <p className="text-xs text-muted-foreground">
-            Edit pricing and store catalog visibility.
+            Create products, edit pricing, and manage store catalog visibility.
           </p>
         </div>
+        <Button variant="luxe" size="sm" onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4" /> Create Product
+        </Button>
       </div>
 
       <div className="border border-border/80 bg-card">
@@ -775,15 +921,199 @@ function ProductsManagerTab() {
                   </button>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="luxeOutline" size="sm" onClick={() => setEditingProduct(p)}>
-                    Edit Price
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="luxeOutline" size="sm" onClick={() => setEditingProduct(p)}>
+                      Edit Price
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => void handleDelete(p)}
+                      className="text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
+      {createOpen && (
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto rounded-none border border-border bg-background p-6">
+            <DialogHeader>
+              <DialogTitle className="font-display text-xl">Create Product</DialogTitle>
+              <DialogDescription>
+                Add a new piece to the catalog. You can publish it later.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleCreate} className="mt-4 space-y-4">
+              <div>
+                <Label htmlFor="p-name">Name</Label>
+                <Input
+                  id="p-name"
+                  required
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      name: e.target.value,
+                      slug: f.slug === slugify(f.name) ? slugify(e.target.value) : f.slug,
+                    }))
+                  }
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="p-slug">Slug</Label>
+                <Input
+                  id="p-slug"
+                  value={form.slug}
+                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+                  placeholder={slugify(form.name) || "auto-generated-from-name"}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="p-category">Category</Label>
+                  <Input
+                    id="p-category"
+                    required
+                    value={form.category}
+                    onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="p-badge">Badge</Label>
+                  <Select
+                    value={form.badge}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, badge: v as ProductFormValues["badge"] }))
+                    }
+                  >
+                    <SelectTrigger id="p-badge" className="mt-1 rounded-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="bestseller">Bestseller</SelectItem>
+                      <SelectItem value="exclusive">Exclusive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="p-price">Price (INR)</Label>
+                  <Input
+                    id="p-price"
+                    type="number"
+                    required
+                    min="0"
+                    value={form.price}
+                    onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="p-mrp">MRP (INR)</Label>
+                  <Input
+                    id="p-mrp"
+                    type="number"
+                    min="0"
+                    value={form.mrp}
+                    onChange={(e) => setForm((f) => ({ ...f, mrp: e.target.value }))}
+                    placeholder={form.price || "0"}
+                    className="mt-1 rounded-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="p-short">Short description</Label>
+                <Input
+                  id="p-short"
+                  required
+                  value={form.shortDescription}
+                  onChange={(e) => setForm((f) => ({ ...f, shortDescription: e.target.value }))}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="p-desc">Full description</Label>
+                <Textarea
+                  id="p-desc"
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="p-images">Image URLs (one per line)</Label>
+                <Textarea
+                  id="p-images"
+                  rows={3}
+                  value={form.images}
+                  onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))}
+                  placeholder="/products/example.jpg"
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="p-sizes">Sizes (comma-separated)</Label>
+                  <Input
+                    id="p-sizes"
+                    required
+                    value={form.sizes}
+                    onChange={(e) => setForm((f) => ({ ...f, sizes: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="p-colours">Colours (comma-separated)</Label>
+                  <Input
+                    id="p-colours"
+                    required
+                    value={form.colours}
+                    onChange={(e) => setForm((f) => ({ ...f, colours: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="p-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="p-tags"
+                  value={form.tags}
+                  onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {(["featured", "bestseller", "newArrival", "published"] as const).map((key) => (
+                  <label key={key} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={form[key]}
+                      onCheckedChange={(c) => setForm((f) => ({ ...f, [key]: c === true }))}
+                    />
+                    <span className="capitalize">{key === "newArrival" ? "New arrival" : key}</span>
+                  </label>
+                ))}
+              </div>
+              <Button type="submit" variant="luxe" className="w-full" disabled={saving}>
+                {saving ? "Creating…" : "Create Product"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {editingProduct && (
         <Dialog
@@ -826,7 +1156,298 @@ function ProductsManagerTab() {
 }
 
 /* =========================================================================
-   4. COUPONS & OFFERS MANAGER TAB
+   4. COLLECTIONS MANAGER TAB
+   ========================================================================= */
+interface CollectionFormValues {
+  name: string;
+  slug: string;
+  description: string;
+  coverImage: string;
+  productIds: string[];
+  featured: boolean;
+  published: boolean;
+  order: string;
+}
+
+function collectionToForm(c: Collection): CollectionFormValues {
+  return {
+    name: c.name,
+    slug: c.slug,
+    description: c.description,
+    coverImage: c.coverImage,
+    productIds: c.productIds,
+    featured: c.featured,
+    published: c.published,
+    order: String(c.order),
+  };
+}
+
+const emptyCollectionForm: CollectionFormValues = {
+  name: "",
+  slug: "",
+  description: "",
+  coverImage: "",
+  productIds: [],
+  featured: false,
+  published: false,
+  order: "0",
+};
+
+function CollectionsManagerTab() {
+  const { collections, products, saveCollection, deleteCollection } = useStore();
+  const [editing, setEditing] = useState<Collection | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [form, setForm] = useState<CollectionFormValues>(emptyCollectionForm);
+  const [saving, setSaving] = useState(false);
+
+  function openCreate() {
+    setForm(emptyCollectionForm);
+    setEditing(null);
+    setCreateOpen(true);
+  }
+
+  function openEdit(c: Collection) {
+    setForm(collectionToForm(c));
+    setEditing(c);
+    setCreateOpen(true);
+  }
+
+  async function handleDelete(c: Collection) {
+    if (!window.confirm(`Delete "${c.name}"? This can't be undone.`)) return;
+    try {
+      await deleteCollection(c.id);
+      toast.success(`${c.name} deleted`);
+    } catch {
+      toast.error("Couldn't delete that collection. Please try again.");
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      await saveCollection({
+        id: editing?.id ?? `new-${Date.now()}`,
+        slug: form.slug.trim() || slugify(form.name),
+        name: form.name.trim(),
+        description: form.description.trim(),
+        coverImage: form.coverImage.trim(),
+        bannerImage: form.coverImage.trim(),
+        productIds: form.productIds,
+        featured: form.featured,
+        published: form.published,
+        order: Number(form.order) || 0,
+      });
+      toast.success(`${form.name} ${editing ? "updated" : "created"}`);
+      setCreateOpen(false);
+      setEditing(null);
+    } catch {
+      toast.error("Couldn't save that collection. Please check the slug is unique and try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function toggleProduct(id: string) {
+    setForm((f) => ({
+      ...f,
+      productIds: f.productIds.includes(id)
+        ? f.productIds.filter((p) => p !== id)
+        : [...f.productIds, id],
+    }));
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h2 className="font-display text-2xl">Collections</h2>
+          <p className="text-xs text-muted-foreground">
+            Group products into curated collections for the storefront.
+          </p>
+        </div>
+        <Button variant="luxe" size="sm" onClick={openCreate}>
+          <Plus className="h-4 w-4" /> Create Collection
+        </Button>
+      </div>
+
+      <div className="border border-border/80 bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Collection</TableHead>
+              <TableHead>Products</TableHead>
+              <TableHead>Featured</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {collections.map((c) => (
+              <TableRow key={c.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    {c.coverImage && (
+                      <img src={c.coverImage} alt={c.name} className="h-12 w-16 object-cover" />
+                    )}
+                    <div>
+                      <p className="font-medium text-foreground">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">Slug: {c.slug}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs">{c.productIds.length}</TableCell>
+                <TableCell className="text-xs">{c.featured ? "Yes" : "No"}</TableCell>
+                <TableCell>
+                  <StatusBadge
+                    status={c.published ? "success" : "muted"}
+                    label={c.published ? "Published" : "Draft"}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="luxeOutline" size="sm" onClick={() => openEdit(c)}>
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => void handleDelete(c)}
+                      className="text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {createOpen && (
+        <Dialog
+          open={createOpen}
+          onOpenChange={(open) => {
+            setCreateOpen(open);
+            if (!open) setEditing(null);
+          }}
+        >
+          <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto rounded-none border border-border bg-background p-6">
+            <DialogHeader>
+              <DialogTitle className="font-display text-xl">
+                {editing ? "Edit Collection" : "Create Collection"}
+              </DialogTitle>
+              <DialogDescription>
+                {editing ? editing.name : "Group products for a themed storefront edit."}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+              <div>
+                <Label htmlFor="c-name">Name</Label>
+                <Input
+                  id="c-name"
+                  required
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      name: e.target.value,
+                      slug: f.slug === slugify(f.name) ? slugify(e.target.value) : f.slug,
+                    }))
+                  }
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="c-slug">Slug</Label>
+                <Input
+                  id="c-slug"
+                  value={form.slug}
+                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+                  placeholder={slugify(form.name) || "auto-generated-from-name"}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="c-description">Description</Label>
+                <Textarea
+                  id="c-description"
+                  rows={3}
+                  required
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="c-cover">Cover image URL</Label>
+                <Input
+                  id="c-cover"
+                  required
+                  value={form.coverImage}
+                  onChange={(e) => setForm((f) => ({ ...f, coverImage: e.target.value }))}
+                  placeholder="/collections/example.jpg"
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="c-order">Display order</Label>
+                <Input
+                  id="c-order"
+                  type="number"
+                  value={form.order}
+                  onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
+                  className="mt-1 rounded-none"
+                />
+              </div>
+              <div>
+                <Label>Products in this collection</Label>
+                <div className="mt-1.5 max-h-40 space-y-1.5 overflow-y-auto border border-border p-3">
+                  {products.map((p) => (
+                    <label key={p.id} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={form.productIds.includes(p.id)}
+                        onCheckedChange={() => toggleProduct(p.id)}
+                      />
+                      <span>{p.name}</span>
+                    </label>
+                  ))}
+                  {products.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No products yet.</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={form.featured}
+                    onCheckedChange={(c) => setForm((f) => ({ ...f, featured: c === true }))}
+                  />
+                  <span>Featured</span>
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={form.published}
+                    onCheckedChange={(c) => setForm((f) => ({ ...f, published: c === true }))}
+                  />
+                  <span>Published</span>
+                </label>
+              </div>
+              <Button type="submit" variant="luxe" className="w-full" disabled={saving}>
+                {saving ? "Saving…" : editing ? "Save Changes" : "Create Collection"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================================
+   5. COUPONS & OFFERS MANAGER TAB
    ========================================================================= */
 function CouponsManagerTab() {
   const { coupons, saveCoupon, deleteCoupon } = useStore();
@@ -980,7 +1601,144 @@ function CouponsManagerTab() {
 }
 
 /* =========================================================================
-   5. LOGISTICS & DELHIVERY MANAGER TAB
+   6. CUSTOMERS MANAGER TAB
+   ========================================================================= */
+function CustomersManagerTab() {
+  const { users, user: currentUser, updateUser } = useStore();
+  const [search, setSearch] = useState("");
+
+  const filtered = users.filter((u) => {
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    return (
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.phone.includes(q)
+    );
+  });
+
+  async function handleToggleRole(target: (typeof users)[number]) {
+    const nextRole = target.role === "admin" ? "customer" : "admin";
+    try {
+      await updateUser(target.id, { role: nextRole });
+      toast.success(
+        `${target.firstName} ${target.lastName} is now ${nextRole === "admin" ? "an admin" : "a customer"}`,
+      );
+    } catch {
+      toast.error("Couldn't update that customer. Please try again.");
+    }
+  }
+
+  async function handleToggleStatus(target: (typeof users)[number]) {
+    const nextStatus = target.status === "blocked" ? "active" : "blocked";
+    try {
+      await updateUser(target.id, { status: nextStatus });
+      toast.success(
+        `${target.firstName} ${target.lastName} ${nextStatus === "blocked" ? "blocked" : "unblocked"}`,
+      );
+    } catch {
+      toast.error("Couldn't update that customer. Please try again.");
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h2 className="font-display text-2xl">Customers</h2>
+          <p className="text-xs text-muted-foreground">
+            Manage customer accounts — promote to admin or block access.
+          </p>
+        </div>
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email or phone"
+          className="max-w-xs rounded-none"
+        />
+      </div>
+
+      <div className="border border-border/80 bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Customer</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((u) => {
+              const isSelf = u.id === currentUser?.id;
+              return (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium text-foreground">
+                    {u.firstName} {u.lastName}
+                    {isSelf && (
+                      <span className="ml-2 text-[10px] uppercase text-muted-foreground">
+                        (You)
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    <div>{u.email}</div>
+                    <div>{u.phone}</div>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge
+                      status={u.role === "admin" ? "info" : "muted"}
+                      label={u.role === "admin" ? "Admin" : "Customer"}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge
+                      status={u.status === "blocked" ? "destructive" : "success"}
+                      label={u.status === "blocked" ? "Blocked" : "Active"}
+                    />
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {formatDate(u.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isSelf}
+                        onClick={() => void handleToggleRole(u)}
+                        className="text-xs"
+                      >
+                        {u.role === "admin" ? "Make Customer" : "Make Admin"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isSelf}
+                        onClick={() => void handleToggleStatus(u)}
+                        className={cn(
+                          "text-xs",
+                          u.status === "blocked" ? "text-emerald" : "text-destructive",
+                        )}
+                      >
+                        {u.status === "blocked" ? "Unblock" : "Block"}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
+   7. LOGISTICS & DELHIVERY MANAGER TAB
    ========================================================================= */
 function ShippingManagerTab() {
   const { orders, updateOrder } = useStore();
@@ -1111,7 +1869,7 @@ function ShippingManagerTab() {
 }
 
 /* =========================================================================
-   6. STORE SETTINGS TAB
+   8. STORE SETTINGS TAB
    ========================================================================= */
 function SettingsManagerTab() {
   const { settings, updateSettings } = useStore();

@@ -18,7 +18,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { formatDate, formatDateTime, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
-import type { Order } from "@/data/types";
+import type { Order, OrderStatus } from "@/data/types";
+
+const CANCELLABLE_STATUSES: OrderStatus[] = [
+  "confirmed",
+  "processing",
+  "packed",
+  "ready_for_pickup",
+];
 
 function paymentStatusBadge(order: Order) {
   if (order.payment.method === "cod") {
@@ -53,10 +60,25 @@ export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   // My own order — not the admin-only `orders` list, which is empty for a
   // regular customer.
-  const { myOrders, requestReturn } = useStore();
+  const { myOrders, requestReturn, cancelOrder } = useStore();
   const order = myOrders.find((o) => o.id === id);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnReason, setReturnReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+
+  async function handleCancelOrder() {
+    if (!order) return;
+    if (!window.confirm("Cancel this order? This can't be undone.")) return;
+    setCancelling(true);
+    try {
+      await cancelOrder(order.id);
+      toast.success("Order cancelled.");
+    } catch {
+      toast.error("Couldn't cancel that order. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   async function handleRequestReturn(e: React.FormEvent) {
     e.preventDefault();
@@ -186,6 +208,24 @@ export function OrderConfirmationPage() {
             {order.address.state} {order.address.pincode}, {order.address.country}
           </p>
         </div>
+
+        {CANCELLABLE_STATUSES.includes(order.status) && (
+          <div className="mt-8 border border-border p-6">
+            <p className="eyebrow">Need to make a change?</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You can cancel this order before it ships.
+            </p>
+            <Button
+              variant="luxeOutline"
+              size="sm"
+              className="mt-4 text-destructive hover:bg-destructive/10"
+              disabled={cancelling}
+              onClick={() => void handleCancelOrder()}
+            >
+              {cancelling ? "Cancelling…" : "Cancel Order"}
+            </Button>
+          </div>
+        )}
 
         {order.status === "delivered" && (
           <div className="mt-8 border border-border p-6">

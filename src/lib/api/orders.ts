@@ -32,6 +32,11 @@ export async function requestReturnRequest(id: string, reason: string): Promise<
   return data.order;
 }
 
+export async function cancelOrderRequest(id: string): Promise<Order> {
+  const { data } = await apiClient.post<{ order: Order }>(`/orders/${id}/cancel`);
+  return data.order;
+}
+
 // Both id and email are required by the backend — an order id alone (a Mongo
 // ObjectId, not fully random) must never be enough on its own to pull
 // someone else's order details.
