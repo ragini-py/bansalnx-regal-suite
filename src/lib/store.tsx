@@ -58,6 +58,7 @@ import {
 import { createCouponRequest, deleteCouponRequest, getCoupons } from "@/lib/api/coupons";
 import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
 import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
+import { getWishlistRequest, replaceWishlistRequest } from "@/lib/api/wishlist";
 import { getSettingsRequest, updateSettingsRequest } from "@/lib/api/settings";
 import type {
   Address,
@@ -381,6 +382,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error("Failed to save cart:", err),
     );
   }, [state.cart, authUserId]);
+
+  // Wishlist sync (bansalnx-backend) — same pattern as cart above, just a
+  // plain array of productIds (union instead of quantity-summed merge).
+  const wishlistSyncedRef = useRef(false);
+
+  useEffect(() => {
+    wishlistSyncedRef.current = false;
+    if (!authUserId) return;
+    let cancelled = false;
+    getWishlistRequest()
+      .then((serverIds) => {
+        if (cancelled) return;
+        patch((prev) => ({
+          ...prev,
+          wishlist: Array.from(new Set([...serverIds, ...prev.wishlist])),
+        }));
+        wishlistSyncedRef.current = true;
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to sync wishlist:", err);
+        wishlistSyncedRef.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUserId, patch]);
+
+  useEffect(() => {
+    if (!authUserId || !wishlistSyncedRef.current) return;
+    replaceWishlistRequest(state.wishlist).catch((err: unknown) =>
+      console.error("Failed to save wishlist:", err),
+    );
+  }, [state.wishlist, authUserId]);
 
   const user = authUser;
 
