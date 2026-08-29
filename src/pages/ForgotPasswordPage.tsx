@@ -113,11 +113,6 @@ export function ForgotPasswordPage() {
               </div>
             </div>
           )}
-
-          <p className="mt-8 text-center text-[11px] leading-relaxed text-muted-foreground">
-            Transactional email delivery is pending provider integration; in this preview no email
-            is actually sent.
-          </p>
         </div>
       </div>
     </SiteLayout>

@@ -48,6 +48,7 @@ import {
 import { orderStatusLabels, paymentStatusLabels } from "@/data/mock";
 import type { Collection, Order, OrderStatus, Product, Coupon, PermissionKey } from "@/data/types";
 import { formatDate, formatDateTime, formatINR } from "@/lib/format";
+import { uploadImageRequest } from "@/lib/api/uploads";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -787,6 +788,23 @@ function ProductsManagerTab() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, field: "images") {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImageRequest(file);
+      setForm((f) => ({ ...f, [field]: f[field] ? `${f[field]}\n${url}` : url }));
+      toast.success("Image uploaded");
+    } catch {
+      toast.error("Couldn't upload that image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleToggleAvailability(prod: Product) {
     const nextPublished = !prod.published;
@@ -1064,6 +1082,16 @@ function ProductsManagerTab() {
                   placeholder="/products/example.jpg"
                   className="mt-1 rounded-none"
                 />
+                <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-gold-deep hover:underline">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => void handleImageUpload(e, "images")}
+                  />
+                  {uploading ? "Uploading…" : "+ Upload an image"}
+                </label>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1199,6 +1227,23 @@ function CollectionsManagerTab() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<CollectionFormValues>(emptyCollectionForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImageRequest(file);
+      setForm((f) => ({ ...f, coverImage: url }));
+      toast.success("Image uploaded");
+    } catch {
+      toast.error("Couldn't upload that image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function openCreate() {
     setForm(emptyCollectionForm);
@@ -1391,6 +1436,16 @@ function CollectionsManagerTab() {
                   placeholder="/collections/example.jpg"
                   className="mt-1 rounded-none"
                 />
+                <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-gold-deep hover:underline">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => void handleCoverUpload(e)}
+                  />
+                  {uploading ? "Uploading…" : "+ Upload an image"}
+                </label>
               </div>
               <div>
                 <Label htmlFor="c-order">Display order</Label>

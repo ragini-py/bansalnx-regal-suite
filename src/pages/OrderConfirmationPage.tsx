@@ -265,15 +265,8 @@ export function OrderConfirmationPage() {
           <Mail className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
           <div className="text-sm text-muted-foreground">
             <p>
-              A confirmation email is queued for{" "}
-              <strong className="text-foreground">{order.email}</strong>. It will include the
-              customer name, order number, products/variants/quantities, subtotal, discount,
-              shipping, total, payment method and status, delivery address, estimated delivery, and
-              View/Track order buttons.
-            </p>
-            <p className="mt-2 text-[11px] uppercase tracking-[0.15em]">
-              The transactional email provider is not yet connected — this is an integration-ready
-              state.
+              A confirmation email with your order summary and a tracking link has been sent to{" "}
+              <strong className="text-foreground">{order.email}</strong>.
             </p>
           </div>
         </div>
