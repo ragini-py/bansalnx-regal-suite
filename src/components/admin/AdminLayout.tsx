@@ -9,6 +9,7 @@ import {
   Users,
   ShieldCheck,
   Layers,
+  FileText,
   Settings as SettingsIcon,
   Menu,
   LogOut,
@@ -39,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/orders", label: "Orders", icon: ClipboardList, permission: "orders" },
   { to: "/admin/customers", label: "Customers", icon: Users, permission: "customers" },
   { to: "/admin/shipping", label: "Shipping", icon: Truck, permission: "shipping" },
+  { to: "/admin/content", label: "Content", icon: FileText, permission: "content" },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon, permission: "settings" },
 ];
 

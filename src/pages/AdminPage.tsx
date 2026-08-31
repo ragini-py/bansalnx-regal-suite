@@ -60,6 +60,7 @@ type AdminTab =
   | "coupons"
   | "customers"
   | "shipping"
+  | "content"
   | "settings";
 
 const TAB_TITLES: Record<AdminTab, string> = {
@@ -70,6 +71,7 @@ const TAB_TITLES: Record<AdminTab, string> = {
   coupons: "Coupons & Offers",
   customers: "Customers",
   shipping: "Logistics & Delhivery",
+  content: "Homepage Content",
   settings: "Store Settings",
 };
 
@@ -82,6 +84,7 @@ function tabFromPathname(pathname: string): AdminTab {
     segment === "coupons" ||
     segment === "customers" ||
     segment === "shipping" ||
+    segment === "content" ||
     segment === "settings"
   ) {
     return segment;
@@ -109,6 +112,7 @@ export function AdminPage() {
           {activeTab === "coupons" && <CouponsManagerTab />}
           {activeTab === "customers" && <CustomersManagerTab />}
           {activeTab === "shipping" && <ShippingManagerTab />}
+          {activeTab === "content" && <ContentManagerTab />}
           {activeTab === "settings" && <SettingsManagerTab />}
         </div>
       </AdminLayout>
@@ -1924,7 +1928,320 @@ function ShippingManagerTab() {
 }
 
 /* =========================================================================
-   8. STORE SETTINGS TAB
+   8. HOMEPAGE CONTENT TAB
+   ========================================================================= */
+function ContentManagerTab() {
+  const { content, updateContent, products, collections } = useStore();
+  const [form, setForm] = useState(content);
+
+  // Content loads asynchronously (GET /api/content) after this tab's initial
+  // render — resync the form once the real values arrive, same as Settings.
+  useEffect(() => {
+    setForm(content);
+  }, [content]);
+
+  function toggleSection(key: string) {
+    setForm((f) => ({
+      ...f,
+      sections: f.sections.map((s) => (s.key === key ? { ...s, visible: !s.visible } : s)),
+    }));
+  }
+
+  function toggleFeaturedProduct(slug: string) {
+    setForm((f) => ({
+      ...f,
+      featuredProductIds: f.featuredProductIds.includes(slug)
+        ? f.featuredProductIds.filter((s) => s !== slug)
+        : [...f.featuredProductIds, slug],
+    }));
+  }
+
+  function toggleFeaturedCollection(slug: string) {
+    setForm((f) => ({
+      ...f,
+      featuredCollectionIds: f.featuredCollectionIds.includes(slug)
+        ? f.featuredCollectionIds.filter((s) => s !== slug)
+        : [...f.featuredCollectionIds, slug],
+    }));
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      await updateContent(form);
+      toast.success("Homepage content updated successfully");
+    } catch {
+      toast.error("Couldn't update homepage content. Please try again.");
+    }
+  }
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-slate-900">Homepage Content</h2>
+        <p className="text-xs text-slate-500">
+          Edit the announcement bar, hero, editorial copy, and which sections and products appear on
+          the homepage.
+        </p>
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-6">
+        <div className="border border-border/80 bg-card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-900">Announcement Bar</h3>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={form.announcement.enabled}
+              onCheckedChange={(c) =>
+                setForm((f) => ({ ...f, announcement: { ...f.announcement, enabled: c === true } }))
+              }
+            />
+            <span>Show announcement bar</span>
+          </label>
+          <div>
+            <Label htmlFor="announcement-text">Announcement text</Label>
+            <Input
+              id="announcement-text"
+              value={form.announcement.text}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  announcement: { ...f.announcement, text: e.target.value },
+                }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-900">Hero</h3>
+          <div>
+            <Label htmlFor="hero-eyebrow">Eyebrow</Label>
+            <Input
+              id="hero-eyebrow"
+              value={form.hero.eyebrow}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hero: { ...f.hero, eyebrow: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="hero-heading">Heading</Label>
+            <Input
+              id="hero-heading"
+              value={form.hero.heading}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hero: { ...f.hero, heading: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="hero-subheading">Subheading</Label>
+            <Textarea
+              id="hero-subheading"
+              value={form.hero.subheading}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hero: { ...f.hero, subheading: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hero-primary-cta">Primary button label</Label>
+              <Input
+                id="hero-primary-cta"
+                value={form.hero.primaryCta}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, hero: { ...f.hero, primaryCta: e.target.value } }))
+                }
+                className="mt-1 rounded-none"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero-secondary-cta">Secondary button label</Label>
+              <Input
+                id="hero-secondary-cta"
+                value={form.hero.secondaryCta}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, hero: { ...f.hero, secondaryCta: e.target.value } }))
+                }
+                className="mt-1 rounded-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-900">Editorial Banner</h3>
+          <div>
+            <Label htmlFor="editorial-heading">Heading</Label>
+            <Input
+              id="editorial-heading"
+              value={form.editorial.heading}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, editorial: { ...f.editorial, heading: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="editorial-caption">Caption</Label>
+            <Textarea
+              id="editorial-caption"
+              value={form.editorial.caption}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, editorial: { ...f.editorial, caption: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="editorial-cta">Button label</Label>
+            <Input
+              id="editorial-cta"
+              value={form.editorial.cta}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, editorial: { ...f.editorial, cta: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-900">Promotional Banner</h3>
+          <div>
+            <Label htmlFor="promo-heading">Heading</Label>
+            <Input
+              id="promo-heading"
+              value={form.promo.heading}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, promo: { ...f.promo, heading: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="promo-caption">Caption</Label>
+            <Textarea
+              id="promo-caption"
+              value={form.promo.caption}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, promo: { ...f.promo, caption: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="promo-cta">Button label</Label>
+            <Input
+              id="promo-cta"
+              value={form.promo.cta}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, promo: { ...f.promo, cta: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-900">Brand Story</h3>
+          <div>
+            <Label htmlFor="story-heading">Heading</Label>
+            <Input
+              id="story-heading"
+              value={form.story.heading}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, story: { ...f.story, heading: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+          <div>
+            <Label htmlFor="story-body">Body</Label>
+            <Textarea
+              id="story-body"
+              value={form.story.body}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, story: { ...f.story, body: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+              rows={4}
+            />
+          </div>
+          <div>
+            <Label htmlFor="story-cta">Button label</Label>
+            <Input
+              id="story-cta"
+              value={form.story.cta}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, story: { ...f.story, cta: e.target.value } }))
+              }
+              className="mt-1 rounded-none"
+            />
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-2">
+          <h3 className="text-sm font-semibold text-slate-900">Section Visibility</h3>
+          {form.sections.map((s) => (
+            <label key={s.key} className="flex items-center gap-2 text-sm">
+              <Checkbox checked={s.visible} onCheckedChange={() => toggleSection(s.key)} />
+              <span>{s.label}</span>
+            </label>
+          ))}
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-2">
+          <h3 className="text-sm font-semibold text-slate-900">Featured Products</h3>
+          <div className="max-h-48 space-y-1.5 overflow-y-auto border border-border p-3">
+            {products.map((p) => (
+              <label key={p.id} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={form.featuredProductIds.includes(p.slug)}
+                  onCheckedChange={() => toggleFeaturedProduct(p.slug)}
+                />
+                <span>{p.name}</span>
+              </label>
+            ))}
+            {products.length === 0 && (
+              <p className="text-xs text-muted-foreground">No products yet.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="border border-border/80 bg-card p-6 space-y-2">
+          <h3 className="text-sm font-semibold text-slate-900">Featured Collections</h3>
+          <div className="max-h-48 space-y-1.5 overflow-y-auto border border-border p-3">
+            {collections.map((c) => (
+              <label key={c.id} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={form.featuredCollectionIds.includes(c.slug)}
+                  onCheckedChange={() => toggleFeaturedCollection(c.slug)}
+                />
+                <span>{c.name}</span>
+              </label>
+            ))}
+            {collections.length === 0 && (
+              <p className="text-xs text-muted-foreground">No collections yet.</p>
+            )}
+          </div>
+        </div>
+
+        <Button type="submit" variant="luxe" className="w-full">
+          Save Homepage Content
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+/* =========================================================================
+   9. STORE SETTINGS TAB
    ========================================================================= */
 function SettingsManagerTab() {
   const { settings, updateSettings } = useStore();

@@ -19,12 +19,12 @@ import {
 } from "react";
 
 import { getProductById } from "@/data/catalog";
-// storeSettings (aliased below) is only a placeholder shown for the brief
-// window before the real GET /api/settings resolves (see the fetch effect
-// below) — its values match the backend's own schema defaults, it's not
-// "mock data" in the seed-layer sense anymore.
+// storeSettings/homepageContent (aliased below) are only placeholders shown
+// for the brief window before the real GET /api/settings and GET /api/content
+// resolve (see the fetch effect below) — their values match the backend's
+// own schema defaults, they're not "mock data" in the seed-layer sense anymore.
 import {
-  homepageContent as seedContent,
+  homepageContent as contentPlaceholder,
   permissionsForRole,
   storeSettings as settingsPlaceholder,
 } from "@/data/mock";
@@ -60,6 +60,7 @@ import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
 import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
 import { getWishlistRequest, replaceWishlistRequest } from "@/lib/api/wishlist";
 import { getSettingsRequest, updateSettingsRequest } from "@/lib/api/settings";
+import { getContentRequest, updateContentRequest } from "@/lib/api/content";
 import type {
   Address,
   CartLine,
@@ -87,7 +88,6 @@ export interface PendingIntent {
 interface PersistedState {
   wishlist: string[];
   cart: CartLine[];
-  content: HomepageContent;
   welcomeOfferSeen: boolean;
   claimedCoupons: string[];
 }
@@ -96,7 +96,6 @@ function initialState(): PersistedState {
   return {
     wishlist: [],
     cart: [],
-    content: seedContent,
     welcomeOfferSeen: false,
     claimedCoupons: [],
   };
@@ -203,7 +202,7 @@ interface StoreValue {
   deleteCollection: (id: string) => Promise<void>;
   saveCoupon: (coupon: Coupon) => Promise<void>;
   deleteCoupon: (id: string) => Promise<void>;
-  updateContent: (patch: Partial<HomepageContent>) => void;
+  updateContent: (patch: Partial<HomepageContent>) => Promise<void>;
   updateSettings: (patch: Partial<StoreSettings>) => Promise<void>;
   updateUser: (id: string, patch: Partial<User>) => Promise<void>;
   /* welcome offer */
@@ -231,16 +230,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(settingsPlaceholder);
+  const [content, setContent] = useState<HomepageContent>(contentPlaceholder);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getProducts(), getCollections(), getCoupons(), getSettingsRequest()])
-      .then(([p, c, cp, s]) => {
+    Promise.all([
+      getProducts(),
+      getCollections(),
+      getCoupons(),
+      getSettingsRequest(),
+      getContentRequest(),
+    ])
+      .then(([p, c, cp, s, ct]) => {
         if (cancelled) return;
         setProducts(p);
         setCollections(c);
         setCoupons(cp);
         setSettings(s);
+        setContent(ct);
       })
       .catch((err: unknown) => {
         if (!cancelled) console.error("Failed to load catalog:", err);
@@ -718,7 +725,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     products,
     collections,
     coupons,
-    content: state.content,
+    content,
     settings,
     saveProduct: async (product) => {
       const exists = products.some((p) => p.id === product.id);
@@ -762,8 +769,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       await deleteCouponRequest(id);
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     },
-    updateContent: (contentPatch) =>
-      patch((prev) => ({ ...prev, content: { ...prev.content, ...contentPatch } })),
+    updateContent: async (contentPatch) => {
+      const updated = await updateContentRequest(contentPatch);
+      setContent(updated);
+    },
     // Only freeShippingThreshold/shippingFee/codMaxOrderValue are actually
     // editable via AdminPage's SettingsManagerTab — matches the backend's
     // admin-editable field set exactly.

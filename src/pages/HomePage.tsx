@@ -11,45 +11,54 @@ import { SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { imagery } from "@/data/catalog";
 import { useStore } from "@/lib/store";
-import type { Collection, Product } from "@/data/types";
+import type { Collection, HomepageContent, Product } from "@/data/types";
 import { cn } from "@/lib/utils";
 
 const newsletterEmailSchema = z.string().trim().email().max(255);
 
-const HERO_SLIDES = [
-  {
-    image: imagery.hero,
-    eyebrow: "Bespoke Royal Couture",
-    heading: "Crafted for the Extraordinary You",
-    subheading:
-      "Hand-embroidered lehengas, bridal sarees, and raw silk ensembles created in our Jaipur studio.",
-    primaryCta: "Shop New Arrivals",
-    primaryTo: "/products?sort=newest",
-    secondaryCta: "Explore Collections",
-    secondaryTo: "/collections",
-  },
-  {
-    image: imagery.collection1,
-    eyebrow: "The Wedding Pavilion Edit",
-    heading: "Timeless Bridal Opulence",
-    subheading:
-      "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
-    primaryCta: "Discover Bridal",
-    primaryTo: "/collections/the-wedding-pavilion",
-    secondaryCta: "Browse All Collections",
-    secondaryTo: "/collections",
-  },
-  {
-    image: imagery.collection2,
-    eyebrow: "Summer Muslins & Florals",
-    heading: "Breeze & Light Heritage",
-    subheading: "Fine chanderi and tissue kurtas woven with pure silver zari threads.",
-    primaryCta: "Shop Festive Edit",
-    primaryTo: "/collections/courtly-threads",
-    secondaryCta: "Our Story",
-    secondaryTo: "/about",
-  },
-];
+// The first slide's copy comes from the admin-editable content.hero; its
+// image and link targets stay fixed since HomepageContent only models one
+// hero object, not per-slide routing. The other two slides are fixed
+// editorial spotlights, not part of the content model.
+function buildHeroSlides(hero: HomepageContent["hero"]) {
+  return [
+    {
+      image: imagery.hero,
+      eyebrow: hero.eyebrow,
+      heading: hero.heading,
+      subheading: hero.subheading,
+      primaryCta: hero.primaryCta,
+      primaryTo: "/products?sort=newest",
+      secondaryCta: hero.secondaryCta,
+      secondaryTo: "/collections",
+    },
+    {
+      image: imagery.collection1,
+      eyebrow: "The Wedding Pavilion Edit",
+      heading: "Timeless Bridal Opulence",
+      subheading:
+        "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
+      primaryCta: "Discover Bridal",
+      primaryTo: "/collections/the-wedding-pavilion",
+      secondaryCta: "Browse All Collections",
+      secondaryTo: "/collections",
+    },
+    {
+      image: imagery.collection2,
+      eyebrow: "Summer Muslins & Florals",
+      heading: "Breeze & Light Heritage",
+      subheading: "Fine chanderi and tissue kurtas woven with pure silver zari threads.",
+      primaryCta: "Shop Festive Edit",
+      primaryTo: "/collections/courtly-threads",
+      secondaryCta: "Our Story",
+      secondaryTo: "/about",
+    },
+  ];
+}
+
+function isSectionVisible(content: HomepageContent, key: string): boolean {
+  return content.sections.find((s) => s.key === key)?.visible ?? true;
+}
 
 export function HomePage() {
   const { content, products, collections } = useStore();
@@ -72,10 +81,10 @@ export function HomePage() {
 
   return (
     <SiteLayout>
-      <HeroSlider />
+      <HeroSlider hero={content.hero} />
 
       {/* Featured Products */}
-      {featuredProducts.length > 0 && (
+      {isSectionVisible(content, "featured") && featuredProducts.length > 0 && (
         <ProductBlock
           eyebrow="Handpicked"
           title="Featured Products"
@@ -87,10 +96,12 @@ export function HomePage() {
       )}
 
       {/* Featured Collections Showcase */}
-      {featuredCollections.length > 0 && <CollectionsBlock collections={featuredCollections} />}
+      {isSectionVisible(content, "collections") && featuredCollections.length > 0 && (
+        <CollectionsBlock collections={featuredCollections} />
+      )}
 
       {/* New Arrivals Section */}
-      {newArrivals.length > 0 && (
+      {isSectionVisible(content, "new-arrivals") && newArrivals.length > 0 && (
         <ProductBlock
           eyebrow="Just in"
           title="New Arrivals"
@@ -102,10 +113,10 @@ export function HomePage() {
       )}
 
       {/* Full-width Luxury Editorial Banner */}
-      <Editorial />
+      {isSectionVisible(content, "editorial") && <Editorial editorial={content.editorial} />}
 
       {/* Bestsellers Section */}
-      {bestsellers.length > 0 && (
+      {isSectionVisible(content, "bestsellers") && bestsellers.length > 0 && (
         <ProductBlock
           eyebrow="Most requested"
           title="The Bestsellers"
@@ -117,7 +128,7 @@ export function HomePage() {
       )}
 
       {/* Promotional Banner */}
-      <Promo />
+      {isSectionVisible(content, "promo") && <Promo promo={content.promo} />}
 
       {/* Craftsmanship & Heritage */}
       <Craft />
@@ -126,29 +137,30 @@ export function HomePage() {
       <Testimonials />
 
       {/* Newsletter */}
-      <Newsletter />
+      {isSectionVisible(content, "newsletter") && <Newsletter />}
 
       {/* Brand Story */}
-      <Story />
+      {isSectionVisible(content, "story") && <Story story={content.story} />}
     </SiteLayout>
   );
 }
 
-function HeroSlider() {
+function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
   const [current, setCurrent] = useState(0);
+  const heroSlides = buildHeroSlides(hero);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+      setCurrent((prev) => (prev + 1) % heroSlides.length);
     }, 6500);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
-  const slide = HERO_SLIDES[current] ?? HERO_SLIDES[0]!;
+  const slide = heroSlides[current] ?? heroSlides[0]!;
 
   return (
     <section className="relative isolate min-h-[85vh] w-full overflow-hidden bg-slate-950">
-      {HERO_SLIDES.map((s, idx) => (
+      {heroSlides.map((s, idx) => (
         <div
           key={idx}
           className={cn(
@@ -206,7 +218,7 @@ function HeroSlider() {
         {/* Carousel Indicators & Controls */}
         <div className="mt-10 flex items-center justify-between">
           <div className="flex gap-2">
-            {HERO_SLIDES.map((_, idx) => (
+            {heroSlides.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
@@ -223,7 +235,7 @@ function HeroSlider() {
             <button
               type="button"
               onClick={() =>
-                setCurrent((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+                setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
               }
               aria-label="Previous slide"
               className="grid h-9 w-9 place-items-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition-colors"
@@ -232,7 +244,7 @@ function HeroSlider() {
             </button>
             <button
               type="button"
-              onClick={() => setCurrent((prev) => (prev + 1) % HERO_SLIDES.length)}
+              onClick={() => setCurrent((prev) => (prev + 1) % heroSlides.length)}
               aria-label="Next slide"
               className="grid h-9 w-9 place-items-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition-colors"
             >
@@ -326,7 +338,7 @@ function ProductBlock({
   );
 }
 
-function Editorial() {
+function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-12">
       <div className="relative isolate overflow-hidden bg-slate-900 py-20 px-6 sm:py-28 sm:px-12 rounded-2xl text-white text-center shadow-lg">
@@ -341,11 +353,10 @@ function Editorial() {
             Bespoke Excellence
           </p>
           <h2 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-snug">
-            &ldquo;Every thread carries the heartbeat of Rajasthan&rsquo;s finest karigars.&rdquo;
+            {editorial.heading}
           </h2>
           <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-300">
-            From hand-drawn motifs to the final zardozi stitch, our garments are crafted with
-            perfection.
+            {editorial.caption}
           </p>
           <Button
             asChild
@@ -353,7 +364,7 @@ function Editorial() {
             size="lg"
             className="mt-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md"
           >
-            <Link to="/about">Our Heritage &amp; Craft</Link>
+            <Link to="/about">{editorial.cta}</Link>
           </Button>
         </div>
       </div>
@@ -361,7 +372,7 @@ function Editorial() {
   );
 }
 
-function Promo() {
+function Promo({ promo }: { promo: HomepageContent["promo"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12">
       <div className="relative overflow-hidden border border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 p-8 sm:p-12 rounded-2xl text-slate-900 shadow-sm">
@@ -370,19 +381,12 @@ function Promo() {
             Exclusive Client Privilege
           </p>
           <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900">
-            Complimentary Fitting &amp; Express Delivery
+            {promo.heading}
           </h2>
-          <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">
-            Enjoy complimentary made-to-measure sizing adjustments on all bridal lehengas and
-            sherwanis with code{" "}
-            <span className="font-mono text-amber-800 font-bold bg-amber-100/70 px-2 py-0.5 rounded">
-              WELCOME10
-            </span>
-            .
-          </p>
+          <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">{promo.caption}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild variant="luxe" size="lg">
-              <Link to="/products">Claim Privilege</Link>
+              <Link to="/products">{promo.cta}</Link>
             </Button>
             <Button
               asChild
@@ -576,20 +580,17 @@ function Newsletter() {
   );
 }
 
-function Story() {
+function Story({ story }: { story: HomepageContent["story"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
       <div className="mx-auto max-w-2xl text-center space-y-5">
         <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Our Philosophy</p>
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">
-          Crafted for the Extraordinary You
+          {story.heading}
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600">
-          Bansal-nx was established with one singular vision: to create heirloom royal garments that
-          elevate your most monumental moments. No shortcuts, no compromises.
-        </p>
+        <p className="text-sm leading-relaxed text-slate-600">{story.body}</p>
         <Button asChild variant="luxe" size="lg" className="font-semibold">
-          <Link to="/products">Explore Full Catalog</Link>
+          <Link to="/products">{story.cta}</Link>
         </Button>
       </div>
     </section>
