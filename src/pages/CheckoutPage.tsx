@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { extractApiErrorMessage } from "@/lib/api/auth";
 import { formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { Address, PaymentMethod } from "@/data/types";
@@ -72,6 +73,10 @@ export function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
   const [paymentState, setPaymentState] = useState<PaymentState>("idle");
   const [formError, setFormError] = useState<string | null>(null);
+  // null = the manual "simulate failure" demo button; a real placeOrder()
+  // rejection (expired coupon, COD now over the limit, network error, ...)
+  // sets this to the server's actual reason instead of the demo copy.
+  const [paymentFailureReason, setPaymentFailureReason] = useState<string | null>(null);
 
   const t = totals(paymentMethod);
   const codBlocked = !settings.codEnabled || t.total > settings.codMaxOrderValue;
@@ -154,13 +159,16 @@ export function CheckoutPage() {
       const order = await placeOrder({ address: address!, paymentMethod, email, phone });
       setPaymentState("idle");
       navigate(`/order/${order.id}`);
-    } catch {
+    } catch (err) {
+      const message = extractApiErrorMessage(err, "Couldn't place your order. Please try again.");
+      setPaymentFailureReason(message);
       setPaymentState("failed");
-      setFormError("Couldn't place your order. Please try again.");
+      setFormError(message);
     }
   }
 
   function simulateFailure() {
+    setPaymentFailureReason(null);
     setPaymentState("processing");
     setTimeout(() => setPaymentState("failed"), 1200);
   }
@@ -603,14 +611,17 @@ export function CheckoutPage() {
             <XCircle className="mx-auto h-8 w-8 text-destructive" />
             <h3 className="mt-5 font-display text-xl">We couldn't complete your payment.</h3>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              This is a demo failure state. No charge was made.
+              {paymentFailureReason ?? "This is a demo failure state. No charge was made."}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button
                 variant="luxe"
                 size="luxeSm"
                 className="flex-1"
-                onClick={() => setPaymentState("idle")}
+                onClick={() => {
+                  setPaymentState("idle");
+                  setPaymentFailureReason(null);
+                }}
               >
                 Try Again
               </Button>
@@ -620,6 +631,7 @@ export function CheckoutPage() {
                 className="flex-1"
                 onClick={() => {
                   setPaymentState("idle");
+                  setPaymentFailureReason(null);
                   setPaymentMethod(paymentMethod === "razorpay" ? "cod" : "razorpay");
                 }}
               >
