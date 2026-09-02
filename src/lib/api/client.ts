@@ -20,6 +20,29 @@ export function getAccessToken(): string | null {
   return accessToken;
 }
 
+// Double-submit CSRF token — returned in the JSON body by register/login/
+// refresh (see backend/src/modules/auth/auth.controller.ts) alongside a
+// same-value cookie the server compares it against. Kept in memory and sent
+// back explicitly as a header (rather than relying on the browser reading
+// the cookie itself) so this keeps working if the frontend and API ever end
+// up on genuinely different domains, not just different ports.
+let csrfToken: string | null = null;
+
+export function setCsrfToken(token: string | null): void {
+  csrfToken = token;
+}
+
+// On a fresh page load, csrfToken above is still null (in-memory state
+// doesn't survive a reload) even though the browser may already be holding
+// a valid csrfToken cookie from a previous session — used by store.tsx's
+// silent boot-time refresh before any explicit login/refresh response has
+// set the in-memory value. Read the cookie directly as a one-time fallback;
+// once a real auth response comes back, the in-memory value takes over.
+function readCsrfCookie(): string | null {
+  const match = document.cookie.match(/(?:^|; )csrfToken=([^;]*)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 export const apiClient = axios.create({
   baseURL: env.apiUrl,
   withCredentials: true,
@@ -28,6 +51,10 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+  const csrf = csrfToken ?? readCsrfCookie();
+  if (csrf) {
+    config.headers.set("X-CSRF-Token", csrf);
   }
   return config;
 });

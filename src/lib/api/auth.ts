@@ -6,13 +6,14 @@
 import { isAxiosError } from "axios";
 
 import type { User } from "@/data/types";
-import { apiClient, setAccessToken, setRefreshHandler } from "@/lib/api/client";
+import { apiClient, setAccessToken, setCsrfToken, setRefreshHandler } from "@/lib/api/client";
 
 export type AuthUser = Omit<User, "password">;
 
 interface AuthResponse {
   user: AuthUser;
   accessToken: string;
+  csrfToken: string;
 }
 
 export interface RegisterInput {
@@ -39,27 +40,34 @@ export function extractApiErrorMessage(err: unknown, fallback: string): string {
 export async function registerRequest(input: RegisterInput): Promise<AuthUser> {
   const { data } = await apiClient.post<AuthResponse>("/auth/register", input);
   setAccessToken(data.accessToken);
+  setCsrfToken(data.csrfToken);
   return data.user;
 }
 
 export async function loginRequest(input: LoginInput): Promise<AuthUser> {
   const { data } = await apiClient.post<AuthResponse>("/auth/login", input);
   setAccessToken(data.accessToken);
+  setCsrfToken(data.csrfToken);
   return data.user;
 }
 
 export async function logoutRequest(): Promise<void> {
   await apiClient.post("/auth/logout");
   setAccessToken(null);
+  setCsrfToken(null);
 }
 
 export async function refreshRequest(): Promise<string | null> {
   try {
-    const { data } = await apiClient.post<{ accessToken: string }>("/auth/refresh");
+    const { data } = await apiClient.post<{ accessToken: string; csrfToken: string }>(
+      "/auth/refresh",
+    );
     setAccessToken(data.accessToken);
+    setCsrfToken(data.csrfToken);
     return data.accessToken;
   } catch {
     setAccessToken(null);
+    setCsrfToken(null);
     return null;
   }
 }
