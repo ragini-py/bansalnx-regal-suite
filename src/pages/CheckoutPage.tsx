@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, ShoppingBag, XCircle } from "lucide-react";
 import { z } from "zod";
@@ -44,6 +44,7 @@ type PaymentState = "idle" | "processing" | "failed";
 export function CheckoutPage() {
   const {
     isAuthenticated,
+    authReady,
     user,
     cartLines,
     totals,
@@ -56,6 +57,13 @@ export function CheckoutPage() {
     setPendingIntent,
   } = useStore();
   const navigate = useNavigate();
+
+  // Stable for the life of this checkout attempt — reused across a manual
+  // re-submit after a failure (and automatically across the API client's own
+  // 401-refresh-then-retry) so a retried request can never create a second
+  // order. A fresh key is only ever needed for a genuinely new checkout, and
+  // this page unmounts/remounts on navigation away, so a ref is enough.
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -156,7 +164,13 @@ export function CheckoutPage() {
     await new Promise((resolve) => setTimeout(resolve, 1600));
 
     try {
-      const order = await placeOrder({ address: address!, paymentMethod, email, phone });
+      const order = await placeOrder({
+        address: address!,
+        paymentMethod,
+        email,
+        phone,
+        idempotencyKey: idempotencyKeyRef.current,
+      });
       setPaymentState("idle");
       navigate(`/order/${order.id}`);
     } catch (err) {
@@ -171,6 +185,16 @@ export function CheckoutPage() {
     setPaymentFailureReason(null);
     setPaymentState("processing");
     setTimeout(() => setPaymentState("failed"), 1200);
+  }
+
+  if (!authReady) {
+    return (
+      <SiteLayout>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </SiteLayout>
+    );
   }
 
   if (!isAuthenticated) {
@@ -568,7 +592,9 @@ export function CheckoutPage() {
                 disabled={paymentState === "processing"}
               >
                 {paymentMethod === "razorpay"
-                  ? `Pay ${formatINR(t.total)} securely`
+                  ? settings.razorpayConnected
+                    ? `Pay ${formatINR(t.total)} securely`
+                    : `Place order — Razorpay (demo, not yet connected)`
                   : "Place order — Cash on Delivery"}
               </Button>
 
@@ -594,8 +620,9 @@ export function CheckoutPage() {
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-gold" />
             <h3 className="mt-5 font-display text-xl">Processing your payment</h3>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              The Razorpay checkout would open here. Success is confirmed server-side once payment
-              settles — never asserted from the browser.
+              {paymentMethod === "razorpay"
+                ? 'Razorpay isn\'t connected yet — this is a placeholder. No real charge is happening, and the order is created with payment still "processing" until a real payment integration confirms it server-side.'
+                : "Confirming your order."}
             </p>
           </div>
         </div>

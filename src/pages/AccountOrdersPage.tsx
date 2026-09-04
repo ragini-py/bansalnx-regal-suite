@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Search } from "lucide-react";
+import { ChevronRight, Loader2, Search } from "lucide-react";
 
-import { AccountGate, AccountLayout } from "@/components/account/AccountLayout";
+import { AccountGate, AccountLayout, AccountLoading } from "@/components/account/AccountLayout";
 import { EmptyState } from "@/components/common/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ function shipmentStatusLabel(status: OrderStatus) {
 }
 
 export function AccountOrdersPage() {
-  const { isAuthenticated, myOrders } = useStore();
+  const { isAuthenticated, authReady, myOrders, ordersLoading } = useStore();
   const [filter, setFilter] = useState(FILTERS[0]?.label ?? "All");
   const [query, setQuery] = useState("");
 
@@ -54,6 +54,7 @@ export function AccountOrdersPage() {
     return list;
   }, [myOrders, filter, query]);
 
+  if (!authReady) return <AccountLoading />;
   if (!isAuthenticated) return <AccountGate />;
 
   return (
@@ -87,9 +88,16 @@ export function AccountOrdersPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {ordersLoading ? (
+        <div className="mt-8 flex justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="mt-8">
-          <EmptyState title="No orders yet." description="Orders matching this filter will appear here." />
+          <EmptyState
+            title="No orders yet."
+            description="Orders matching this filter will appear here."
+          />
         </div>
       ) : (
         <>
@@ -110,8 +118,12 @@ export function AccountOrdersPage() {
                   {order.lines.map((l) => l.name).join(", ")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="rounded-none">{orderStatusLabels[order.status]}</Badge>
-                  <Badge variant="outline" className="rounded-none">{paymentStatusLabels[order.payment.status]}</Badge>
+                  <Badge variant="outline" className="rounded-none">
+                    {orderStatusLabels[order.status]}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-none">
+                    {paymentStatusLabels[order.payment.status]}
+                  </Badge>
                 </div>
                 <p className="text-sm">{formatINR(order.total)}</p>
               </Link>
@@ -142,7 +154,10 @@ export function AccountOrdersPage() {
                       >
                         <span>{order.id}</span>
                         <span className="text-muted-foreground">{formatDate(order.createdAt)}</span>
-                        <span className="truncate text-muted-foreground" title={order.lines.map((l) => l.name).join(", ")}>
+                        <span
+                          className="truncate text-muted-foreground"
+                          title={order.lines.map((l) => l.name).join(", ")}
+                        >
                           {order.lines.map((l) => l.name).join(", ")}
                         </span>
                         <span>{formatINR(order.total)}</span>

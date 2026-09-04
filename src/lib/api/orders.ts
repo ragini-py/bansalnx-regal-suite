@@ -7,8 +7,16 @@ import { apiClient } from "@/lib/api/client";
 
 export async function createOrderRequest(
   order: Omit<Order, "id" | "createdAt" | "userId">,
+  idempotencyKey: string,
 ): Promise<Order> {
-  const { data } = await apiClient.post<{ order: Order }>("/orders", order);
+  // The backend dedupes retried checkout submissions by this header (see
+  // orders.controller.ts) — the axios client's own 401-refresh-then-retry
+  // resends the same request config/headers automatically, and the caller
+  // reuses the same key across a manual re-submit after a failure, so a
+  // retried request can never create a second order for one checkout attempt.
+  const { data } = await apiClient.post<{ order: Order }>("/orders", order, {
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
   return data.order;
 }
 

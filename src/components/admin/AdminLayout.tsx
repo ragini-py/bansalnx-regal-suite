@@ -14,6 +14,7 @@ import {
   Menu,
   LogOut,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 
 import { BrandMark } from "@/components/brand/BrandMark";
@@ -190,7 +191,19 @@ export function AdminGuard({
   permission?: PermissionKey;
   children: ReactNode;
 }) {
-  const { isAuthenticated, isAdmin, user, hasPermission } = useStore();
+  const { isAuthenticated, authReady, isAdmin, user, hasPermission } = useStore();
+
+  // Wait for the silent session-restore check (refresh + /me) to resolve
+  // before deciding whether to show the gate — otherwise a logged-in admin
+  // sees "Sign in required" flash for the ~100-300ms that check takes on
+  // every hard refresh or deep link into /admin.
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !isAdmin) {
     return (

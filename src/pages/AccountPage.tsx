@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { AccountGate, AccountLayout } from "@/components/account/AccountLayout";
+import { AccountGate, AccountLayout, AccountLoading } from "@/components/account/AccountLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,11 +37,20 @@ function tabFromPathname(pathname: string): AccountTab {
 export function AccountPage() {
   const location = useLocation();
   const activeTab = tabFromPathname(location.pathname);
-  const { isAuthenticated, user, myOrders, wishlist, coupons, addAddress, removeAddress } =
-    useStore();
+  const {
+    isAuthenticated,
+    authReady,
+    user,
+    myOrders,
+    wishlist,
+    coupons,
+    addAddress,
+    removeAddress,
+  } = useStore();
 
   const [addAddressOpen, setAddAddressOpen] = useState(false);
 
+  if (!authReady) return <AccountLoading />;
   if (!isAuthenticated || !user) return <AccountGate />;
 
   const activeCoupons = coupons.filter((c) => c.active && new Date(c.expiresAt) >= new Date());

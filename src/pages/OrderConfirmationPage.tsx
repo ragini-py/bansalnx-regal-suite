@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CheckCircle2, Mail, PackageSearch } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
@@ -60,7 +60,7 @@ export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   // My own order — not the admin-only `orders` list, which is empty for a
   // regular customer.
-  const { myOrders, requestReturn, cancelOrder } = useStore();
+  const { myOrders, ordersLoading, authReady, requestReturn, cancelOrder } = useStore();
   const order = myOrders.find((o) => o.id === id);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnReason, setReturnReason] = useState("");
@@ -91,6 +91,16 @@ export function OrderConfirmationPage() {
     } catch {
       toast.error("Couldn't submit the return request. Please try again.");
     }
+  }
+
+  if (!order && (!authReady || ordersLoading)) {
+    return (
+      <SiteLayout>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </SiteLayout>
+    );
   }
 
   if (!order) {

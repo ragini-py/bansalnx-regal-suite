@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { AccountGate } from "@/components/account/AccountLayout";
+import { AccountGate, AccountLoading } from "@/components/account/AccountLayout";
 import { EmptyState } from "@/components/common/SectionHeading";
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,12 @@ function WishlistCard({ product }: { product: Product }) {
 
   const availableSizesForColour = useMemo(
     () =>
-      product.variants.filter((v) => v.colour === colour).map((v) => ({
-        size: v.size,
-        available: v.availability === "available",
-      })),
+      product.variants
+        .filter((v) => v.colour === colour)
+        .map((v) => ({
+          size: v.size,
+          available: v.availability === "available",
+        })),
     [product.variants, colour],
   );
 
@@ -88,7 +90,9 @@ function WishlistCard({ product }: { product: Product }) {
           <span className="text-sm tracking-wide">{formatINR(product.price)}</span>
           {off > 0 && (
             <>
-              <span className="text-xs text-muted-foreground line-through">{formatINR(product.mrp)}</span>
+              <span className="text-xs text-muted-foreground line-through">
+                {formatINR(product.mrp)}
+              </span>
               <span className="text-xs text-gold-deep">{off}% off</span>
             </>
           )}
@@ -163,8 +167,9 @@ function WishlistCard({ product }: { product: Product }) {
 }
 
 export function WishlistPage() {
-  const { isAuthenticated, wishlist, products } = useStore();
+  const { isAuthenticated, authReady, wishlist, products } = useStore();
 
+  if (!authReady) return <AccountLoading />;
   if (!isAuthenticated) return <AccountGate />;
 
   const savedProducts = wishlist
@@ -175,7 +180,9 @@ export function WishlistPage() {
     <SiteLayout>
       <PageHeader
         breadcrumb={
-          <Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Wishlist" }]} />
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Wishlist" }]}
+          />
         }
         title="Wishlist"
         description="Pieces you've saved for later."

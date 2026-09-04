@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,29 @@ const NAV_ITEMS = [
   { label: "Profile", to: "/account/profile" },
 ];
 
+// Shown while the silent session-restore check (refresh + /me) is still in
+// flight — without this, every account-area page briefly renders AccountGate
+// ("Sign in to your account") for a logged-in user on a hard refresh or deep
+// link, before flipping to the real content once the check resolves.
+export function AccountLoading() {
+  return (
+    <SiteLayout>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    </SiteLayout>
+  );
+}
+
 export function AccountGate() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "My Account" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "My Account" }]}
+          />
+        }
         title="My Account"
       />
       <div className="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 lg:px-12">
@@ -35,14 +53,10 @@ export function AccountGate() {
           </p>
           <div className="mt-8 flex w-full flex-col gap-3">
             <Button asChild variant="luxe" size="luxe">
-              <Link to="/login?redirect=/account">
-                Login
-              </Link>
+              <Link to="/login?redirect=/account">Login</Link>
             </Button>
             <Button asChild variant="luxeOutline" size="luxe">
-              <Link to="/register?redirect=/account">
-                Create Account
-              </Link>
+              <Link to="/register?redirect=/account">Create Account</Link>
             </Button>
           </div>
         </div>
@@ -74,14 +88,19 @@ export function AccountLayout({
     <SiteLayout>
       <PageHeader
         breadcrumb={
-          <Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "My Account" }]} />
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "My Account" }]}
+          />
         }
         title={title}
         description={description}
       />
       <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-[220px_1fr] lg:gap-10">
-          <nav aria-label="Account navigation" className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-fit">
+          <nav
+            aria-label="Account navigation"
+            className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-fit"
+          >
             <ul className="flex gap-1 overflow-x-auto whitespace-nowrap lg:flex-col lg:overflow-visible">
               {NAV_ITEMS.map((item) => {
                 const active = currentPath === item.to;

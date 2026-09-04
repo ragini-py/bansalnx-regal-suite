@@ -178,11 +178,13 @@ interface StoreValue {
   /* orders */
   orders: Order[];
   myOrders: Order[];
+  ordersLoading: boolean;
   placeOrder: (input: {
     address: Address;
     paymentMethod: PaymentMethod;
     email: string;
     phone: string;
+    idempotencyKey: string;
   }) => Promise<Order>;
   updateOrder: (id: string, patch: Partial<Order>) => Promise<void>;
   requestReturn: (id: string, reason: string) => Promise<void>;
@@ -231,6 +233,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(settingsPlaceholder);
   const [content, setContent] = useState<HomepageContent>(contentPlaceholder);
+  // False only for the brief window before the initial catalog fetch settles
+  // (success or failure) — cartLines below uses this to tell "still loading,
+  // fall back to placeholder data for a saved cart line" apart from "the
+  // catalog is loaded and this product genuinely doesn't exist anymore".
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -251,6 +258,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       .catch((err: unknown) => {
         if (!cancelled) console.error("Failed to load catalog:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setCatalogLoaded(true);
       });
     return () => {
       cancelled = true;
@@ -260,6 +270,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /* real orders (bansalnx-backend) — `orders` is the admin-only full list, `myOrders` the caller's own */
   const [orders, setOrders] = useState<Order[]>([]);
   const [myOrders, setMyOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const authUserId = authUser?.id;
   const authUserRole = authUser?.role;
 
@@ -267,23 +278,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!authUserId) {
       setOrders([]);
       setMyOrders([]);
+      setOrdersLoading(false);
       return;
     }
     let cancelled = false;
-    getMyOrders()
-      .then((o) => {
+    setOrdersLoading(true);
+    const requests = [
+      getMyOrders().then((o) => {
         if (!cancelled) setMyOrders(o);
-      })
-      .catch((err: unknown) => console.error("Failed to load orders:", err));
+      }),
+    ];
     if (authUserRole !== "customer") {
-      getAllOrders()
-        .then((o) => {
+      requests.push(
+        getAllOrders().then((o) => {
           if (!cancelled) setOrders(o);
-        })
-        .catch((err: unknown) => console.error("Failed to load orders:", err));
+        }),
+      );
     } else {
       setOrders([]);
     }
+    Promise.allSettled(requests).then((results) => {
+      if (cancelled) return;
+      for (const r of results) {
+        if (r.status === "rejected") console.error("Failed to load orders:", r.reason);
+      }
+      setOrdersLoading(false);
+    });
     return () => {
       cancelled = true;
     };
@@ -517,8 +537,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const cartLines = useMemo<CartLineView[]>(() => {
     return state.cart.flatMap((line) => {
+      // Only fall back to placeholder data while the real catalog is still
+      // loading — once it's loaded, a product missing from it is genuinely
+      // gone (e.g. an admin deleted it), and must drop out of the cart
+      // rather than silently render stale mock pricing/details.
       const product =
-        products.find((p) => p.id === line.productId) ?? getProductById(line.productId);
+        products.find((p) => p.id === line.productId) ??
+        (!catalogLoaded ? getProductById(line.productId) : undefined);
       if (!product) return [];
       const variant = product.variants.find(
         (v) => v.size === line.size && v.colour === line.colour,
@@ -532,7 +557,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         },
       ];
     });
-  }, [state.cart, products]);
+  }, [state.cart, products, catalogLoaded]);
 
   const appliedCoupon = useMemo(
     () => coupons.find((c) => c.code === appliedCouponCode) ?? null,
@@ -591,7 +616,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const placeOrder = useCallback<StoreValue["placeOrder"]>(
-    async ({ address, paymentMethod, email, phone }) => {
+    async ({ address, paymentMethod, email, phone, idempotencyKey }) => {
       const t = totals(paymentMethod);
       const lines: OrderLine[] = cartLines.map((line) => ({
         productId: line.productId,
@@ -605,47 +630,52 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         mrp: line.product.mrp,
       }));
       const eta = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000);
-      const order = await createOrderRequest({
-        customerName: user ? `${user.firstName} ${user.lastName}` : address.fullName,
-        email,
-        phone,
-        lines,
-        subtotal: t.subtotal,
-        discount: t.discount,
-        couponCode: appliedCoupon?.code ?? null,
-        shippingFee: t.shippingFee + t.codFee,
-        tax: t.tax,
-        total: t.total,
-        status: "confirmed",
-        payment: {
-          method: paymentMethod,
-          // Razorpay success is never asserted from the client; a real build
-          // marks this paid only after server-side signature verification.
-          status: paymentMethod === "cod" ? "pending" : "processing",
-          amount: t.total,
-          razorpayPaymentId:
-            paymentMethod === "razorpay"
-              ? `pay_MOCK${Math.random().toString(36).slice(2, 8)}`
-              : null,
-          transactionId: null,
-          paidAt: null,
-          refundStatus: "none",
-          refundAmount: 0,
+      const order = await createOrderRequest(
+        {
+          customerName: user ? `${user.firstName} ${user.lastName}` : address.fullName,
+          email,
+          phone,
+          lines,
+          subtotal: t.subtotal,
+          discount: t.discount,
+          couponCode: appliedCoupon?.code ?? null,
+          shippingFee: t.shippingFee + t.codFee,
+          tax: t.tax,
+          total: t.total,
+          status: "confirmed",
+          payment: {
+            method: paymentMethod,
+            // Razorpay success is never asserted from the client; a real build
+            // marks this paid only after server-side signature verification.
+            status: paymentMethod === "cod" ? "pending" : "processing",
+            amount: t.total,
+            razorpayPaymentId:
+              paymentMethod === "razorpay"
+                ? `pay_MOCK${Math.random().toString(36).slice(2, 8)}`
+                : null,
+            transactionId: null,
+            paidAt: null,
+            refundStatus: "none",
+            refundAmount: 0,
+          },
+          address,
+          shipment: {
+            courier: null,
+            awb: null,
+            shipmentId: null,
+            trackingUrl: null,
+            estimatedDelivery: eta.toISOString(),
+            attempts: 0,
+            ndrReason: null,
+            rto: false,
+            events: [
+              { status: "confirmed", label: "Order Confirmed", at: new Date().toISOString() },
+            ],
+          },
+          returnRequest: null,
         },
-        address,
-        shipment: {
-          courier: null,
-          awb: null,
-          shipmentId: null,
-          trackingUrl: null,
-          estimatedDelivery: eta.toISOString(),
-          attempts: 0,
-          ndrReason: null,
-          rto: false,
-          events: [{ status: "confirmed", label: "Order Confirmed", at: new Date().toISOString() }],
-        },
-        returnRequest: null,
-      });
+        idempotencyKey,
+      );
       setMyOrders((prev) => [order, ...prev]);
       patch((prev) => ({ ...prev, cart: [] }));
       setAppliedCouponCode(null);
@@ -716,6 +746,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     totals,
     orders,
     myOrders,
+    ordersLoading,
     placeOrder,
     updateOrder,
     requestReturn,

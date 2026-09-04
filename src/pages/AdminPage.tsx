@@ -1598,6 +1598,8 @@ function CouponsManagerTab() {
                     variant="ghost"
                     size="icon"
                     onClick={async () => {
+                      if (!window.confirm(`Delete coupon "${c.code}"? This can't be undone.`))
+                        return;
                       try {
                         await deleteCoupon(c.id);
                         toast.success(`Coupon ${c.code} deleted`);
@@ -1800,7 +1802,7 @@ function CustomersManagerTab() {
    7. LOGISTICS & DELHIVERY MANAGER TAB
    ========================================================================= */
 function ShippingManagerTab() {
-  const { orders, updateOrder } = useStore();
+  const { orders, updateOrder, settings } = useStore();
   const shippedOrders = orders.filter((o) => Boolean(o.shipment));
 
   async function handleSimulateDispatch(orderId: string) {
@@ -1849,12 +1851,20 @@ function ShippingManagerTab() {
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-lg font-medium">Delhivery Surface Express</span>
-            <Badge variant="outline" className="border-emerald/50 text-emerald rounded-none">
-              Active
-            </Badge>
+            {settings.delhiveryConnected ? (
+              <Badge variant="outline" className="border-emerald/50 text-emerald rounded-none">
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-gold/50 text-gold-deep rounded-none">
+                Not connected
+              </Badge>
+            )}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Origin Hub: Jaipur Central Facility, Rajasthan (302001)
+            {settings.delhiveryConnected
+              ? "Origin Hub: Jaipur Central Facility, Rajasthan (302001)"
+              : "AWB generation below is simulated until a real Delhivery account is connected in Settings."}
           </p>
         </div>
         <div className="border border-border/80 bg-card p-5">
