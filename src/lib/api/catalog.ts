@@ -5,8 +5,15 @@
 import type { Collection, Product } from "@/data/types";
 import { apiClient } from "@/lib/api/client";
 
+// No query params — the backend now also accepts page/limit/category/
+// collection/search/published for a real paginated/filtered fetch (see
+// backend/src/modules/catalog/catalog.routes.ts), but omitting all of them
+// still returns the full catalog, so this keeps the app's existing
+// fetch-once-on-boot pattern working unchanged.
 export async function getProducts(): Promise<Product[]> {
-  const { data } = await apiClient.get<{ products: Product[] }>("/products");
+  const { data } = await apiClient.get<{ products: Product[]; total: number; page: number; limit: number }>(
+    "/products",
+  );
   return data.products;
 }
 
