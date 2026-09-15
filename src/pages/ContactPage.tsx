@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";

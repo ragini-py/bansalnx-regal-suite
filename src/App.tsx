@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import { Toaster } from "sonner";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { StoreProvider } from "@/lib/store";
 import { HomePage } from "@/pages/HomePage";
@@ -82,7 +83,14 @@ export function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <Toaster position="bottom-right" richColors />
+        <ToastContainer
+          position="bottom-right"
+          theme="colored"
+          autoClose={4000}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+        />
       </BrowserRouter>
     </StoreProvider>
   );

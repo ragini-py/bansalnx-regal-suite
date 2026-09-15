@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { AccountGate, AccountLayout, AccountLoading } from "@/components/account/AccountLayout";
 import { Badge } from "@/components/ui/badge";

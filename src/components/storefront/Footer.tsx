@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 
 import { BrandMark } from "@/components/brand/BrandMark";
@@ -152,7 +152,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={label}
-                  className="text-slate-400 transition-colors hover:text-slate-900"
+                  className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-400 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-900 hover:text-white hover:shadow-md"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -171,7 +171,7 @@ export function Footer() {
                     <li key={link.label}>
                       <Link
                         to={link.to}
-                        className="text-xs sm:text-sm text-slate-600 transition-colors hover:text-slate-900 font-medium"
+                        className="inline-block text-xs sm:text-sm text-slate-600 transition-all duration-200 hover:translate-x-0.5 hover:text-slate-900 font-medium"
                       >
                         {link.label}
                       </Link>

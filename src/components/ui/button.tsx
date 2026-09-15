@@ -5,24 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-md",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-secondary hover:text-foreground",
+          "border border-input bg-background shadow-sm hover:bg-secondary hover:text-foreground hover:border-foreground/30",
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         /* Minimalist luxury storefront variants */
-        luxe: "bg-slate-900 text-white font-medium text-xs sm:text-sm hover:bg-slate-800 transition-colors shadow-sm rounded-md",
+        luxe: "bg-slate-900 text-white font-medium text-xs sm:text-sm hover:bg-slate-800 shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
         luxeOutline:
-          "border border-slate-300 bg-white text-slate-800 font-medium text-xs sm:text-sm hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm rounded-md",
+          "border border-slate-300 bg-white text-slate-800 font-medium text-xs sm:text-sm hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400 shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-md",
         onImage:
-          "border border-white/60 bg-white/20 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-slate-900 transition-colors rounded-md",
-        gold: "bg-amber-700 text-white font-medium text-xs sm:text-sm hover:bg-amber-800 transition-colors shadow-sm rounded-md",
+          "border border-white/60 bg-white/20 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-slate-900 hover:-translate-y-0.5 rounded-md",
+        gold: "bg-amber-700 text-white font-medium text-xs sm:text-sm hover:bg-amber-800 shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
       },
       size: {
         default: "h-9 px-4 py-2",

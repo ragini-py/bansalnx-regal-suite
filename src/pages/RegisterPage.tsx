@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 
 import { SiteLayout } from "@/components/storefront/SiteLayout";

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Eye, Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { AuthPromptDialog } from "@/components/storefront/AuthPromptDialog";
 import { Button } from "@/components/ui/button";

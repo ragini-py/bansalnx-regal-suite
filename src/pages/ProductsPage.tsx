@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { allSizes, categories } from "@/data/catalog";
+import { allSizes } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Product } from "@/data/types";
 
@@ -46,6 +46,21 @@ export function ProductsPage() {
     () => Array.from(new Set(products.flatMap((p) => p.colours))).sort(),
     [products],
   );
+  // Derived from the live catalog, not the fixed demo list — an admin can add
+  // any category/size string freely (see AdminPage's free-text inputs), so a
+  // static facet list would silently hide real products from these filters.
+  const liveCategories = useMemo(() => {
+    const names = Array.from(new Set(products.map((p) => p.category))).sort();
+    return names.map((name) => ({ slug: slug(name), name }));
+  }, [products]);
+  const liveSizes = useMemo(() => {
+    const present = new Set(products.flatMap((p) => p.sizes));
+    const known = allSizes.filter((s) => present.has(s));
+    const extra = Array.from(present)
+      .filter((s) => !allSizes.includes(s))
+      .sort();
+    return [...known, ...extra];
+  }, [products]);
 
   const search: ProductSearch = useMemo(
     () => ({
@@ -162,8 +177,8 @@ export function ProductsPage() {
               onChange={() => setSearch({ category: undefined })}
             />
           </li>
-          {categories.map((cat) => (
-            <li key={cat.id}>
+          {liveCategories.map((cat) => (
+            <li key={cat.slug}>
               <FilterRadio
                 id={`cat-${cat.slug}`}
                 label={cat.name}
@@ -202,7 +217,7 @@ export function ProductsPage() {
 
       <FilterGroup title="Size">
         <div className="flex flex-wrap gap-2">
-          {allSizes.map((size) => (
+          {liveSizes.map((size) => (
             <button
               key={size}
               type="button"
@@ -298,7 +313,7 @@ export function ProductsPage() {
 
                 {search.category && (
                   <Chip
-                    label={categories.find((c) => c.slug === search.category)?.name ?? "Category"}
+                    label={liveCategories.find((c) => c.slug === search.category)?.name ?? "Category"}
                     onRemove={() => setSearch({ category: undefined })}
                   />
                 )}

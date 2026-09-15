@@ -14,7 +14,7 @@ import {
   Truck,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { AdminGuard, AdminLayout, StatusBadge } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";

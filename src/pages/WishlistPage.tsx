@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, X } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { AccountGate, AccountLoading } from "@/components/account/AccountLayout";
 import { EmptyState } from "@/components/common/SectionHeading";

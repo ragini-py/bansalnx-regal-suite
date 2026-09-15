@@ -1,7 +1,7 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Mail, Sparkles, Star } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 
 import { Reveal } from "@/components/common/Reveal";
@@ -260,17 +260,19 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 function CollectionsBlock({ collections }: { collections: Collection[] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
-      <SectionHeading
-        eyebrow="Curated Edits"
-        title="The Collections"
-        description="Bespoke ensembles built around ceremony, quiet luxury, regal heritage, and modern grace."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="Curated Edits"
+          title="The Collections"
+          description="Bespoke ensembles built around ceremony, quiet luxury, regal heritage, and modern grace."
+        />
+      </Reveal>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {collections.slice(0, 3).map((collection, i) => (
           <Reveal key={collection.id} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
             <Link
               to={`/collections/${collection.slug}`}
-              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="relative aspect-3/4 overflow-hidden bg-slate-100">
                 <img
@@ -294,7 +296,7 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
                     {collection.description}
                   </p>
                   <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-amber-200 transition-colors">
-                    Explore Collection <ArrowRight className="h-3.5 w-3.5" />
+                    Explore Collection <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
               </div>
@@ -323,14 +325,16 @@ function ProductBlock({
 }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 border-t border-slate-200">
-      <SectionHeading eyebrow={eyebrow} title={title} description={description} />
+      <Reveal>
+        <SectionHeading eyebrow={eyebrow} title={title} description={description} />
+      </Reveal>
       <div className="mt-10">
         <ProductGrid products={items} />
       </div>
       <div className="mt-10 text-center">
-        <Button asChild variant="luxeOutline" size="lg" className="font-semibold">
+        <Button asChild variant="luxeOutline" size="lg" className="font-semibold group">
           <Link to={href}>
-            {cta} <ArrowRight className="ml-2 h-4 w-4" />
+            {cta} <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>
       </div>
@@ -341,12 +345,12 @@ function ProductBlock({
 function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-12">
-      <div className="relative isolate overflow-hidden bg-slate-900 py-20 px-6 sm:py-28 sm:px-12 rounded-2xl text-white text-center shadow-lg">
+      <Reveal className="group relative isolate overflow-hidden bg-slate-900 py-20 px-6 sm:py-28 sm:px-12 rounded-2xl text-white text-center shadow-lg">
         <img
           src={imagery.editorial}
           alt="Bansal-nx couture portrait"
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
+          className="absolute inset-0 h-full w-full object-cover opacity-25 transition-transform duration-[1200ms] ease-out group-hover:scale-105"
         />
         <div className="relative mx-auto max-w-2xl">
           <p className="text-xs uppercase font-bold tracking-wider text-amber-300">
@@ -367,7 +371,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
             <Link to="/about">{editorial.cta}</Link>
           </Button>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -375,7 +379,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
 function Promo({ promo }: { promo: HomepageContent["promo"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12">
-      <div className="relative overflow-hidden border border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 p-8 sm:p-12 rounded-2xl text-slate-900 shadow-sm">
+      <Reveal className="relative overflow-hidden border border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 p-8 sm:p-12 rounded-2xl text-slate-900 shadow-sm transition-shadow duration-300 hover:shadow-md">
         <div className="relative z-10 max-w-xl">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
             Exclusive Client Privilege
@@ -398,7 +402,7 @@ function Promo({ promo }: { promo: HomepageContent["promo"] }) {
             </Button>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -407,15 +411,15 @@ function Craft() {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12 border-t border-slate-200">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm">
+        <Reveal className="group relative aspect-4/5 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
           <img
             src={imagery.craft}
             alt="Artisan embroidering silk fabric"
             loading="lazy"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
           />
-        </div>
-        <div className="space-y-6">
+        </Reveal>
+        <Reveal delay={150} className="space-y-6">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
             Mastery &amp; Lineage
           </p>
@@ -441,7 +445,7 @@ function Craft() {
               <p className="mt-1 text-xs text-slate-500 font-medium">Mulberry &amp; raw silks</p>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -479,25 +483,24 @@ function Testimonials() {
         />
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {reviews.map((r, i) => (
-            <div
-              key={i}
-              className="border border-slate-200 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex gap-1 text-amber-500 mb-3">
-                  {[...Array(r.rating)].map((_, idx) => (
-                    <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  ))}
+            <Reveal key={i} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
+              <div className="h-full border border-slate-200 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-300">
+                <div>
+                  <div className="flex gap-1 text-amber-500 mb-3">
+                    {[...Array(r.rating)].map((_, idx) => (
+                      <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600 italic">
+                    &ldquo;{r.text}&rdquo;
+                  </p>
                 </div>
-                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 italic">
-                  &ldquo;{r.text}&rdquo;
-                </p>
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  <p className="text-xs font-semibold text-slate-900">{r.author}</p>
+                  <p className="text-[11px] text-slate-500">{r.city}</p>
+                </div>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                <p className="text-xs font-semibold text-slate-900">{r.author}</p>
-                <p className="text-[11px] text-slate-500">{r.city}</p>
-              </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -530,7 +533,7 @@ function Newsletter() {
 
   return (
     <section className="border-t border-slate-200 bg-slate-900 py-16 sm:py-24">
-      <div className="mx-auto max-w-2xl px-5 text-center sm:px-8">
+      <Reveal className="mx-auto max-w-2xl px-5 text-center sm:px-8">
         <Mail className="mx-auto h-7 w-7 text-amber-300" aria-hidden="true" />
         <p className="mt-4 text-xs font-bold uppercase tracking-wider text-amber-300">
           Stay in the know
@@ -575,7 +578,7 @@ function Newsletter() {
             {error}
           </p>
         )}
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -583,7 +586,7 @@ function Newsletter() {
 function Story({ story }: { story: HomepageContent["story"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
-      <div className="mx-auto max-w-2xl text-center space-y-5">
+      <Reveal className="mx-auto max-w-2xl text-center space-y-5">
         <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Our Philosophy</p>
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">
           {story.heading}
@@ -592,7 +595,7 @@ function Story({ story }: { story: HomepageContent["story"] }) {
         <Button asChild variant="luxe" size="lg" className="font-semibold">
           <Link to="/products">{story.cta}</Link>
         </Button>
-      </div>
+      </Reveal>
     </section>
   );
 }

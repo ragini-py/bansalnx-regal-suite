@@ -13,7 +13,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { Reveal } from "@/components/common/Reveal";
 import { EmptyState, SectionHeading } from "@/components/common/SectionHeading";
