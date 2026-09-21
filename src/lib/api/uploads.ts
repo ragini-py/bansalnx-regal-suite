@@ -1,13 +1,17 @@
 /**
- * `/api/uploads` — admin-only image upload. Backend stores to Cloudinary if
- * configured, otherwise local disk (see backend/src/modules/uploads); this
- * side only cares that it gets a usable URL back.
+ * `/api/uploads` — admin-only image upload to the backend public directory.
  */
 import { apiClient } from "@/lib/api/client";
 
-export async function uploadImageRequest(file: File): Promise<string> {
+export type UploadFolder = "products" | "collections" | "content" | "general";
+
+export async function uploadImageRequest(
+  file: File,
+  folder: UploadFolder = "general",
+): Promise<string> {
   const form = new FormData();
   form.append("image", file);
+  form.append("folder", folder);
   const { data } = await apiClient.post<{ url: string }>("/uploads", form);
-  return data.url;
+  return new URL(data.url, apiClient.defaults.baseURL).toString();
 }
