@@ -800,7 +800,7 @@ function ProductsManagerTab() {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImageRequest(file);
+      const url = await uploadImageRequest(file, "products");
       setForm((f) => ({ ...f, [field]: f[field] ? `${f[field]}\n${url}` : url }));
       toast.success("Image uploaded");
     } catch {
@@ -1239,7 +1239,7 @@ function CollectionsManagerTab() {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImageRequest(file);
+      const url = await uploadImageRequest(file, "collections");
       setForm((f) => ({ ...f, coverImage: url }));
       toast.success("Image uploaded");
     } catch {
