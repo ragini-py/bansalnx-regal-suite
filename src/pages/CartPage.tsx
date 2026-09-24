@@ -25,18 +25,24 @@ export function CartPage() {
 
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSubmitting, setCouponSubmitting] = useState(false);
   const t = totals();
 
-  function handleApplyCoupon() {
+  async function handleApplyCoupon() {
     if (!couponInput.trim()) return;
-    const result = applyCoupon(couponInput);
-    if (!result.ok) {
-      setCouponError(result.error ?? "That code isn't valid.");
-      return;
+    setCouponSubmitting(true);
+    try {
+      const result = await applyCoupon(couponInput);
+      if (!result.ok) {
+        setCouponError(result.error ?? "That code isn't valid.");
+        return;
+      }
+      setCouponError(null);
+      setCouponInput("");
+      toast.success("Coupon applied");
+    } finally {
+      setCouponSubmitting(false);
     }
-    setCouponError(null);
-    setCouponInput("");
-    toast.success("Coupon applied");
   }
 
   function handleMoveToWishlist(productId: string, variantId: string, name: string) {

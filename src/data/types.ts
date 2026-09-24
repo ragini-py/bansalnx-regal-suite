@@ -75,6 +75,7 @@ export interface Coupon {
   perUserLimit: number | null;
   newCustomerOnly: boolean;
   restrictedCollections: string[];
+  isPublic: boolean;
   active: boolean;
   timesUsed: number;
 }

@@ -50,7 +50,15 @@ const columns = [
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -60,7 +68,15 @@ function InstagramIcon({ className }: { className?: string }) {
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   );
@@ -68,7 +84,15 @@ function FacebookIcon({ className }: { className?: string }) {
 
 function YoutubeIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
       <polygon points="10 15 15 12 10 9 10 15" fill="currentColor" stroke="none" />
     </svg>
@@ -109,13 +133,11 @@ export function Footer() {
               {settings.tagline}
             </p>
             <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600">
-              Made to order in India. Hand-embroidered by master karigars in limited bespoke editions.
+              Made to order in India. Hand-embroidered by master karigars in limited bespoke
+              editions.
             </p>
             <form onSubmit={subscribe} className="mt-6 max-w-sm" noValidate>
-              <label
-                htmlFor="footer-email"
-                className="text-xs font-medium text-slate-700"
-              >
+              <label htmlFor="footer-email" className="text-xs font-medium text-slate-700">
                 Join Our Newsletter
               </label>
               <div className="mt-2 flex gap-2">
@@ -130,7 +152,13 @@ export function Footer() {
                   aria-describedby={error ? "footer-email-error" : undefined}
                   className="h-10 w-full border border-slate-200 bg-white px-3 text-xs sm:text-sm text-slate-900 rounded-md placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
                 />
-                <Button type="submit" variant="luxe" size="sm" disabled={sending} className="h-10 shrink-0 font-medium">
+                <Button
+                  type="submit"
+                  variant="luxe"
+                  size="sm"
+                  disabled={sending}
+                  className="h-10 shrink-0 font-medium"
+                >
                   {sending ? "…" : "Subscribe"}
                 </Button>
               </div>
@@ -142,8 +170,16 @@ export function Footer() {
             </form>
             <div className="mt-6 flex gap-4">
               {[
-                { Icon: InstagramIcon, label: "Instagram", href: "https://www.instagram.com/bansalnx" },
-                { Icon: FacebookIcon, label: "Facebook", href: "https://www.facebook.com/bansalnx" },
+                {
+                  Icon: InstagramIcon,
+                  label: "Instagram",
+                  href: "https://www.instagram.com/bansalnx",
+                },
+                {
+                  Icon: FacebookIcon,
+                  label: "Facebook",
+                  href: "https://www.facebook.com/bansalnx",
+                },
                 { Icon: YoutubeIcon, label: "YouTube", href: "https://www.youtube.com/@bansalnx" },
               ].map(({ Icon, label, href }) => (
                 <a

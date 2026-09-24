@@ -55,7 +55,13 @@ import {
   requestReturnRequest,
   updateOrderRequest,
 } from "@/lib/api/orders";
-import { createCouponRequest, deleteCouponRequest, getCoupons } from "@/lib/api/coupons";
+import {
+  createCouponRequest,
+  deleteCouponRequest,
+  getCoupons,
+  getPublicCoupons,
+  validateCouponRequest,
+} from "@/lib/api/coupons";
 import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
 import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
 import { getWishlistRequest, replaceWishlistRequest } from "@/lib/api/wishlist";
@@ -171,8 +177,8 @@ interface StoreValue {
   cartDrawerOpen: boolean;
   setCartDrawerOpen: (open: boolean) => void;
   /* coupon */
-  appliedCoupon: Coupon | null;
-  applyCoupon: (code: string) => { ok: boolean; error?: string };
+  appliedCoupon: { code: string } | null;
+  applyCoupon: (code: string) => Promise<{ ok: boolean; error?: string }>;
   removeCoupon: () => void;
   totals: (paymentMethod?: PaymentMethod) => CartTotals;
   /* orders */
@@ -195,7 +201,10 @@ interface StoreValue {
   /* admin data */
   products: Product[];
   collections: Collection[];
+  /** Customer-facing coupons only — admins marked these `isPublic`. */
   coupons: Coupon[];
+  /** Full coupon list including hidden/targeted codes — admin-only. */
+  adminCoupons: Coupon[];
   content: HomepageContent;
   settings: StoreSettings;
   saveProduct: (product: Product) => Promise<void>;
@@ -221,6 +230,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<PendingIntent | null>(null);
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+  // Set only from a trusted POST /coupons/validate response — never derived
+  // from a locally-held coupon list, since hidden/targeted codes aren't in it.
+  const [appliedCouponDiscount, setAppliedCouponDiscount] = useState<number | null>(null);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
 
   /* real auth (bansalnx-backend) — separate from the mock/localStorage state above */
@@ -230,7 +242,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /* real catalog (bansalnx-backend) — fetched fresh each session, never persisted to localStorage */
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  // Public/customer-facing coupons only (isPublic: true) — safe to fetch for
+  // any visitor. The full list (adminCoupons below) requires admin auth.
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [adminCoupons, setAdminCoupons] = useState<Coupon[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(settingsPlaceholder);
   const [content, setContent] = useState<HomepageContent>(contentPlaceholder);
   // False only for the brief window before the initial catalog fetch settles
@@ -244,7 +259,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     Promise.all([
       getProducts(),
       getCollections(),
-      getCoupons(),
+      getPublicCoupons(),
       getSettingsRequest(),
       getContentRequest(),
     ])
@@ -323,6 +338,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setUsers(u);
       })
       .catch((err: unknown) => console.error("Failed to load users:", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [authUserId, authUserRole]);
+
+  /* full coupon list (bansalnx-backend) — admin-only, for CouponsManagerTab */
+  useEffect(() => {
+    if (!authUserId || authUserRole === "customer") {
+      setAdminCoupons([]);
+      return;
+    }
+    let cancelled = false;
+    getCoupons()
+      .then((c) => {
+        if (!cancelled) setAdminCoupons(c);
+      })
+      .catch((err: unknown) => console.error("Failed to load admin coupons:", err));
     return () => {
       cancelled = true;
     };
@@ -475,6 +507,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     void logoutRequest();
     patch((prev) => ({ ...prev, cart: [], wishlist: [] }));
     setAppliedCouponCode(null);
+    setAppliedCouponDiscount(null);
   }, [patch]);
 
   const toggleWishlist = useCallback<StoreValue["toggleWishlist"]>(
@@ -533,6 +566,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => {
     patch((prev) => ({ ...prev, cart: [] }));
     setAppliedCouponCode(null);
+    setAppliedCouponDiscount(null);
   }, [patch]);
 
   const cartLines = useMemo<CartLineView[]>(() => {
@@ -559,9 +593,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, [state.cart, products, catalogLoaded]);
 
+  // Just the code, not a full coupon record — the discount amount only ever
+  // comes from a trusted validate response (below), never recomputed locally
+  // from `coupons`, since that list excludes hidden/targeted codes.
   const appliedCoupon = useMemo(
-    () => coupons.find((c) => c.code === appliedCouponCode) ?? null,
-    [coupons, appliedCouponCode],
+    () => (appliedCouponCode ? { code: appliedCouponCode } : null),
+    [appliedCouponCode],
   );
 
   const subtotal = useMemo(
@@ -569,33 +606,63 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [cartLines],
   );
 
+  const removeCoupon = useCallback(() => {
+    setAppliedCouponCode(null);
+    setAppliedCouponDiscount(null);
+  }, []);
+
   const applyCoupon = useCallback<StoreValue["applyCoupon"]>(
-    (code) => {
-      const coupon = coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
-      if (!coupon || !coupon.active) return { ok: false, error: "That code isn't valid." };
-      if (new Date(coupon.expiresAt) < new Date())
-        return { ok: false, error: "That code has expired." };
-      if (subtotal < coupon.minOrder)
-        return {
-          ok: false,
-          error: `This code applies to orders above ₹${coupon.minOrder.toLocaleString("en-IN")}.`,
-        };
-      setAppliedCouponCode(coupon.code);
-      return { ok: true };
+    async (code) => {
+      const trimmed = code.trim();
+      if (!trimmed) return { ok: false, error: "Enter a coupon code." };
+      try {
+        const result = await validateCouponRequest(
+          trimmed,
+          cartLines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
+        );
+        setAppliedCouponCode(result.couponCode);
+        setAppliedCouponDiscount(result.discount);
+        return { ok: true };
+      } catch (err) {
+        return { ok: false, error: extractApiErrorMessage(err, "That code isn't valid.") };
+      }
     },
-    [coupons, subtotal],
+    [cartLines],
   );
+
+  // Keeps the applied coupon's discount accurate as the cart changes (e.g. a
+  // quantity edit or removed item) — silently re-validates and drops the
+  // coupon if it's no longer eligible, rather than showing a stale amount.
+  // The order-creation endpoint re-derives all of this again regardless; this
+  // is purely so the pre-checkout total the shopper sees isn't misleading.
+  useEffect(() => {
+    if (!appliedCouponCode) return;
+    let cancelled = false;
+    validateCouponRequest(
+      appliedCouponCode,
+      cartLines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
+    )
+      .then((result) => {
+        if (!cancelled) setAppliedCouponDiscount(result.discount);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAppliedCouponCode(null);
+          setAppliedCouponDiscount(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Re-checks whenever the cart's contents change; appliedCouponCode itself
+    // triggering this too (right after applyCoupon sets it) is a harmless
+    // extra check, not a bug.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartLines, appliedCouponCode]);
 
   const totals = useCallback<StoreValue["totals"]>(
     (paymentMethod) => {
-      let discount = 0;
-      if (appliedCoupon) {
-        discount =
-          appliedCoupon.type === "percent"
-            ? Math.round((subtotal * appliedCoupon.value) / 100)
-            : appliedCoupon.value;
-        if (appliedCoupon.maxDiscount) discount = Math.min(discount, appliedCoupon.maxDiscount);
-      }
+      const discount = appliedCoupon ? (appliedCouponDiscount ?? 0) : 0;
       const afterDiscount = Math.max(subtotal - discount, 0);
       const shippingFee =
         afterDiscount === 0 || afterDiscount >= settings.freeShippingThreshold
@@ -612,7 +679,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         total: afterDiscount + shippingFee + codFee + tax,
       };
     },
-    [appliedCoupon, subtotal, settings],
+    [appliedCoupon, appliedCouponDiscount, subtotal, settings],
   );
 
   const placeOrder = useCallback<StoreValue["placeOrder"]>(
@@ -679,6 +746,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setMyOrders((prev) => [order, ...prev]);
       patch((prev) => ({ ...prev, cart: [] }));
       setAppliedCouponCode(null);
+      setAppliedCouponDiscount(null);
       return order;
     },
     [cartLines, totals, appliedCoupon, user, patch],
@@ -742,7 +810,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCartDrawerOpen,
     appliedCoupon,
     applyCoupon,
-    removeCoupon: () => setAppliedCouponCode(null),
+    removeCoupon,
     totals,
     orders,
     myOrders,
@@ -756,6 +824,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     products,
     collections,
     coupons,
+    adminCoupons,
     content,
     settings,
     saveProduct: async (product) => {
@@ -790,14 +859,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     // AdminPage's CouponsManagerTab only ever creates (a fresh temp id that
     // never matches an existing coupon) or deletes — there's no edit-existing
-    // flow, so this always creates rather than truly upserting.
+    // flow, so this always creates rather than truly upserting. Mutates
+    // adminCoupons (the full list) — `coupons` (public-only) is refreshed
+    // from the server separately and would silently drop non-public creates.
     saveCoupon: async (coupon) => {
       const { id: _tempId, timesUsed: _timesUsed, ...input } = coupon;
       const created = await createCouponRequest(input);
-      setCoupons((prev) => [created, ...prev]);
+      setAdminCoupons((prev) => [created, ...prev]);
+      if (created.isPublic) setCoupons((prev) => [created, ...prev]);
     },
     deleteCoupon: async (id) => {
       await deleteCouponRequest(id);
+      setAdminCoupons((prev) => prev.filter((c) => c.id !== id));
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     },
     updateContent: async (contentPatch) => {

@@ -124,7 +124,7 @@ export function AdminPage() {
    1. OVERVIEW TAB
    ========================================================================= */
 function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void }) {
-  const { orders, products, coupons, settings, hasPermission } = useStore();
+  const { orders, products, adminCoupons: coupons, settings, hasPermission } = useStore();
 
   const awaitingFulfilment = orders.filter((o) =>
     ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status),
@@ -1509,10 +1509,11 @@ function CollectionsManagerTab() {
    5. COUPONS & OFFERS MANAGER TAB
    ========================================================================= */
 function CouponsManagerTab() {
-  const { coupons, saveCoupon, deleteCoupon } = useStore();
+  const { adminCoupons, saveCoupon, deleteCoupon } = useStore();
   const [createOpen, setCreateOpen] = useState(false);
   const [newCode, setNewCode] = useState("");
   const [newDiscount, setNewDiscount] = useState("15");
+  const [newIsPublic, setNewIsPublic] = useState(true);
 
   async function handleCreateCoupon(e: React.FormEvent) {
     e.preventDefault();
@@ -1530,6 +1531,7 @@ function CouponsManagerTab() {
       perUserLimit: 1,
       newCustomerOnly: false,
       restrictedCollections: [],
+      isPublic: newIsPublic,
       active: true,
       timesUsed: 0,
     };
@@ -1565,12 +1567,13 @@ function CouponsManagerTab() {
               <TableHead>Discount</TableHead>
               <TableHead>Min Order Value</TableHead>
               <TableHead>Expires</TableHead>
+              <TableHead>Visibility</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {coupons.map((c) => (
+            {adminCoupons.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-mono font-medium text-foreground">{c.code}</TableCell>
                 <TableCell className="font-medium text-gold-deep">
@@ -1581,6 +1584,11 @@ function CouponsManagerTab() {
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {formatDate(c.expiresAt)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="rounded-none text-xs text-muted-foreground">
+                    {c.isPublic ? "Public" : "Hidden"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -1650,6 +1658,16 @@ function CouponsManagerTab() {
                   required
                 />
               </div>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={newIsPublic}
+                  onCheckedChange={(c) => setNewIsPublic(c === true)}
+                />
+                <span>
+                  List publicly (shown to customers in Account &gt; Coupons; leave unchecked for a
+                  hidden/targeted code)
+                </span>
+              </label>
               <Button type="submit" variant="luxe" className="w-full">
                 Publish Coupon
               </Button>
