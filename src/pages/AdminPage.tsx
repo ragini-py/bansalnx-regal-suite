@@ -584,11 +584,11 @@ function OrdersManagerTab() {
                       className={cn(
                         "rounded-full text-[11px] font-semibold capitalize",
                         o.status === "delivered" &&
-                          "border-emerald-200 bg-emerald-50 text-emerald-700",
+                        "border-emerald-200 bg-emerald-50 text-emerald-700",
                         ["ndr", "rto", "cancelled"].includes(o.status) &&
-                          "border-rose-200 bg-rose-50 text-rose-700",
+                        "border-rose-200 bg-rose-50 text-rose-700",
                         !["delivered", "ndr", "rto", "cancelled"].includes(o.status) &&
-                          "border-slate-200 bg-slate-50 text-slate-700",
+                        "border-slate-200 bg-slate-50 text-slate-700",
                       )}
                     >
                       {orderStatusLabels[o.status] || o.status}
@@ -752,6 +752,8 @@ interface ProductFormValues {
   name: string;
   slug: string;
   category: string;
+  material: string;
+  clothMaterial: string;
   price: string;
   mrp: string;
   images: string;
@@ -771,6 +773,8 @@ const emptyProductForm: ProductFormValues = {
   name: "",
   slug: "",
   category: "",
+  material: "",
+  clothMaterial: "",
   price: "",
   mrp: "",
   images: "",
@@ -787,7 +791,7 @@ const emptyProductForm: ProductFormValues = {
 };
 
 function ProductsManagerTab() {
-  const { products, saveProduct, deleteProduct } = useStore();
+  const { products, saveProduct, deleteProduct, settings } = useStore();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
@@ -852,6 +856,8 @@ function ProductsManagerTab() {
         id: `new-${Date.now()}`,
         slug: form.slug.trim() || slugify(form.name),
         name: form.name.trim(),
+        material: form.material.trim() || undefined,
+        clothMaterial: form.clothMaterial.trim() || undefined,
         price: Number(form.price) || 0,
         mrp: Number(form.mrp) || Number(form.price) || 0,
         currency: "INR",
@@ -1005,10 +1011,16 @@ function ProductsManagerTab() {
                   <Input
                     id="p-category"
                     required
+                    list="category-options"
                     value={form.category}
                     onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                     className="mt-1 rounded-none"
                   />
+                  <datalist id="category-options">
+                    {settings.catalogCategories.map((item) => (
+                      <option key={item} value={item} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <Label htmlFor="p-badge">Badge</Label>
@@ -1028,6 +1040,33 @@ function ProductsManagerTab() {
                       <SelectItem value="exclusive">Exclusive</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="p-material">Material</Label>
+                  <Input
+                    id="p-material"
+                    list="material-options"
+                    value={form.material}
+                    onChange={(e) => setForm((f) => ({ ...f, material: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
+                  <datalist id="material-options">
+                    {settings.catalogMaterials.map((item) => (
+                      <option key={item} value={item} />
+                    ))}
+                  </datalist>
+                </div>
+                <div>
+                  <Label htmlFor="p-cloth-material">Cloth Material</Label>
+                  <Input
+                    id="p-cloth-material"
+                    list="material-options"
+                    value={form.clothMaterial}
+                    onChange={(e) => setForm((f) => ({ ...f, clothMaterial: e.target.value }))}
+                    className="mt-1 rounded-none"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -2278,6 +2317,10 @@ function SettingsManagerTab() {
   );
   const [shippingFee, setShippingFee] = useState(String(settings.shippingFee));
   const [codMax, setCodMax] = useState(String(settings.codMaxOrderValue));
+  const [materials, setMaterials] = useState(settings.catalogMaterials.join(", "));
+  const [colors, setColors] = useState(settings.catalogColors.join(", "));
+  const [sizes, setSizes] = useState(settings.catalogSizes.join(", "));
+  const [categories, setCategories] = useState(settings.catalogCategories.join(", "));
 
   // Settings load asynchronously (GET /api/settings) after this tab's
   // initial render — resync the form once the real values arrive, in case
@@ -2286,6 +2329,10 @@ function SettingsManagerTab() {
     setShippingThreshold(String(settings.freeShippingThreshold));
     setShippingFee(String(settings.shippingFee));
     setCodMax(String(settings.codMaxOrderValue));
+    setMaterials(settings.catalogMaterials.join(", "));
+    setColors(settings.catalogColors.join(", "));
+    setSizes(settings.catalogSizes.join(", "));
+    setCategories(settings.catalogCategories.join(", "));
   }, [settings]);
 
   async function handleSave(e: React.FormEvent) {
@@ -2295,6 +2342,22 @@ function SettingsManagerTab() {
         freeShippingThreshold: Number(shippingThreshold),
         shippingFee: Number(shippingFee),
         codMaxOrderValue: Number(codMax),
+        catalogMaterials: materials
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+        catalogColors: colors
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+        catalogSizes: sizes
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+        catalogCategories: categories
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
       });
       toast.success("Store settings updated successfully");
     } catch {
@@ -2349,6 +2412,50 @@ function SettingsManagerTab() {
           <p className="mt-1 text-[11px] text-muted-foreground">
             Orders above this threshold will require online prepay.
           </p>
+        </div>
+
+        <div>
+          <Label htmlFor="catalog-materials">Catalog Materials</Label>
+          <Input
+            id="catalog-materials"
+            value={materials}
+            onChange={(e) => setMaterials(e.target.value)}
+            placeholder="Silk, Cotton, Linen"
+            className="mt-1 rounded-none"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="catalog-colors">Catalog Colors</Label>
+          <Input
+            id="catalog-colors"
+            value={colors}
+            onChange={(e) => setColors(e.target.value)}
+            placeholder="Ivory, Gold, Rose"
+            className="mt-1 rounded-none"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="catalog-sizes">Catalog Sizes</Label>
+          <Input
+            id="catalog-sizes"
+            value={sizes}
+            onChange={(e) => setSizes(e.target.value)}
+            placeholder="XS, S, M, L, XL"
+            className="mt-1 rounded-none"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="catalog-categories">Catalog Categories</Label>
+          <Input
+            id="catalog-categories"
+            value={categories}
+            onChange={(e) => setCategories(e.target.value)}
+            placeholder="Sarees, Lehengas, Gowns"
+            className="mt-1 rounded-none"
+          />
         </div>
 
         <Button type="submit" variant="luxe" className="w-full">

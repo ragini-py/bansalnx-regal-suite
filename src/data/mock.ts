@@ -24,6 +24,10 @@ export const storeSettings: StoreSettings = {
   delhiveryConnected: false,
   emailProviderConnected: false,
   allowGuestBrowsing: true,
+  catalogMaterials: ["Silk", "Cotton", "Linen", "Georgette"],
+  catalogColors: ["Ivory", "Gold", "Rose", "Peach"],
+  catalogSizes: ["XS", "S", "M", "L", "XL"],
+  catalogCategories: ["Sarees", "Lehengas", "Gowns", "Kurta Sets"],
 };
 
 export const permissionLabels: Record<PermissionKey, string> = {

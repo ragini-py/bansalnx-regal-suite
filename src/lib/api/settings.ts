@@ -11,7 +11,18 @@ export async function getSettingsRequest(): Promise<StoreSettings> {
 }
 
 export async function updateSettingsRequest(
-  patch: Partial<Pick<StoreSettings, "freeShippingThreshold" | "shippingFee" | "codMaxOrderValue">>,
+  patch: Partial<
+    Pick<
+      StoreSettings,
+      | "freeShippingThreshold"
+      | "shippingFee"
+      | "codMaxOrderValue"
+      | "catalogMaterials"
+      | "catalogColors"
+      | "catalogSizes"
+      | "catalogCategories"
+    >
+  >,
 ): Promise<StoreSettings> {
   const { data } = await apiClient.patch<{ settings: StoreSettings }>("/settings", patch);
   return data.settings;

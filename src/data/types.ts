@@ -19,6 +19,8 @@ export interface Product {
   id: string;
   slug: string;
   name: string;
+  material?: string;
+  clothMaterial?: string;
   price: number;
   mrp: number;
   currency: "INR";
@@ -266,4 +268,8 @@ export interface StoreSettings {
   delhiveryConnected: boolean;
   emailProviderConnected: boolean;
   allowGuestBrowsing: boolean;
+  catalogMaterials: string[];
+  catalogColors: string[];
+  catalogSizes: string[];
+  catalogCategories: string[];
 }
