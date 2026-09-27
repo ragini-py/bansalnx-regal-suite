@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2, ShoppingBag, XCircle } from "lucide-react";
 import { z } from "zod";
@@ -10,9 +10,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { extractApiErrorMessage } from "@/lib/api/auth";
+import { env } from "@/lib/env";
 import { formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { Address, PaymentMethod } from "@/data/types";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: {
+      key: string;
+      amount: number;
+      currency: string;
+      name: string;
+      description: string;
+      image?: string;
+      handler: (response: { razorpay_payment_id: string }) => void;
+      prefill?: {
+        name?: string;
+        email?: string;
+        contact?: string;
+      };
+      theme?: {
+        color?: string;
+      };
+      modal?: {
+        ondismiss?: () => void;
+      };
+    }) => {
+      open: () => void;
+    };
+  }
+}
 
 const addressSchema = z.object({
   fullName: z.string().trim().min(2, "Enter the recipient's full name"),
@@ -81,13 +109,39 @@ export function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
   const [paymentState, setPaymentState] = useState<PaymentState>("idle");
   const [formError, setFormError] = useState<string | null>(null);
+  const [razorpayScriptReady, setRazorpayScriptReady] = useState(false);
   // null = the manual "simulate failure" demo button; a real placeOrder()
   // rejection (expired coupon, COD now over the limit, network error, ...)
   // sets this to the server's actual reason instead of the demo copy.
   const [paymentFailureReason, setPaymentFailureReason] = useState<string | null>(null);
 
+  const isDummyRazorpayKey = /dummy/i.test(env.razorpayKeyId || "");
   const t = totals(paymentMethod);
   const codBlocked = !settings.codEnabled || t.total > settings.codMaxOrderValue;
+
+  useEffect(() => {
+    if (isDummyRazorpayKey || typeof window === "undefined") {
+      setRazorpayScriptReady(false);
+      return;
+    }
+    if (window.Razorpay) {
+      setRazorpayScriptReady(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => setRazorpayScriptReady(true);
+    script.onerror = () => setRazorpayScriptReady(false);
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+  }, [isDummyRazorpayKey]);
 
   const resolvedAddress: Address | null = useMemo(() => {
     if (!useNewAddress) {
@@ -124,12 +178,35 @@ export function CheckoutPage() {
     return false;
   }
 
-  async function handlePlaceOrder() {
+  async function submitOrderForExistingAddress(address: Address) {
     setFormError(null);
+    setPaymentState("processing");
+    await new Promise((resolve) => setTimeout(resolve, 1600));
+
+    try {
+      const order = await placeOrder({
+        address,
+        paymentMethod,
+        email,
+        phone,
+        idempotencyKey: idempotencyKeyRef.current,
+      });
+      setPaymentState("idle");
+      navigate(`/order/${order.id}`);
+    } catch (err) {
+      const message = extractApiErrorMessage(err, "Couldn't place your order. Please try again.");
+      setPaymentFailureReason(message);
+      setPaymentState("failed");
+      setFormError(message);
+    }
+  }
+
+  async function handlePlaceOrder() {
     if (!email.trim() || !phone.trim()) {
       setFormError("Please provide contact details.");
       return;
     }
+
     let address: Address | null = null;
     if (useNewAddress) {
       if (!validateAddressForm()) return;
@@ -155,30 +232,43 @@ export function CheckoutPage() {
         return;
       }
     }
+
     if (paymentMethod === "cod" && codBlocked) {
       setFormError("Cash on Delivery isn't available for this order.");
       return;
     }
 
-    setPaymentState("processing");
-    await new Promise((resolve) => setTimeout(resolve, 1600));
-
-    try {
-      const order = await placeOrder({
-        address: address!,
-        paymentMethod,
-        email,
-        phone,
-        idempotencyKey: idempotencyKeyRef.current,
+    if (paymentMethod === "razorpay" && !isDummyRazorpayKey && razorpayScriptReady && window.Razorpay) {
+      const checkout = new window.Razorpay({
+        key: env.razorpayKeyId,
+        amount: Math.round(t.total * 100),
+        currency: "INR",
+        name: "Bansal-nx",
+        description: "Order payment",
+        handler: async () => {
+          await submitOrderForExistingAddress(address!);
+        },
+        prefill: {
+          name: address!.fullName,
+          email,
+          contact: phone,
+        },
+        theme: {
+          color: "#a67c52",
+        },
+        modal: {
+          ondismiss: () => {
+            setPaymentState("idle");
+            setFormError("Payment cancelled. You can try again anytime.");
+          },
+        },
       });
-      setPaymentState("idle");
-      navigate(`/order/${order.id}`);
-    } catch (err) {
-      const message = extractApiErrorMessage(err, "Couldn't place your order. Please try again.");
-      setPaymentFailureReason(message);
-      setPaymentState("failed");
-      setFormError(message);
+
+      checkout.open();
+      return;
     }
+
+    await submitOrderForExistingAddress(address!);
   }
 
   function simulateFailure() {
@@ -592,9 +682,9 @@ export function CheckoutPage() {
                 disabled={paymentState === "processing"}
               >
                 {paymentMethod === "razorpay"
-                  ? settings.razorpayConnected
+                  ? settings.razorpayConnected && !isDummyRazorpayKey && razorpayScriptReady
                     ? `Pay ${formatINR(t.total)} securely`
-                    : `Place order — Razorpay (demo, not yet connected)`
+                    : `Place order — Razorpay (demo / live key pending)`
                   : "Place order — Cash on Delivery"}
               </Button>
 

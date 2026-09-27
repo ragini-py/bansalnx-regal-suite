@@ -27,3 +27,16 @@ export async function updateSettingsRequest(
   const { data } = await apiClient.patch<{ settings: StoreSettings }>("/settings", patch);
   return data.settings;
 }
+export async function checkPincodeRequest(pincode: string): Promise<{
+  provider: 'shiprocket';
+  mode: 'demo' | 'live';
+  available: boolean;
+  pincode: string;
+  pickupPincode: string;
+  message: string;
+}> {
+  const { data } = await apiClient.get<{ provider: 'shiprocket'; mode: 'demo' | 'live'; available: boolean; pincode: string; pickupPincode: string; message: string }>('/settings/check-pincode', {
+    params: { pincode },
+  });
+  return data;
+}

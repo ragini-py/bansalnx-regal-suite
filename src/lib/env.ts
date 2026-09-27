@@ -12,6 +12,7 @@ const schema = z.object({
     .trim()
     .min(1, "VITE_API_URL is required")
     .url("VITE_API_URL must be a valid URL"),
+  VITE_RAZORPAY_KEY_ID: z.string().trim().min(1).default("rzp_test_dummy_key_id"),
 });
 
 const parsed = schema.safeParse(import.meta.env);
@@ -23,4 +24,5 @@ if (!parsed.success) {
 
 export const env = {
   apiUrl: parsed.data.VITE_API_URL,
+  razorpayKeyId: parsed.data.VITE_RAZORPAY_KEY_ID,
 };
