@@ -176,11 +176,11 @@ export function Navbar() {
       <AnnouncementBar />
       <header
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-200 frosted-panel",
-          scrolled ? "bg-white/55 shadow-[0_10px_30px_-20px_rgba(17,43,47,0.35)] border-b border-[#d8c7a6]/60" : "bg-white/35 border-b border-[#d8c7a6]/60",
+          "sticky top-0 z-40 w-full border-b border-[#e7dcc2]/70 bg-white/40 backdrop-blur-xl transition-all duration-200",
+          scrolled ? "shadow-[0_10px_28px_-24px_rgba(17,43,47,0.35)]" : "",
         )}
       >
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-5 sm:h-20 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-5 sm:h-16 sm:px-8 lg:px-12">
           {/* Mobile Menu Button */}
           <button
             type="button"

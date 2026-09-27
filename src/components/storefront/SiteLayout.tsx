@@ -15,7 +15,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <Navbar />
-      <main id="main" className="flex-1 pt-4 sm:pt-6">
+      <main id="main" className="flex-1 pt-0 sm:pt-2">
         {children}
       </main>
       <Footer />
@@ -37,8 +37,8 @@ export function PageHeader({
   meta?: ReactNode | undefined;
 }) {
   return (
-    <div className="border-b border-slate-200 bg-slate-50/50">
-      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
+    <div className="border-b border-slate-200 bg-slate-50/60">
+      <div className="mx-auto max-w-[1400px] px-5 py-6 sm:px-8 sm:py-7 lg:px-12">
         {breadcrumb}
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
