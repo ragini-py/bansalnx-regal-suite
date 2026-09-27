@@ -98,9 +98,9 @@ export function CheckoutPage() {
     return { id: "new", label: "Delivery", isDefault: false, ...parsed.data };
   }, [useNewAddress, selectedAddressId, addressForm, user]);
 
-  function handleApplyCoupon() {
+  async function handleApplyCoupon() {
     if (!couponInput.trim()) return;
-    const result = applyCoupon(couponInput);
+    const result = await applyCoupon(couponInput);
     if (!result.ok) {
       setCouponError(result.error ?? "That code isn't valid.");
       return;

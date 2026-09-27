@@ -78,6 +78,7 @@ export const coupons: Coupon[] = [
     newCustomerOnly: true,
     restrictedCollections: [],
     active: true,
+    isPublic: true,
     timesUsed: 214,
   },
   {
@@ -94,6 +95,7 @@ export const coupons: Coupon[] = [
     newCustomerOnly: false,
     restrictedCollections: ["the-ceremony-edit"],
     active: true,
+    isPublic: true,
     timesUsed: 61,
   },
   {
@@ -110,6 +112,7 @@ export const coupons: Coupon[] = [
     newCustomerOnly: false,
     restrictedCollections: [],
     active: true,
+    isPublic: true,
     timesUsed: 128,
   },
   {
@@ -126,6 +129,7 @@ export const coupons: Coupon[] = [
     newCustomerOnly: false,
     restrictedCollections: [],
     active: false,
+    isPublic: false,
     timesUsed: 200,
   },
 ];

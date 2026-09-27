@@ -33,4 +33,7 @@ export const toast = {
   error(title: string, options?: AppToastOptions) {
     return reactToastify.error(render(title, options?.description), baseOptions);
   },
+  info(title: string, options?: AppToastOptions) {
+    return reactToastify.info(render(title, options?.description), baseOptions);
+  },
 };

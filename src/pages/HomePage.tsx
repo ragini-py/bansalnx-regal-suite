@@ -159,7 +159,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
   const slide = heroSlides[current] ?? heroSlides[0]!;
 
   return (
-    <section className="relative isolate min-h-[85vh] w-full overflow-hidden bg-slate-950">
+    <section className="relative isolate min-h-[85vh] w-full overflow-hidden bg-[#173a3d]">
       {heroSlides.map((s, idx) => (
         <div
           key={idx}
@@ -186,7 +186,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
       <div className="relative mx-auto flex min-h-[85vh] max-w-[1400px] flex-col justify-end px-5 pb-14 pt-28 sm:px-8 sm:pb-20 lg:px-12">
         <div className="max-w-2xl fade-up">
-          <p className="text-xs font-semibold uppercase tracking-wider text-amber-300 flex items-center gap-2 mb-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#d4a76a] flex items-center gap-2 mb-3">
             <Sparkles className="h-3.5 w-3.5" /> {slide.eyebrow}
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
@@ -259,7 +259,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
 function CollectionsBlock({ collections }: { collections: Collection[] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
+    <section className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
       <Reveal>
         <SectionHeading
           eyebrow="Curated Edits"
@@ -267,7 +267,7 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
           description="Bespoke ensembles built around ceremony, quiet luxury, regal heritage, and modern grace."
         />
       </Reveal>
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {collections.slice(0, 3).map((collection, i) => (
           <Reveal key={collection.id} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
             <Link
@@ -324,7 +324,7 @@ function ProductBlock({
   cta: string;
 }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 border-t border-slate-200">
+    <section className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12 border-t border-slate-200">
       <Reveal>
         <SectionHeading eyebrow={eyebrow} title={title} description={description} />
       </Reveal>
@@ -344,8 +344,8 @@ function ProductBlock({
 
 function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-12">
-      <Reveal className="group relative isolate overflow-hidden bg-slate-900 py-20 px-6 sm:py-28 sm:px-12 rounded-2xl text-white text-center shadow-lg">
+    <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-8">
+      <Reveal className="group relative isolate overflow-hidden bg-[#183d40]/80 py-12 px-6 sm:py-16 sm:px-10 rounded-[24px] text-white text-center shadow-[0_22px_45px_-28px_rgba(17,43,47,0.55)] backdrop-blur-lg">
         <img
           src={imagery.editorial}
           alt="Bansal-nx couture portrait"
@@ -378,8 +378,8 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
 
 function Promo({ promo }: { promo: HomepageContent["promo"] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 lg:px-12">
-      <Reveal className="relative overflow-hidden border border-amber-200/80 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 p-8 sm:p-12 rounded-2xl text-slate-900 shadow-sm transition-shadow duration-300 hover:shadow-md">
+    <section className="mx-auto max-w-[1400px] px-5 py-6 sm:px-8 lg:px-12">
+      <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-8 sm:p-12 rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_20px_45px_-28px_rgba(17,43,47,0.45)]">
         <div className="relative z-10 max-w-xl">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
             Exclusive Client Privilege
@@ -409,9 +409,9 @@ function Promo({ promo }: { promo: HomepageContent["promo"] }) {
 
 function Craft() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12 border-t border-slate-200">
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-        <Reveal className="group relative aspect-4/5 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
+    <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12 border-t border-slate-200">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
+        <Reveal className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
           <img
             src={imagery.craft}
             alt="Artisan embroidering silk fabric"
@@ -419,11 +419,11 @@ function Craft() {
             className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
           />
         </Reveal>
-        <Reveal delay={150} className="space-y-6">
+        <Reveal delay={150} className="space-y-3">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
             Mastery &amp; Lineage
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-none">
             Generations of Jaipur Artistry
           </h2>
           <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
@@ -431,15 +431,15 @@ function Craft() {
             Lucknow, and Marodi needlework. Each garment requires upwards of 80 hours of meticulous
             hand-needlework.
           </p>
-          <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-200">
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">
+              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700 leading-none">
                 80+ Hours
               </p>
               <p className="mt-1 text-xs text-slate-500 font-medium">Hand-embroidery per piece</p>
             </div>
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700">
+              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700 leading-none">
                 100% Pure
               </p>
               <p className="mt-1 text-xs text-slate-500 font-medium">Mulberry &amp; raw silks</p>
@@ -474,19 +474,19 @@ function Testimonials() {
   ];
 
   return (
-    <section className="bg-slate-50 border-t border-b border-slate-200 py-16 sm:py-24">
+    <section className="bg-slate-50 border-t border-b border-slate-200 py-10 sm:py-14">
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12">
         <SectionHeading
           eyebrow="Patron Reviews"
           title="Voices of Our Patrons"
           description="Reflections from our cherished clients across the globe."
         />
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {reviews.map((r, i) => (
             <Reveal key={i} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
-              <div className="h-full border border-slate-200 bg-white p-6 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-300">
+              <div className="h-full border border-slate-200 bg-white p-4 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-300">
                 <div>
-                  <div className="flex gap-1 text-amber-500 mb-3">
+                  <div className="flex gap-1 text-amber-500 mb-2">
                     {[...Array(r.rating)].map((_, idx) => (
                       <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
@@ -495,7 +495,7 @@ function Testimonials() {
                     &ldquo;{r.text}&rdquo;
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-100">
+                <div className="mt-4 pt-3 border-t border-slate-100">
                   <p className="text-xs font-semibold text-slate-900">{r.author}</p>
                   <p className="text-[11px] text-slate-500">{r.city}</p>
                 </div>
@@ -532,21 +532,21 @@ function Newsletter() {
   }
 
   return (
-    <section className="border-t border-slate-200 bg-slate-900 py-16 sm:py-24">
+    <section className="border-t border-[#214f6d]/20 bg-[#183d40] py-10 sm:py-14">
       <Reveal className="mx-auto max-w-2xl px-5 text-center sm:px-8">
-        <Mail className="mx-auto h-7 w-7 text-amber-300" aria-hidden="true" />
-        <p className="mt-4 text-xs font-bold uppercase tracking-wider text-amber-300">
+        <Mail className="mx-auto h-7 w-7 text-[#d4a76a]" aria-hidden="true" />
+        <p className="mt-3 text-xs font-bold uppercase tracking-wider text-[#d4a76a]">
           Stay in the know
         </p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white">
+        <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white leading-none">
           Join the Bansal-nx Circle
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
           Be first to know about new collections, private trunk shows, and member-only offers.
         </p>
         <form
           onSubmit={subscribe}
-          className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
+          className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center"
           noValidate
         >
           <label htmlFor="home-newsletter-email" className="sr-only">
@@ -585,10 +585,10 @@ function Newsletter() {
 
 function Story({ story }: { story: HomepageContent["story"] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-24 lg:px-12">
-      <Reveal className="mx-auto max-w-2xl text-center space-y-5">
+    <section className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
+      <Reveal className="mx-auto max-w-2xl text-center space-y-3">
         <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Our Philosophy</p>
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">
+        <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 leading-none">
           {story.heading}
         </h2>
         <p className="text-sm leading-relaxed text-slate-600">{story.body}</p>

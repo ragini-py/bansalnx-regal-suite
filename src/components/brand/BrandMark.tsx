@@ -1,46 +1,27 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Placeholder brand treatment for Bansal-nx.
- *
- * The real logo (stylised capital B built from a peacock's head and neck, set
- * against a fan of peacock feathers, in metallic gold) is not available yet.
- * This mark is a tasteful stand-in with the same silhouette and proportions:
- * swap the <PeacockGlyph /> for the supplied asset and nothing else changes.
+ * Official Bansal-nx peacock insignia mark (from /ui/favicon.png).
  */
 export function PeacockGlyph({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-      className={cn("h-full w-full", className)}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.1"
-      strokeLinecap="round"
-    >
-      {/* feather fan */}
-      <path d="M24 42C13 38 7 29 8 18" opacity="0.5" />
-      <path d="M24 42C18 36 15 27 17 15" opacity="0.6" />
-      <path d="M24 42C30 36 33 27 31 15" opacity="0.6" />
-      <path d="M24 42C35 38 41 29 40 18" opacity="0.5" />
-      <circle cx="8" cy="16" r="1.6" opacity="0.7" />
-      <circle cx="17" cy="13" r="1.6" opacity="0.8" />
-      <circle cx="31" cy="13" r="1.6" opacity="0.8" />
-      <circle cx="40" cy="16" r="1.6" opacity="0.7" />
-      {/* stylised B whose bowl reads as a peacock head and neck */}
-      <path d="M19 40V10h6.5c3.6 0 6 1.9 6 5.2 0 2.6-1.6 4.4-4.2 4.9 3.2.4 5.2 2.5 5.2 5.6 0 3.8-2.7 6.1-7 6.1H19" />
-      <path d="M25.5 20c2.8-1.1 4.6-3.3 4.6-6.2 0-1.6-.6-3-1.7-4" />
-      <circle cx="28.6" cy="9.4" r="0.9" fill="currentColor" stroke="none" />
-      <path d="M29.4 8.2 32 6.4" />
-    </svg>
+    <img
+      src="/ui/favicon.png"
+      alt="Bansal-nx Insignia"
+      className={cn("h-full w-full object-contain inline-block select-none", className)}
+      loading="eager"
+      decoding="async"
+    />
   );
 }
 
+/**
+ * Official Bansal-nx primary brand logo (from /ui/logo.png).
+ */
 export function BrandMark({
   className,
   size = "md",
-  withTagline = false,
+  withTagline,
   tone = "default",
 }: {
   className?: string;
@@ -48,28 +29,32 @@ export function BrandMark({
   withTagline?: boolean;
   tone?: "default" | "onDark" | "gold";
 }) {
-  const glyph = { sm: "h-6 w-6", md: "h-8 w-8", lg: "h-12 w-12" }[size];
-  const word = {
-    sm: "text-lg",
-    md: "text-2xl",
-    lg: "text-4xl sm:text-5xl",
-  }[size];
-  const toneClass =
-    tone === "onDark" ? "text-ivory" : tone === "gold" ? "text-gold" : "text-foreground";
+  const sizeMap = {
+    sm: "h-9 sm:h-10",
+    md: "h-11 sm:h-13",
+    lg: "h-24 sm:h-32",
+  };
 
   return (
-    <span className={cn("inline-flex items-center gap-2.5", toneClass, className)}>
-      <span className={cn(glyph, "shrink-0 text-amber-700")}>
-        <PeacockGlyph />
-      </span>
-      <span className="flex flex-col leading-none">
-        <span className={cn("font-display font-bold tracking-tight text-slate-900", word)}>Bansal<span className="text-amber-700 font-medium">·nx</span></span>
-        {withTagline && (
-          <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-            Crafted for the extraordinary you
-          </span>
+    <span
+      className={cn(
+        "inline-flex items-center select-none transition-opacity hover:opacity-95",
+        className,
+      )}
+    >
+      <img
+        src="/ui/logo.png"
+        alt="Bansal-nx — Crafted for the Extraordinary You"
+        className={cn(
+          sizeMap[size] ?? sizeMap.md,
+          "w-auto max-w-full object-contain transition-transform duration-200",
+          tone === "onDark"
+            ? "drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]"
+            : "drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
         )}
-      </span>
+        loading="eager"
+        decoding="async"
+      />
     </span>
   );
 }

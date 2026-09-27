@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, UserCheck } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -85,6 +85,13 @@ export function LoginPage() {
     }
     toast.success(`Welcome back, ${res.user.firstName}`);
     resolveIntentAndNavigate(res.user.role);
+  }
+
+  function handleAutofill(email: string, pass: string, roleName: string) {
+    setValues({ email, password: pass });
+    setErrors({});
+    setFormError(null);
+    toast.info(`Filled ${roleName} test credentials`);
   }
 
   return (
@@ -182,6 +189,68 @@ export function LoginPage() {
                 {loading ? "Signing in…" : "Sign in"}
               </Button>
             </form>
+
+            {/* Quick-fill testing credentials */}
+            <div className="mt-8 border border-border/70 bg-muted/30 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground">
+                  Quick-Fill Test Accounts
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">Dev Testing</span>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                {/* Admin account */}
+                <div className="flex items-center justify-between gap-2 border border-border/50 bg-background/90 p-2.5 text-xs">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 font-medium text-foreground">
+                      <ShieldCheck className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                      <span>Admin Account</span>
+                    </div>
+                    <p className="mt-0.5 font-mono text-[11px] text-muted-foreground truncate">
+                      bansalnxindia@gmail.com
+                    </p>
+                    <p className="font-mono text-[10px] text-muted-foreground/80">
+                      Password: <span className="text-foreground font-semibold">Admin@12345</span>
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] px-2.5 shrink-0 rounded-none border-border hover:bg-muted"
+                    onClick={() => handleAutofill("bansalnxindia@gmail.com", "Admin@12345", "Admin")}
+                  >
+                    Autofill
+                  </Button>
+                </div>
+
+                {/* User account */}
+                <div className="flex items-center justify-between gap-2 border border-border/50 bg-background/90 p-2.5 text-xs">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 font-medium text-foreground">
+                      <UserCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>Customer Account</span>
+                    </div>
+                    <p className="mt-0.5 font-mono text-[11px] text-muted-foreground truncate">
+                      user@bansalnx.com
+                    </p>
+                    <p className="font-mono text-[10px] text-muted-foreground/80">
+                      Password: <span className="text-foreground font-semibold">User@12345</span>
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[11px] px-2.5 shrink-0 rounded-none border-border hover:bg-muted"
+                    onClick={() => handleAutofill("user@bansalnx.com", "User@12345", "Customer")}
+                  >
+                    Autofill
+                  </Button>
+                </div>
+              </div>
+            </div>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               New to Bansal-nx?{" "}

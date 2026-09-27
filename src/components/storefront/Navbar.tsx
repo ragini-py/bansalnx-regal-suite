@@ -28,7 +28,7 @@ export function AnnouncementBar() {
   const [dismissed, setDismissed] = useState(false);
   if (!content.announcement.enabled || dismissed) return null;
   return (
-    <div className="relative bg-slate-900 text-slate-100">
+    <div className="relative bg-[#183d40] text-[#f8f1e5]">
       <p className="mx-auto max-w-[1400px] px-10 py-2 text-center text-xs font-medium tracking-normal">
         {content.announcement.text}
       </p>
@@ -64,7 +64,7 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl border border-slate-200 bg-white p-0 rounded-xl shadow-xl overflow-hidden">
+      <DialogContent className="max-w-2xl border border-white/50 bg-white/70 p-0 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl">
         <DialogTitle className="sr-only">Search products</DialogTitle>
         <DialogDescription className="sr-only">Search our luxury couture catalog</DialogDescription>
         <div className="border-b border-slate-200 p-4 bg-slate-50/50">
@@ -176,8 +176,8 @@ export function Navbar() {
       <AnnouncementBar />
       <header
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-200",
-          scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80" : "bg-white border-b border-slate-200",
+          "sticky top-0 z-40 w-full transition-all duration-200 frosted-panel",
+          scrolled ? "bg-white/55 shadow-[0_10px_30px_-20px_rgba(17,43,47,0.35)] border-b border-[#d8c7a6]/60" : "bg-white/35 border-b border-[#d8c7a6]/60",
         )}
       >
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-5 sm:h-20 sm:px-8 lg:px-12">

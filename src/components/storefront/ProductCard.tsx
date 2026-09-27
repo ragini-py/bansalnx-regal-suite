@@ -75,10 +75,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   return (
     <>
       <article className="group relative flex flex-col">
-        <div className="relative overflow-hidden bg-muted">
+        <div className="relative overflow-hidden rounded-[22px] border border-[#e8dcc2] bg-[#f7f2ea]/80 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-md">
           <Link
             to={`/products/${product.slug}`}
-            className="block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            className="block overflow-hidden rounded-t-[22px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#c6903c]"
             aria-label={product.name}
           >
             <img
@@ -143,7 +143,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </button>
 
         {/* Card Details */}
-        <div className="mt-3 flex flex-col gap-1">
+        <div className="mt-3 flex flex-col gap-1 px-1 pb-1">
           <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
             {product.category}
           </p>

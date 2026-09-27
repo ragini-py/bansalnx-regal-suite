@@ -17,12 +17,12 @@ const buttonVariants = cva(
         ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         /* Minimalist luxury storefront variants */
-        luxe: "bg-slate-900 text-white font-medium text-xs sm:text-sm hover:bg-slate-800 shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
+        luxe: "bg-[#183d40] text-white font-medium text-xs sm:text-sm hover:bg-[#123238] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
         luxeOutline:
-          "border border-slate-300 bg-white text-slate-800 font-medium text-xs sm:text-sm hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400 shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-md",
+          "border border-[#d8c7a6] bg-white text-[#183d40] font-medium text-xs sm:text-sm hover:bg-[#f8f1e5] hover:text-[#112b2f] hover:border-[#c9af7a] shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-md",
         onImage:
-          "border border-white/60 bg-white/20 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-slate-900 hover:-translate-y-0.5 rounded-md",
-        gold: "bg-amber-700 text-white font-medium text-xs sm:text-sm hover:bg-amber-800 shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
+          "border border-white/60 bg-white/15 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-[#112b2f] hover:-translate-y-0.5 rounded-md",
+        gold: "bg-[#c6903c] text-white font-medium text-xs sm:text-sm hover:bg-[#b8812f] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
       },
       size: {
         default: "h-9 px-4 py-2",
