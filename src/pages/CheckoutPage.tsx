@@ -118,6 +118,7 @@ export function CheckoutPage() {
   const isDummyRazorpayKey = /dummy/i.test(env.razorpayKeyId || "");
   const t = totals(paymentMethod);
   const codBlocked = !settings.codEnabled || t.total > settings.codMaxOrderValue;
+  const cartHasUnavailableItems = cartLines.some((line) => !line.available);
 
   useEffect(() => {
     if (isDummyRazorpayKey || typeof window === "undefined") {
@@ -181,7 +182,6 @@ export function CheckoutPage() {
   async function submitOrderForExistingAddress(address: Address) {
     setFormError(null);
     setPaymentState("processing");
-    await new Promise((resolve) => setTimeout(resolve, 1600));
 
     try {
       const order = await placeOrder({
@@ -204,6 +204,11 @@ export function CheckoutPage() {
   async function handlePlaceOrder() {
     if (!email.trim() || !phone.trim()) {
       setFormError("Please provide contact details.");
+      return;
+    }
+
+    if (cartHasUnavailableItems) {
+      setFormError("One or more items in your bag are no longer available. Please remove them to continue.");
       return;
     }
 
@@ -623,6 +628,11 @@ export function CheckoutPage() {
             </section>
 
             {formError && <p className="text-sm text-destructive">{formError}</p>}
+            {cartHasUnavailableItems && !formError && (
+              <p className="text-sm text-destructive">
+                One or more items in your bag are no longer available. Please remove them to continue.
+              </p>
+            )}
           </div>
 
           {/* Order summary */}
@@ -679,7 +689,7 @@ export function CheckoutPage() {
                 size="luxe"
                 className="mt-8 w-full"
                 onClick={handlePlaceOrder}
-                disabled={paymentState === "processing"}
+                disabled={paymentState === "processing" || cartHasUnavailableItems}
               >
                 {paymentMethod === "razorpay"
                   ? settings.razorpayConnected && !isDummyRazorpayKey && razorpayScriptReady
