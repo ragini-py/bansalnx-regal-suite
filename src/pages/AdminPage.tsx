@@ -1373,7 +1373,7 @@ function CollectionsManagerTab() {
         name: form.name.trim(),
         description: form.description.trim(),
         coverImage: form.coverImage.trim(),
-        bannerImage: form.coverImage.trim(),
+        bannerImage: editing?.bannerImage ?? form.coverImage.trim(),
         productIds: form.productIds,
         featured: form.featured,
         published: form.published,

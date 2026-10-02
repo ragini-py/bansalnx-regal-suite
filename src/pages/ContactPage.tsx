@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore } from "@/lib/store";
+import { submitContactRequest } from "@/lib/api/contact";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required").max(80, "Too long"),
@@ -27,7 +28,7 @@ export function ContactPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const result = schema.safeParse(values);
     if (!result.success) {
@@ -41,11 +42,15 @@ export function ContactPage() {
     }
     setErrors({});
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    try {
+      await submitContactRequest(result.data);
       toast.success("Message sent — our team will reply within one business day.");
       setValues({ name: "", email: "", subject: "", message: "" });
-    }, 700);
+    } catch {
+      toast.error("We couldn't send your message. Please try again or contact us by email.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
