@@ -824,6 +824,28 @@ function ProductsManagerTab() {
     }
   }
 
+  async function handleToggleVariantAvailability(product: Product, variantId: string) {
+    const target = product.variants.find((variant) => variant.id === variantId);
+    if (!target) return;
+
+    const nextAvailability: Product["variants"][number]["availability"] =
+      target.availability === "available" ? "unavailable" : "available";
+    const updatedVariants: Product["variants"] = product.variants.map((variant) =>
+      variant.id === variantId ? { ...variant, availability: nextAvailability } : variant,
+    );
+    const updatedProduct: Product = { ...product, variants: updatedVariants };
+
+    try {
+      await saveProduct(updatedProduct);
+      setEditingProduct(updatedProduct);
+      toast.success(
+        `${target.colour} / ${target.size} marked ${nextAvailability === "available" ? "available" : "unavailable"}`,
+      );
+    } catch {
+      toast.error("Couldn't update that variant. Please try again.");
+    }
+  }
+
   async function handleSavePrice(prod: Product, newPrice: number) {
     try {
       await saveProduct({ ...prod, price: newPrice });
@@ -1191,9 +1213,9 @@ function ProductsManagerTab() {
           open={Boolean(editingProduct)}
           onOpenChange={(open) => !open && setEditingProduct(null)}
         >
-          <DialogContent className="max-w-md rounded-none border border-border bg-background p-6">
+          <DialogContent className="max-w-lg rounded-none border border-border bg-background p-6">
             <DialogHeader>
-              <DialogTitle className="font-display text-xl">Edit Product Pricing</DialogTitle>
+              <DialogTitle className="font-display text-xl">Edit Product</DialogTitle>
               <DialogDescription>{editingProduct.name}</DialogDescription>
             </DialogHeader>
             <form
@@ -1203,7 +1225,7 @@ function ProductsManagerTab() {
                 const price = Number((form.elements.namedItem("price") as HTMLInputElement).value);
                 if (price > 0) handleSavePrice(editingProduct, price);
               }}
-              className="mt-4 space-y-4"
+              className="mt-4 space-y-5"
             >
               <div>
                 <Label htmlFor="edit-price">Selling Price (INR)</Label>
@@ -1215,6 +1237,36 @@ function ProductsManagerTab() {
                   className="mt-1 rounded-none"
                 />
               </div>
+
+              <div>
+                <Label>Variant availability</Label>
+                <div className="mt-2 space-y-2">
+                  {editingProduct.variants.map((variant) => (
+                    <div
+                      key={variant.id}
+                      className="flex items-center justify-between gap-3 rounded border border-border bg-muted/30 p-2.5"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {variant.colour} / {variant.size}
+                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                          {variant.availability}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant={variant.availability === "available" ? "luxe" : "outline"}
+                        size="sm"
+                        onClick={() => void handleToggleVariantAvailability(editingProduct, variant.id)}
+                      >
+                        {variant.availability === "available" ? "Available" : "Unavailable"}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <Button type="submit" variant="luxe" className="w-full">
                 Save Changes
               </Button>
