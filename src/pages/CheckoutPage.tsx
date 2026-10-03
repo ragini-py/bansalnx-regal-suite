@@ -420,6 +420,22 @@ export function CheckoutPage() {
         description="Encrypted 256-bit checkout · Delhivery Insured Shipping"
       />
       <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 lg:px-12">
+        {cartHasUnavailableItems && (
+          <div className="flex items-start justify-between gap-4 border border-destructive/40 bg-destructive/5 p-4 text-destructive">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium">Some items in your cart are currently unavailable</p>
+                <p className="mt-0.5 text-xs text-destructive/80">
+                  One or more items or selected variants are out of stock or unpublished. Please update your bag to continue.
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="luxeOutline" size="sm" className="shrink-0 text-xs">
+              <Link to="/cart">Review Bag</Link>
+            </Button>
+          </div>
+        )}
         <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
           <div className="space-y-10">
             {/* Contact */}
