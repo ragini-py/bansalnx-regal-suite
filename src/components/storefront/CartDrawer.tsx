@@ -18,6 +18,7 @@ export function CartDrawer() {
     settings,
   } = useStore();
   const t = totals();
+  const hasUnavailable = cartLines.some((l) => !l.available);
 
   return (
     <Sheet open={cartDrawerOpen} onOpenChange={setCartDrawerOpen}>
@@ -100,9 +101,10 @@ export function CartDrawer() {
                         <span className="w-8 text-center text-sm">{line.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => updateQuantity(line.variantId, line.quantity + 1)}
+                          onClick={() => updateQuantity(line.variantId, Math.min(10, line.quantity + 1))}
+                          disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
-                          className="grid h-8 w-8 place-items-center transition-colors hover:bg-muted"
+                          className="grid h-8 w-8 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
@@ -126,11 +128,19 @@ export function CartDrawer() {
                 Taxes calculated at checkout.
               </p>
               <div className="mt-5 flex flex-col gap-3">
-                <Button asChild variant="luxe" size="luxe">
-                  <Link to="/checkout" onClick={() => setCartDrawerOpen(false)}>
-                    Proceed to checkout
-                  </Link>
-                </Button>
+                {hasUnavailable ? (
+                  <Button asChild variant="luxe" size="luxe">
+                    <Link to="/cart" onClick={() => setCartDrawerOpen(false)}>
+                      Review bag (unavailable items)
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="luxe" size="luxe">
+                    <Link to="/checkout" onClick={() => setCartDrawerOpen(false)}>
+                      Proceed to checkout
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild variant="luxeOutline" size="luxe">
                   <Link to="/cart" onClick={() => setCartDrawerOpen(false)}>
                     View bag

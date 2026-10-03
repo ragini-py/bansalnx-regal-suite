@@ -13,3 +13,13 @@ export async function replaceWishlistRequest(productIds: string[]): Promise<stri
   const { data } = await apiClient.put<{ productIds: string[] }>("/wishlist", { productIds });
   return data.productIds;
 }
+
+export async function addToWishlistRequest(productId: string): Promise<string[]> {
+  const { data } = await apiClient.post<{ productIds: string[] }>(`/wishlist/${productId}`);
+  return data.productIds;
+}
+
+export async function removeFromWishlistRequest(productId: string): Promise<string[]> {
+  const { data } = await apiClient.delete<{ productIds: string[] }>(`/wishlist/${productId}`);
+  return data.productIds;
+}

@@ -18,11 +18,17 @@ export type ProductBadge = "new" | "bestseller" | "exclusive" | null;
 export interface Product {
   id: string;
   slug: string;
+  productCode?: string;
+  styleNumber?: string;
+  dressName?: string;
   name: string;
   material?: string;
   clothMaterial?: string;
   price: number;
   mrp: number;
+  discountedPrice?: number | null;
+  discountPercentage?: number;
+  quantity?: number;
   currency: "INR";
   images: string[];
   category: string;
@@ -36,6 +42,9 @@ export interface Product {
   care: string[];
   sizes: string[];
   colours: string[];
+  availableSizes?: string[];
+  colorOptions?: string[];
+  additionalComment?: string;
   variants: ProductVariant[];
   featured: boolean;
   bestseller: boolean;

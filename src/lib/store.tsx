@@ -66,7 +66,12 @@ import {
 } from "@/lib/api/coupons";
 import { getAllUsers, updateUserRequest } from "@/lib/api/admin-users";
 import { getCartRequest, replaceCartRequest } from "@/lib/api/cart";
-import { getWishlistRequest, replaceWishlistRequest } from "@/lib/api/wishlist";
+import {
+  addToWishlistRequest,
+  getWishlistRequest,
+  removeFromWishlistRequest,
+  replaceWishlistRequest,
+} from "@/lib/api/wishlist";
 import { getSettingsRequest, updateSettingsRequest } from "@/lib/api/settings";
 import { getContentRequest, updateContentRequest } from "@/lib/api/content";
 import type {
@@ -553,10 +558,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         if (isExplicitLoginForWishlistRef.current) {
           isExplicitLoginForWishlistRef.current = false;
-          patch((prev) => ({
-            ...prev,
-            wishlist: Array.from(new Set([...serverIds, ...prev.wishlist])),
-          }));
+          patch((prev) => {
+            const merged = Array.from(new Set([...serverIds, ...prev.wishlist]));
+            replaceWishlistRequest(merged).catch((err: unknown) =>
+              console.error("Failed to sync merged wishlist:", err),
+            );
+            return {
+              ...prev,
+              wishlist: merged,
+            };
+          });
         } else {
           // Routine session restoration: server wishlist is authoritative.
           patch((prev) => ({
@@ -574,13 +585,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [authUserId, patch]);
-
-  useEffect(() => {
-    if (!authUserId || !wishlistSyncedRef.current) return;
-    replaceWishlistRequest(state.wishlist).catch((err: unknown) =>
-      console.error("Failed to save wishlist:", err),
-    );
-  }, [state.wishlist, authUserId]);
 
   const user = authUser;
 
@@ -632,9 +636,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ? prev.wishlist.filter((id) => id !== productId)
           : [...prev.wishlist, productId],
       }));
+      if (authUserId) {
+        if (had) {
+          removeFromWishlistRequest(productId).catch((err: unknown) =>
+            console.error("Failed to remove from wishlist:", err),
+          );
+        } else {
+          addToWishlistRequest(productId).catch((err: unknown) =>
+            console.error("Failed to add to wishlist:", err),
+          );
+        }
+      }
       return had ? "removed" : "added";
     },
-    [state.wishlist, patch],
+    [state.wishlist, patch, authUserId],
   );
 
   const addToCart = useCallback<StoreValue["addToCart"]>(

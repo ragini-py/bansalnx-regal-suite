@@ -27,6 +27,7 @@ export function CartPage() {
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponSubmitting, setCouponSubmitting] = useState(false);
   const t = totals();
+  const hasUnavailable = cartLines.some((l) => !l.available);
 
   async function handleApplyCoupon() {
     if (!couponInput.trim()) return;
@@ -131,9 +132,10 @@ export function CartPage() {
                         <span className="w-9 text-center text-sm">{line.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => updateQuantity(line.variantId, line.quantity + 1)}
+                          onClick={() => updateQuantity(line.variantId, Math.min(10, line.quantity + 1))}
+                          disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
-                          className="grid h-9 w-9 place-items-center transition-colors hover:bg-muted"
+                          className="grid h-9 w-9 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
@@ -224,8 +226,24 @@ export function CartPage() {
                   <span>{formatINR(t.total)}</span>
                 </div>
 
-                <Button asChild variant="luxe" size="luxe" className="mt-8 w-full">
-                  <Link to="/checkout">Proceed to Checkout</Link>
+                {hasUnavailable && (
+                  <p className="mt-4 text-center text-xs text-destructive">
+                    Please remove unavailable items from your bag to proceed.
+                  </p>
+                )}
+
+                <Button
+                  asChild={!hasUnavailable}
+                  disabled={hasUnavailable}
+                  variant="luxe"
+                  size="luxe"
+                  className="mt-4 w-full"
+                >
+                  {hasUnavailable ? (
+                    <span>Unavailable Items in Bag</span>
+                  ) : (
+                    <Link to="/checkout">Proceed to Checkout</Link>
+                  )}
                 </Button>
               </div>
             </aside>

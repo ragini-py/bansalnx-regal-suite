@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ShoppingBag, XCircle } from "lucide-react";
+import { Loader2, ShoppingBag, XCircle, AlertCircle } from "lucide-react";
 import { z } from "zod";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
@@ -14,6 +14,28 @@ import { env } from "@/lib/env";
 import { formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { Address, PaymentMethod } from "@/data/types";
+
+const IDEMPOTENCY_STORAGE_KEY = "kbc_checkout_idempotency_key";
+
+function getCheckoutIdempotencyKey(): string {
+  try {
+    const existing = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
+    if (existing) return existing;
+    const fresh = crypto.randomUUID();
+    sessionStorage.setItem(IDEMPOTENCY_STORAGE_KEY, fresh);
+    return fresh;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
+function clearCheckoutIdempotencyKey(): void {
+  try {
+    sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
+  } catch {
+    // Ignore storage issues in restricted environments
+  }
+}
 
 declare global {
   interface Window {
@@ -89,9 +111,8 @@ export function CheckoutPage() {
   // Stable for the life of this checkout attempt — reused across a manual
   // re-submit after a failure (and automatically across the API client's own
   // 401-refresh-then-retry) so a retried request can never create a second
-  // order. A fresh key is only ever needed for a genuinely new checkout, and
-  // this page unmounts/remounts on navigation away, so a ref is enough.
-  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
+  // order. Persisted in sessionStorage across page refreshes until order placement completes.
+  const idempotencyKeyRef = useRef<string>(getCheckoutIdempotencyKey());
 
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState(user?.phone ?? "");
@@ -212,6 +233,7 @@ export function CheckoutPage() {
         phone,
         idempotencyKey: idempotencyKeyRef.current,
       });
+      clearCheckoutIdempotencyKey();
       setPaymentState("idle");
       navigate(`/order/${order.id}`);
     } catch (err) {
@@ -249,7 +271,7 @@ export function CheckoutPage() {
           return;
         }
       } else {
-        address = { id: "new", label: "Delivery", ...parsed, isDefault: false };
+        address = { id: crypto.randomUUID(), label: "Delivery", ...parsed, isDefault: false };
       }
     } else {
       address = user?.addresses.find((a) => a.id === selectedAddressId) ?? null;

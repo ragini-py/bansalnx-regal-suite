@@ -152,7 +152,7 @@ function CountBadge({ count }: { count: number }) {
 }
 
 export function Navbar() {
-  const { wishlist, cartCount, user, isAuthenticated, isAdmin, setCartDrawerOpen } = useStore();
+  const { wishlist, products, cartCount, user, isAuthenticated, isAdmin, setCartDrawerOpen } = useStore();
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -228,7 +228,9 @@ export function Navbar() {
               className="relative grid h-9 w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
             >
               <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
-              <CountBadge count={wishlist.length} />
+              <CountBadge
+                count={wishlist.filter((id) => products.some((p) => p.id === id && p.published)).length}
+              />
             </Link>
 
             {/* Account / Admin Link */}
