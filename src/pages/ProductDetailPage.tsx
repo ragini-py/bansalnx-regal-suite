@@ -177,7 +177,7 @@ export function ProductDetailPage() {
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-[1400px] px-5 pb-32 pt-8 sm:px-8 sm:pb-24 lg:pb-20 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-5 pb-32 pt-10 sm:px-8 sm:pb-24 sm:pt-14 lg:pb-20 lg:pt-16 lg:px-12">
         <Breadcrumbs
           items={[
             { label: "Home", href: <Link to="/" className="link-underline">Home</Link> },

@@ -184,7 +184,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-24 sm:px-8 sm:pb-14 lg:px-12">
+      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
         <div className="max-w-2xl fade-up">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#d4a76a] flex items-center gap-2 mb-3">
             <Sparkles className="h-3.5 w-3.5" /> {slide.eyebrow}

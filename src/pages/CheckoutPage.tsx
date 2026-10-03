@@ -711,6 +711,11 @@ export function CheckoutPage() {
                       <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
                         {line.size} · {line.colour} · Qty {line.quantity}
                       </p>
+                      {!line.available && (
+                        <p className="mt-1 text-xs font-semibold text-destructive">
+                          Currently unavailable
+                        </p>
+                      )}
                     </div>
                     <span className="text-sm">{formatINR(line.lineTotal)}</span>
                   </li>
@@ -742,6 +747,19 @@ export function CheckoutPage() {
                 <span>Total</span>
                 <span>{formatINR(t.total)}</span>
               </div>
+
+              {cartHasUnavailableItems && (
+                <div className="mt-6 border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive leading-relaxed">
+                  <p className="font-semibold">Items unavailable</p>
+                  <p className="mt-1">
+                    Please{" "}
+                    <Link to="/cart" className="font-semibold underline underline-offset-2">
+                      return to your bag
+                    </Link>{" "}
+                    to remove unavailable items before placing your order.
+                  </p>
+                </div>
+              )}
 
               <Button
                 variant="luxe"
