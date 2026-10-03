@@ -36,6 +36,7 @@ import {
   refreshRequest,
   registerRequest,
 } from "@/lib/api/auth";
+import { setAuthFailureHandler } from "@/lib/api/client";
 import {
   createCollectionRequest,
   createCategoryRequest,
@@ -469,6 +470,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       if (!cancelled) setAuthReady(true);
     })();
+
+    setAuthFailureHandler(() => {
+      setAuthUser(null);
+    });
+
     return () => {
       cancelled = true;
     };

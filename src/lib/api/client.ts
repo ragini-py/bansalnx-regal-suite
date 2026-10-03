@@ -28,16 +28,41 @@ export function getAccessToken(): string | null {
 // up on genuinely different domains, not just different ports.
 let csrfToken: string | null = null;
 
+const CSRF_STORAGE_KEY = "bansal_csrf_token";
+
 export function setCsrfToken(token: string | null): void {
   csrfToken = token;
+  if (typeof window !== "undefined") {
+    try {
+      if (token) {
+        window.sessionStorage.setItem(CSRF_STORAGE_KEY, token);
+      } else {
+        window.sessionStorage.removeItem(CSRF_STORAGE_KEY);
+      }
+    } catch {
+      /* ignore storage unavailable */
+    }
+  }
+}
+
+export function getCsrfToken(): string | null {
+  if (csrfToken) return csrfToken;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = window.sessionStorage.getItem(CSRF_STORAGE_KEY);
+      if (stored) return stored;
+    } catch {
+      /* ignore storage unavailable */
+    }
+  }
+  return readCsrfCookie();
 }
 
 // On a fresh page load, csrfToken above is still null (in-memory state
 // doesn't survive a reload) even though the browser may already be holding
 // a valid csrfToken cookie from a previous session — used by store.tsx's
 // silent boot-time refresh before any explicit login/refresh response has
-// set the in-memory value. Read the cookie directly as a one-time fallback;
-// once a real auth response comes back, the in-memory value takes over.
+// set the in-memory value. Read the cookie directly as a fallback.
 function readCsrfCookie(): string | null {
   const match = document.cookie.match(/(?:^|; )csrfToken=([^;]*)/);
   return match?.[1] ? decodeURIComponent(match[1]) : null;
@@ -52,7 +77,7 @@ apiClient.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.set("Authorization", `Bearer ${accessToken}`);
   }
-  const csrf = csrfToken ?? readCsrfCookie();
+  const csrf = getCsrfToken();
   if (csrf) {
     config.headers.set("X-CSRF-Token", csrf);
   }
@@ -63,11 +88,17 @@ apiClient.interceptors.request.use((config) => {
 // refresh handler (auth module) — keeps this file free of auth-specific
 // logic while still centralizing the retry behavior.
 type RefreshHandler = () => Promise<string | null>;
+type AuthFailureHandler = () => void;
 let refreshHandler: RefreshHandler | null = null;
+let authFailureHandler: AuthFailureHandler | null = null;
 let refreshInFlight: Promise<string | null> | null = null;
 
 export function setRefreshHandler(handler: RefreshHandler): void {
   refreshHandler = handler;
+}
+
+export function setAuthFailureHandler(handler: AuthFailureHandler): void {
+  authFailureHandler = handler;
 }
 
 interface RetriableConfig extends InternalAxiosRequestConfig {
@@ -79,7 +110,9 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const config = error.config as RetriableConfig | undefined;
     const isAuthRoute =
-      config?.url?.includes("/auth/login") || config?.url?.includes("/auth/register");
+      config?.url?.includes("/auth/login") ||
+      config?.url?.includes("/auth/register") ||
+      config?.url?.includes("/auth/refresh");
 
     if (
       error.response?.status !== 401 ||
@@ -97,7 +130,10 @@ apiClient.interceptors.response.use(
     });
 
     const newToken = await refreshInFlight;
-    if (!newToken) return Promise.reject(error);
+    if (!newToken) {
+      authFailureHandler?.();
+      return Promise.reject(error);
+    }
 
     config.headers.set("Authorization", `Bearer ${newToken}`);
     return apiClient(config);
