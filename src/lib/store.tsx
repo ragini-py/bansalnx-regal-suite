@@ -113,11 +113,34 @@ function load(): PersistedState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    return { ...initialState(), ...parsed };
+    if (!parsed || typeof parsed !== "object") return initialState();
+    return {
+      wishlist: Array.isArray(parsed.wishlist)
+        ? parsed.wishlist.filter((id): id is string => typeof id === "string")
+        : [],
+      cart: Array.isArray(parsed.cart)
+        ? parsed.cart.filter(
+            (l): l is CartLine =>
+              Boolean(l) &&
+              typeof l === "object" &&
+              typeof l.productId === "string" &&
+              typeof l.variantId === "string" &&
+              typeof l.size === "string" &&
+              typeof l.colour === "string" &&
+              typeof l.quantity === "number" &&
+              l.quantity > 0,
+          )
+        : [],
+      welcomeOfferSeen: Boolean(parsed.welcomeOfferSeen),
+      claimedCoupons: Array.isArray(parsed.claimedCoupons)
+        ? parsed.claimedCoupons.filter((c): c is string => typeof c === "string")
+        : [],
+    };
   } catch {
     return initialState();
   }
 }
+
 
 export interface CartLineView extends CartLine {
   product: Product;
@@ -198,6 +221,10 @@ interface StoreValue {
   /* addresses */
   addAddress: (address: Omit<Address, "id">) => Promise<Address>;
   removeAddress: (id: string) => Promise<void>;
+  /* catalog status */
+  catalogLoaded: boolean;
+  catalogError: string | null;
+  reloadCatalog: () => void;
   /* admin data */
   products: Product[];
   collections: Collection[];
@@ -248,39 +275,75 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [adminCoupons, setAdminCoupons] = useState<Coupon[]>([]);
   const [settings, setSettings] = useState<StoreSettings>(settingsPlaceholder);
   const [content, setContent] = useState<HomepageContent>(contentPlaceholder);
-  // False only for the brief window before the initial catalog fetch settles
-  // (success or failure) — cartLines below uses this to tell "still loading,
-  // fall back to placeholder data for a saved cart line" apart from "the
-  // catalog is loaded and this product genuinely doesn't exist anymore".
+  // True only when products have successfully loaded from the backend.
+  // If loading fails, catalogLoaded remains false so cartLines does not
+  // falsely drop saved cart items.
   const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogReloadCounter, setCatalogReloadCounter] = useState(0);
+
+  const reloadCatalog = useCallback(() => {
+    setCatalogReloadCounter((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      getProducts(),
-      getCollections(),
-      getPublicCoupons(),
-      getSettingsRequest(),
-      getContentRequest(),
-    ])
-      .then(([p, c, cp, s, ct]) => {
-        if (cancelled) return;
-        setProducts(p);
-        setCollections(c);
-        setCoupons(cp);
-        setSettings(s);
-        setContent(ct);
+    setCatalogError(null);
+
+    // Boot secondary data independently so non-critical endpoint failures
+    // (coupons, settings, content) never prevent products or collections from rendering.
+    getPublicCoupons()
+      .then((cp) => {
+        if (!cancelled) setCoupons(cp);
       })
       .catch((err: unknown) => {
-        if (!cancelled) console.error("Failed to load catalog:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setCatalogLoaded(true);
+        console.warn("Failed to load public coupons; using empty fallback:", err);
       });
+
+    getSettingsRequest()
+      .then((s) => {
+        if (!cancelled) setSettings(s);
+      })
+      .catch((err: unknown) => {
+        console.warn("Failed to load store settings; using default settings:", err);
+      });
+
+    getContentRequest()
+      .then((ct) => {
+        if (!cancelled) setContent(ct);
+      })
+      .catch((err: unknown) => {
+        console.warn("Failed to load homepage content; using default content:", err);
+      });
+
+    // Boot collections independently so failure doesn't block products
+    getCollections()
+      .then((c) => {
+        if (!cancelled) setCollections(c);
+      })
+      .catch((err: unknown) => {
+        console.warn("Failed to load collections:", err);
+      });
+
+    // Core catalog requirement: products
+    getProducts()
+      .then((p) => {
+        if (cancelled) return;
+        setProducts(p);
+        setCatalogLoaded(true);
+        setCatalogError(null);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error("Failed to load products:", err);
+        setCatalogLoaded(false);
+        setCatalogError("Unable to load product catalog.");
+      });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [catalogReloadCounter]);
 
   /* real orders (bansalnx-backend) — `orders` is the admin-only full list, `myOrders` the caller's own */
   const [orders, setOrders] = useState<Order[]>([]);
@@ -404,6 +467,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // matching variants), and every change after that is pushed to the
   // backend so the cart survives across devices/sessions.
   const cartSyncedRef = useRef(false);
+  // Tracks explicit guest -> authenticated transitions (login / register actions).
+  // On an ordinary page reload / session restore, the server cart/wishlist is authoritative
+  // and local cached quantities must NOT be added to server quantities.
+  const isExplicitLoginForCartRef = useRef(false);
+  const isExplicitLoginForWishlistRef = useRef(false);
 
   useEffect(() => {
     cartSyncedRef.current = false;
@@ -412,18 +480,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     getCartRequest()
       .then((serverLines) => {
         if (cancelled) return;
-        patch((prev) => {
-          const merged = [...serverLines];
-          for (const line of prev.cart) {
-            const existing = merged.find((l) => l.variantId === line.variantId);
-            if (existing) {
-              existing.quantity += line.quantity;
-            } else {
-              merged.push(line);
+        if (isExplicitLoginForCartRef.current) {
+          // Scenario B: Explicit guest -> authenticated transition (login/register).
+          // Merge guest cart with server cart (summing matching variant quantities).
+          isExplicitLoginForCartRef.current = false;
+          patch((prev) => {
+            const merged = [...serverLines];
+            for (const line of prev.cart) {
+              const existing = merged.find((l) => l.variantId === line.variantId);
+              if (existing) {
+                existing.quantity += line.quantity;
+              } else {
+                merged.push(line);
+              }
             }
-          }
-          return { ...prev, cart: merged };
-        });
+            return { ...prev, cart: merged };
+          });
+        } else {
+          // Scenario A: Routine session restoration / page refresh.
+          // Server cart is authoritative — never sum local quantities with server quantities.
+          patch((prev) => ({ ...prev, cart: serverLines }));
+        }
         cartSyncedRef.current = true;
       })
       .catch((err: unknown) => {
@@ -453,10 +530,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     getWishlistRequest()
       .then((serverIds) => {
         if (cancelled) return;
-        patch((prev) => ({
-          ...prev,
-          wishlist: Array.from(new Set([...serverIds, ...prev.wishlist])),
-        }));
+        if (isExplicitLoginForWishlistRef.current) {
+          isExplicitLoginForWishlistRef.current = false;
+          patch((prev) => ({
+            ...prev,
+            wishlist: Array.from(new Set([...serverIds, ...prev.wishlist])),
+          }));
+        } else {
+          // Routine session restoration: server wishlist is authoritative.
+          patch((prev) => ({
+            ...prev,
+            wishlist: serverIds,
+          }));
+        }
         wishlistSyncedRef.current = true;
       })
       .catch((err: unknown) => {
@@ -485,6 +571,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const login = useCallback<StoreValue["login"]>(async (email, password) => {
     try {
       const loggedInUser = await loginRequest({ email: email.trim(), password });
+      isExplicitLoginForCartRef.current = true;
+      isExplicitLoginForWishlistRef.current = true;
       setAuthUser(loggedInUser);
       return { ok: true, user: loggedInUser };
     } catch (err) {
@@ -495,6 +583,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const register = useCallback<StoreValue["register"]>(async (input) => {
     try {
       const newUser = await registerRequest({ ...input, email: input.email.trim() });
+      isExplicitLoginForCartRef.current = true;
+      isExplicitLoginForWishlistRef.current = true;
       setAuthUser(newUser);
       return { ok: true, user: newUser };
     } catch (err) {
@@ -503,6 +593,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    isExplicitLoginForCartRef.current = false;
+    isExplicitLoginForWishlistRef.current = false;
     setAuthUser(null);
     void logoutRequest();
     patch((prev) => ({ ...prev, cart: [], wishlist: [] }));
@@ -821,6 +913,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     cancelOrder,
     addAddress,
     removeAddress,
+    catalogLoaded,
+    catalogError,
+    reloadCatalog,
     products,
     collections,
     coupons,

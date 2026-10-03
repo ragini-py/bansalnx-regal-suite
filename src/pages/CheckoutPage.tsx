@@ -103,6 +103,27 @@ export function CheckoutPage() {
   const [addressErrors, setAddressErrors] = useState<AddressErrors>({});
   const [saveNewAddress, setSaveNewAddress] = useState(true);
 
+  // Hydrate contact info and address selection when authenticated user resolves after mount.
+  // Preserves any fields or address choice the shopper has already manually entered.
+  const authHydratedRef = useRef(false);
+
+  useEffect(() => {
+    if (!user || authHydratedRef.current) return;
+    authHydratedRef.current = true;
+
+    setEmail((prev) => (prev.trim() === "" ? user.email : prev));
+    setPhone((prev) => (prev.trim() === "" ? user.phone : prev));
+
+    if (user.addresses.length > 0) {
+      const defaultId =
+        user.addresses.find((a) => a.isDefault)?.id ?? user.addresses[0]?.id ?? null;
+      if (defaultId) {
+        setSelectedAddressId((prev) => prev ?? defaultId);
+        setUseNewAddress(false);
+      }
+    }
+  }, [user]);
+
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
 

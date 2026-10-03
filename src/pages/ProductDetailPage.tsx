@@ -12,7 +12,7 @@ import {
   Truck,
   ZoomIn,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 
 import { Reveal } from "@/components/common/Reveal";
@@ -66,6 +66,14 @@ export function ProductDetailPage() {
   const [zoomOpen, setZoomOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const wasSwipe = useRef(false);
+
+  useEffect(() => {
+    setActiveImage(0);
+    setSize("");
+    setQuantity(1);
+    setSizeError(false);
+    setColour(product?.colours[0] ?? "");
+  }, [slug, product?.id]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -194,7 +202,7 @@ export function ProductDetailPage() {
               onTouchEnd={handleGalleryTouchEnd}
             >
               <img
-                src={product.images[activeImage]}
+                src={product.images[activeImage] ?? product.images[0]}
                 alt={`${product.name} — view ${activeImage + 1}`}
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -574,7 +582,7 @@ export function ProductDetailPage() {
       {/* Image Zoom Modal */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] rounded-none border border-border bg-ink p-2 overflow-hidden flex items-center justify-center">
-          <img src={product.images[activeImage]} alt={product.name} className="max-h-[85vh] w-auto object-contain" />
+          <img src={product.images[activeImage] ?? product.images[0]} alt={product.name} className="max-h-[85vh] w-auto object-contain" />
         </DialogContent>
       </Dialog>
 
