@@ -17,8 +17,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-import { getProductById } from "@/data/catalog";
 // storeSettings/homepageContent (aliased below) are only placeholders shown
 // for the brief window before the real GET /api/settings and GET /api/content
 // resolve (see the fetch effect below) — their values match the backend's
@@ -686,13 +684,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const cartLines = useMemo<CartLineView[]>(() => {
     return state.cart.flatMap((line) => {
-      // Only fall back to placeholder data while the real catalog is still
-      // loading — once it's loaded, a product missing from it is genuinely
-      // gone (e.g. an admin deleted it), and must drop out of the cart
-      // rather than silently render stale mock pricing/details.
-      const product =
-        products.find((p) => p.id === line.productId) ??
-        (!catalogLoaded ? getProductById(line.productId) : undefined);
+      if (!catalogLoaded) return [];
+      const product = products.find((p) => p.id === line.productId);
       if (!product) return [];
       const variant = product.variants.find(
         (v) => v.size === line.size && v.colour === line.colour,

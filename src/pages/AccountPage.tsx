@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { extractApiErrorMessage } from "@/lib/api/auth";
 
 import { AccountGate, AccountLayout, AccountLoading } from "@/components/account/AccountLayout";
 import { Badge } from "@/components/ui/badge";
@@ -74,8 +75,8 @@ export function AccountPage() {
       });
       toast.success("Delivery address added");
       setAddAddressOpen(false);
-    } catch {
-      toast.error("Couldn't add that address. Please try again.");
+    } catch (err) {
+      toast.error(extractApiErrorMessage(err, "Couldn't add that address. Please check your details and try again."));
     }
   }
 

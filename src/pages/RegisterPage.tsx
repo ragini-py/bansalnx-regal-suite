@@ -77,7 +77,7 @@ export function RegisterPage() {
       return;
     }
     if (role !== "customer") {
-      navigate("/admin");
+      navigate(redirect && redirect.startsWith("/admin") ? redirect : "/admin");
       return;
     }
     navigate(redirect || "/account");

@@ -52,9 +52,12 @@ export async function loginRequest(input: LoginInput): Promise<AuthUser> {
 }
 
 export async function logoutRequest(): Promise<void> {
-  await apiClient.post("/auth/logout");
-  setAccessToken(null);
-  setCsrfToken(null);
+  try {
+    await apiClient.post("/auth/logout");
+  } finally {
+    setAccessToken(null);
+    setCsrfToken(null);
+  }
 }
 
 export async function refreshRequest(): Promise<string | null> {

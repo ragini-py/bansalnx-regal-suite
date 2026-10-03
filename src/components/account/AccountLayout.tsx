@@ -32,6 +32,10 @@ export function AccountLoading() {
 }
 
 export function AccountGate() {
+  const location = useLocation();
+  const currentPath = location.pathname + location.search;
+  const redirectTarget = encodeURIComponent(currentPath || "/account");
+
   return (
     <SiteLayout>
       <PageHeader
@@ -53,10 +57,10 @@ export function AccountGate() {
           </p>
           <div className="mt-8 flex w-full flex-col gap-3">
             <Button asChild variant="luxe" size="luxe">
-              <Link to="/login?redirect=/account">Login</Link>
+              <Link to={`/login?redirect=${redirectTarget}`}>Login</Link>
             </Button>
             <Button asChild variant="luxeOutline" size="luxe">
-              <Link to="/register?redirect=/account">Create Account</Link>
+              <Link to={`/register?redirect=${redirectTarget}`}>Create Account</Link>
             </Button>
           </div>
         </div>

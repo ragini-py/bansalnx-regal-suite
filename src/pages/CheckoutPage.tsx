@@ -249,7 +249,7 @@ export function CheckoutPage() {
           return;
         }
       } else {
-        address = { id: "guest-address", label: "Delivery", ...parsed, isDefault: false };
+        address = { id: "new", label: "Delivery", ...parsed, isDefault: false };
       }
     } else {
       address = user?.addresses.find((a) => a.id === selectedAddressId) ?? null;

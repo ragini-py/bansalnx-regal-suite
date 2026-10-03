@@ -39,7 +39,7 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       subheading:
         "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
       primaryCta: "Discover Bridal",
-      primaryTo: "/collections/the-wedding-pavilion",
+      primaryTo: "/collections/the-ceremony-edit",
       secondaryCta: "Browse All Collections",
       secondaryTo: "/collections",
     },
@@ -49,7 +49,7 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       heading: "Breeze & Light Heritage",
       subheading: "Fine chanderi and tissue kurtas woven with pure silver zari threads.",
       primaryCta: "Shop Festive Edit",
-      primaryTo: "/collections/courtly-threads",
+      primaryTo: "/collections/quiet-hours",
       secondaryCta: "Our Story",
       secondaryTo: "/about",
     },

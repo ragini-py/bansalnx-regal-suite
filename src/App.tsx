@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,6 +40,11 @@ function ScrollToTop() {
   return null;
 }
 
+function AccountOrderRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/order/${id ?? ""}`} replace />;
+}
+
 export function App() {
   return (
     <StoreProvider>
@@ -68,7 +73,7 @@ export function App() {
           {/* Account Routes */}
           <Route path="/account" element={<AccountPage />} />
           <Route path="/account/orders" element={<AccountOrdersPage />} />
-          <Route path="/account/orders/:id" element={<OrderConfirmationPage />} />
+          <Route path="/account/orders/:id" element={<AccountOrderRedirect />} />
           <Route path="/account/coupons" element={<AccountPage />} />
           <Route path="/account/addresses" element={<AccountPage />} />
           <Route path="/account/profile" element={<AccountPage />} />
