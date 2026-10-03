@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   AlertTriangle,
+  Check,
   ChevronRight,
   ClipboardList,
   CreditCard,
@@ -752,6 +753,7 @@ interface ProductFormValues {
   name: string;
   slug: string;
   category: string;
+  categoryIds: string[];
   material: string;
   clothMaterial: string;
   price: string;
@@ -773,6 +775,7 @@ const emptyProductForm: ProductFormValues = {
   name: "",
   slug: "",
   category: "",
+  categoryIds: [],
   material: "",
   clothMaterial: "",
   price: "",
@@ -790,9 +793,153 @@ const emptyProductForm: ProductFormValues = {
   published: false,
 };
 
+function CategoryPillsSelector({
+  selectedIds,
+  onChange,
+}: {
+  selectedIds: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const { categories, saveCategory } = useStore();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const handleToggle = (id: string) => {
+    if (selectedIds.includes(id)) {
+      onChange(selectedIds.filter((item) => item !== id));
+    } else {
+      onChange([...selectedIds, id]);
+    }
+  };
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) {
+      setAddError("Please enter a category name");
+      return;
+    }
+    setAdding(true);
+    setAddError(null);
+    try {
+      const category = await saveCategory(trimmed);
+      if (!selectedIds.includes(category.id)) {
+        onChange([...selectedIds, category.id]);
+      }
+      toast.success(`Category "${category.name}" selected`);
+      setShowAddModal(false);
+      setNewCategoryName("");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create category";
+      setAddError(msg);
+      toast.error(msg);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs font-medium text-foreground">Categories</Label>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setShowAddModal(true);
+            setAddError(null);
+            setNewCategoryName("");
+          }}
+          className="h-7 px-2 text-xs font-semibold text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+        >
+          <Plus className="mr-1 h-3.5 w-3.5" /> Add New Category
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-2 min-h-[38px] p-2.5 rounded border border-border bg-muted/20">
+        {categories.length === 0 ? (
+          <span className="text-xs text-muted-foreground italic">
+            No categories yet. Click &quot;+ Add New Category&quot; to create one.
+          </span>
+        ) : (
+          categories.map((cat) => {
+            const isSelected = selectedIds.includes(cat.id);
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleToggle(cat.id)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border shadow-xs cursor-pointer",
+                  isSelected
+                    ? "bg-amber-700 text-white border-amber-800"
+                    : "bg-background text-foreground/80 border-border hover:border-foreground/30 hover:bg-muted/60"
+                )}
+              >
+                {isSelected ? (
+                  <Check className="h-3 w-3 stroke-[2.5]" />
+                ) : (
+                  <Plus className="h-3 w-3 opacity-40" />
+                )}
+                {cat.name}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {showAddModal && (
+        <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+          <DialogContent className="max-w-sm rounded-none border border-border bg-background p-5">
+            <DialogHeader>
+              <DialogTitle className="font-display text-lg">Add New Category</DialogTitle>
+              <DialogDescription className="text-xs">
+                Create a new category. If it already exists, it will be selected directly.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddCategory} className="mt-4 space-y-4">
+              <div>
+                <Label htmlFor="inline-cat-name" className="text-xs">
+                  Category Name
+                </Label>
+                <Input
+                  id="inline-cat-name"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="e.g. Festive Wear"
+                  className="mt-1 rounded-none text-sm"
+                  autoFocus
+                />
+                {addError && <p className="mt-1 text-xs text-destructive">{addError}</p>}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="luxe" size="sm" disabled={adding}>
+                  {adding ? "Saving..." : "Add & Select"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+
 function ProductsManagerTab() {
-  const { products, saveProduct, deleteProduct, settings } = useStore();
+  const { products, categories, saveProduct, deleteProduct, settings } = useStore();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editCategoryIds, setEditCategoryIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
   const [saving, setSaving] = useState(false);
@@ -846,13 +993,36 @@ function ProductsManagerTab() {
     }
   }
 
-  async function handleSavePrice(prod: Product, newPrice: number) {
+  function handleStartEdit(prod: Product) {
+    setEditingProduct(prod);
+    if (prod.categoryIds && prod.categoryIds.length > 0) {
+      setEditCategoryIds(prod.categoryIds);
+    } else if (prod.category) {
+      const match = categories.find(
+        (c) =>
+          c.name.toLowerCase() === prod.category.toLowerCase() ||
+          c.slug === slugify(prod.category),
+      );
+      setEditCategoryIds(match ? [match.id] : []);
+    } else {
+      setEditCategoryIds([]);
+    }
+  }
+
+  async function handleSaveEditProduct(prod: Product, newPrice: number, catIds: string[]) {
     try {
-      await saveProduct({ ...prod, price: newPrice });
-      toast.success(`Updated price for ${prod.name}`);
+      const primaryCat = categories.find((c) => catIds.includes(c.id));
+      const primaryCatName = primaryCat ? primaryCat.name : (catIds.length > 0 ? "" : prod.category);
+      await saveProduct({
+        ...prod,
+        price: newPrice,
+        categoryIds: catIds,
+        category: primaryCatName,
+      });
+      toast.success(`Updated ${prod.name}`);
       setEditingProduct(null);
     } catch {
-      toast.error("Couldn't update the price. Please try again.");
+      toast.error("Couldn't update that product. Please try again.");
     }
   }
 
@@ -874,6 +1044,9 @@ function ProductsManagerTab() {
 
     setSaving(true);
     try {
+      const primaryCat = categories.find((c) => form.categoryIds.includes(c.id));
+      const primaryCatName = primaryCat ? primaryCat.name : form.category.trim();
+
       await saveProduct({
         id: `new-${Date.now()}`,
         slug: form.slug.trim() || slugify(form.name),
@@ -884,7 +1057,8 @@ function ProductsManagerTab() {
         mrp: Number(form.mrp) || Number(form.price) || 0,
         currency: "INR",
         images: splitList(form.images.replace(/\n/g, ",")),
-        category: form.category.trim(),
+        category: primaryCatName,
+        categoryIds: form.categoryIds,
         collections: [],
         tags: splitList(form.tags),
         badge: form.badge === "none" ? null : form.badge,
@@ -950,7 +1124,14 @@ function ProductsManagerTab() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="capitalize text-xs">{p.category}</TableCell>
+                <TableCell className="capitalize text-xs">
+                  {p.categoryIds && p.categoryIds.length > 0
+                    ? categories
+                        .filter((c) => p.categoryIds?.includes(c.id))
+                        .map((c) => c.name)
+                        .join(", ") || p.category || "—"
+                    : p.category || "—"}
+                </TableCell>
                 <TableCell className="text-sm font-medium">{formatINR(p.price)}</TableCell>
                 <TableCell className="text-xs text-muted-foreground line-through">
                   {formatINR(p.mrp)}
@@ -972,8 +1153,8 @@ function ProductsManagerTab() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="luxeOutline" size="sm" onClick={() => setEditingProduct(p)}>
-                      Edit Price
+                    <Button variant="luxeOutline" size="sm" onClick={() => handleStartEdit(p)}>
+                      Edit
                     </Button>
                     <Button
                       variant="ghost"
@@ -1027,23 +1208,14 @@ function ProductsManagerTab() {
                   className="mt-1 rounded-none"
                 />
               </div>
+              <div>
+                <CategoryPillsSelector
+                  selectedIds={form.categoryIds}
+                  onChange={(ids) => setForm((f) => ({ ...f, categoryIds: ids }))}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="p-category">Category</Label>
-                  <Input
-                    id="p-category"
-                    required
-                    list="category-options"
-                    value={form.category}
-                    onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    className="mt-1 rounded-none"
-                  />
-                  <datalist id="category-options">
-                    {settings.catalogCategories.map((item) => (
-                      <option key={item} value={item} />
-                    ))}
-                  </datalist>
-                </div>
                 <div>
                   <Label htmlFor="p-badge">Badge</Label>
                   <Select
@@ -1213,7 +1385,7 @@ function ProductsManagerTab() {
           open={Boolean(editingProduct)}
           onOpenChange={(open) => !open && setEditingProduct(null)}
         >
-          <DialogContent className="max-w-lg rounded-none border border-border bg-background p-6">
+          <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto rounded-none border border-border bg-background p-6">
             <DialogHeader>
               <DialogTitle className="font-display text-xl">Edit Product</DialogTitle>
               <DialogDescription>{editingProduct.name}</DialogDescription>
@@ -1221,9 +1393,9 @@ function ProductsManagerTab() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const price = Number((form.elements.namedItem("price") as HTMLInputElement).value);
-                if (price > 0) handleSavePrice(editingProduct, price);
+                const formEl = e.target as HTMLFormElement;
+                const price = Number((formEl.elements.namedItem("price") as HTMLInputElement).value);
+                if (price > 0) void handleSaveEditProduct(editingProduct, price, editCategoryIds);
               }}
               className="mt-4 space-y-5"
             >
@@ -1235,6 +1407,13 @@ function ProductsManagerTab() {
                   type="number"
                   defaultValue={editingProduct.price}
                   className="mt-1 rounded-none"
+                />
+              </div>
+
+              <div>
+                <CategoryPillsSelector
+                  selectedIds={editCategoryIds}
+                  onChange={setEditCategoryIds}
                 />
               </div>
 

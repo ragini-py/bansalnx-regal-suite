@@ -40,19 +40,21 @@ const sortOptions = [
 
 export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { products, collections } = useStore();
+  const { products, collections, categories } = useStore();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const allColours = useMemo(
     () => Array.from(new Set(products.flatMap((p) => p.colours))).sort(),
     [products],
   );
-  // Derived from the live catalog, not the fixed demo list — an admin can add
-  // any category/size string freely (see AdminPage's free-text inputs), so a
-  // static facet list would silently hide real products from these filters.
+  // Uses backend persisted categories if available, falling back to any legacy
+  // category string present in loaded products.
   const liveCategories = useMemo(() => {
-    const names = Array.from(new Set(products.map((p) => p.category))).sort();
-    return names.map((name) => ({ slug: slug(name), name }));
-  }, [products]);
+    if (categories && categories.length > 0) {
+      return categories.map((c) => ({ slug: c.slug, name: c.name, id: c.id }));
+    }
+    const names = Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort();
+    return names.map((name) => ({ slug: slug(name), name, id: slug(name) }));
+  }, [categories, products]);
   const liveSizes = useMemo(() => {
     const present = new Set(products.flatMap((p) => p.sizes));
     const known = allSizes.filter((s) => present.has(s));
@@ -105,7 +107,21 @@ export function ProductsPage() {
           .includes(q),
       );
     }
-    if (search.category) list = list.filter((p) => slug(p.category) === search.category);
+    if (search.category) {
+      const targetCategory = categories.find(
+        (c) => c.slug === search.category || c.id === search.category,
+      );
+      list = list.filter((p) => {
+        if (targetCategory) {
+          if (p.categoryIds && p.categoryIds.includes(targetCategory.id)) return true;
+          if (slug(p.category) === targetCategory.slug) return true;
+        }
+        return (
+          slug(p.category) === search.category ||
+          Boolean(p.categoryIds && p.categoryIds.includes(search.category!))
+        );
+      });
+    }
     if (search.collection) list = list.filter((p) => p.collections.includes(search.collection!));
     if (selectedSizes.length)
       list = list.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));

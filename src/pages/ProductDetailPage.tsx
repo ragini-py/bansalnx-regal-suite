@@ -83,6 +83,7 @@ export function ProductDetailPage() {
           p.published &&
           p.id !== product.id &&
           (p.category === product.category ||
+            (product.categoryIds && p.categoryIds?.some((id) => product.categoryIds?.includes(id))) ||
             p.collections.some((c) => product.collections.includes(c))),
       )
       .slice(0, 4);

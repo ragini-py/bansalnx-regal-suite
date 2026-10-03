@@ -26,6 +26,7 @@ export interface Product {
   currency: "INR";
   images: string[];
   category: string;
+  categoryIds?: string[];
   collections: string[];
   tags: string[];
   badge: ProductBadge;

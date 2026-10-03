@@ -38,9 +38,12 @@ import {
 } from "@/lib/api/auth";
 import {
   createCollectionRequest,
+  createCategoryRequest,
   createProductRequest,
+  deleteCategoryRequest,
   deleteCollectionRequest,
   deleteProductRequest,
+  getCategories,
   getCollections,
   getProducts,
   updateCollectionRequest,
@@ -70,6 +73,7 @@ import { getContentRequest, updateContentRequest } from "@/lib/api/content";
 import type {
   Address,
   CartLine,
+  Category,
   Collection,
   Coupon,
   HomepageContent,
@@ -228,6 +232,9 @@ interface StoreValue {
   /* admin data */
   products: Product[];
   collections: Collection[];
+  categories: Category[];
+  saveCategory: (name: string) => Promise<Category>;
+  deleteCategory: (id: string) => Promise<void>;
   /** Customer-facing coupons only — admins marked these `isPublic`. */
   coupons: Coupon[];
   /** Full coupon list including hidden/targeted codes — admin-only. */
@@ -269,6 +276,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /* real catalog (bansalnx-backend) — fetched fresh each session, never persisted to localStorage */
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   // Public/customer-facing coupons only (isPublic: true) — safe to fetch for
   // any visitor. The full list (adminCoupons below) requires admin auth.
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -323,6 +331,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       .catch((err: unknown) => {
         console.warn("Failed to load collections:", err);
+      });
+
+    // Boot categories independently so failure doesn't block products
+    getCategories()
+      .then((cats) => {
+        if (!cancelled) setCategories(cats);
+      })
+      .catch((err: unknown) => {
+        console.warn("Failed to load categories:", err);
       });
 
     // Core catalog requirement: products
@@ -918,6 +935,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     reloadCatalog,
     products,
     collections,
+    categories,
     coupons,
     adminCoupons,
     content,
@@ -951,6 +969,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     deleteCollection: async (id) => {
       await deleteCollectionRequest(id);
       setCollections((prev) => prev.filter((c) => c.id !== id));
+    },
+    saveCategory: async (name: string): Promise<Category> => {
+      const trimmed = name.trim();
+      if (!trimmed) throw new Error("Category name cannot be empty");
+      const res = await createCategoryRequest({ name: trimmed });
+      setCategories((prev) => {
+        if (prev.some((c) => c.id === res.category.id)) return prev;
+        return [...prev, res.category];
+      });
+      return res.category;
+    },
+    deleteCategory: async (id: string) => {
+      await deleteCategoryRequest(id);
+      setCategories((prev) => prev.filter((c) => c.id !== id));
     },
     // AdminPage's CouponsManagerTab only ever creates (a fresh temp id that
     // never matches an existing coupon) or deletes — there's no edit-existing

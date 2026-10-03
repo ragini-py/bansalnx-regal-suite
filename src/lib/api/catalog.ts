@@ -55,3 +55,11 @@ export async function updateCollectionRequest(collection: Collection): Promise<C
 export async function deleteCollectionRequest(id: string): Promise<void> {
   await apiClient.delete(`/collections/${id}`);
 }
+
+export {
+  getCategories,
+  createCategoryRequest,
+  updateCategoryRequest,
+  deleteCategoryRequest,
+} from "./categories";
+
