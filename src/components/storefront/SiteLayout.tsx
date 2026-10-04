@@ -15,7 +15,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <Navbar />
-      <main id="main" className="flex-1 pt-3 sm:pt-5">
+              <main id="main" className="flex-1 pt-16 sm:pt-20">
         {children}
       </main>
       <Footer />

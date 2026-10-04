@@ -11,7 +11,10 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, "VITE_API_URL is required")
-    .url("VITE_API_URL must be a valid URL"),
+    .refine(
+      (val) => val.startsWith("/") || /^https?:\/\//i.test(val),
+      "VITE_API_URL must be a valid absolute URL (e.g. http://localhost:4000/api) or a root-relative path (e.g. /api)",
+    ),
   VITE_RAZORPAY_KEY_ID: z.string().trim().min(1).default("rzp_test_dummy_key_id"),
 });
 
