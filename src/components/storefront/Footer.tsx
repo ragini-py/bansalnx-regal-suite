@@ -168,19 +168,19 @@ export function Footer() {
                 </p>
               )}
             </form>
-            <div className="mt-6 flex gap-4">
+            <div className="mt-6 flex items-center gap-3">
               {[
                 {
                   Icon: InstagramIcon,
-                  label: "Instagram",
+                  label: "Follow Bansal-nx on Instagram",
                   href: "https://www.instagram.com/bansalnx",
                 },
                 {
                   Icon: FacebookIcon,
-                  label: "Facebook",
+                  label: "Follow Bansal-nx on Facebook",
                   href: "https://www.facebook.com/bansalnx",
                 },
-                { Icon: YoutubeIcon, label: "YouTube", href: "https://www.youtube.com/@bansalnx" },
+                { Icon: YoutubeIcon, label: "Subscribe to Bansal-nx on YouTube", href: "https://www.youtube.com/@bansalnx" },
               ].map(({ Icon, label, href }) => (
                 <a
                   key={label}
@@ -188,9 +188,9 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={label}
-                  className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-400 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-900 hover:text-white hover:shadow-md"
+                  className="grid h-11 w-11 place-items-center rounded-full border border-slate-300 bg-white text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-900 hover:bg-slate-900 hover:text-white hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900"
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-5 w-5" />
                 </a>
               ))}
             </div>

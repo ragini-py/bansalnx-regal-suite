@@ -217,38 +217,44 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
         {/* Carousel Indicators & Controls */}
         <div className="mt-10 flex items-center justify-between">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-1" role="tablist" aria-label="Hero slides">
             {heroSlides.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
+                role="tab"
+                aria-selected={current === idx}
                 onClick={() => setCurrent(idx)}
-                aria-label={`Slide ${idx + 1}`}
-                className={cn(
-                  "h-1.5 transition-all duration-300 rounded-full",
-                  current === idx ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/70",
-                )}
-              />
+                aria-label={`Go to slide ${idx + 1} of ${heroSlides.length}`}
+                className="flex h-11 min-w-[36px] items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-md"
+              >
+                <span
+                  className={cn(
+                    "block h-1.5 transition-all duration-300 rounded-full",
+                    current === idx ? "w-8 bg-white" : "w-2.5 bg-white/50 hover:bg-white/80",
+                  )}
+                />
+              </button>
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() =>
                 setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
               }
-              aria-label="Previous slide"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Previous hero slide"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-white/30 text-white hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button
               type="button"
               onClick={() => setCurrent((prev) => (prev + 1) % heroSlides.length)}
-              aria-label="Next slide"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition-colors"
+              aria-label="Next hero slide"
+              className="grid h-11 w-11 place-items-center rounded-lg border border-white/30 text-white hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -359,7 +365,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
           <h2 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-snug">
             {editorial.heading}
           </h2>
-          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-300">
+          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-200">
             {editorial.caption}
           </p>
           <Button
@@ -368,7 +374,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
             size="lg"
             className="mt-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md"
           >
-            <Link to="/about">{editorial.cta}</Link>
+            <Link to="/collections">{editorial.cta}</Link>
           </Button>
         </div>
       </Reveal>
@@ -387,16 +393,16 @@ function Promo({ promo }: { promo: HomepageContent["promo"] }) {
           <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900">
             {promo.heading}
           </h2>
-          <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600">{promo.caption}</p>
+          <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-700">{promo.caption}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild variant="luxe" size="lg">
-              <Link to="/products">{promo.cta}</Link>
+              <Link to="/collections/the-ceremony-edit">{promo.cta}</Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium"
             >
               <Link to="/contact">Book Private Consultation</Link>
             </Button>
@@ -426,23 +432,23 @@ function Craft() {
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-none">
             Generations of Jaipur Artistry
           </h2>
-          <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+          <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
             We preserve centuries-old embroidery techniques: Gota Patti from Jaipur, Zardozi from
             Lucknow, and Marodi needlework. Each garment requires upwards of 80 hours of meticulous
             hand-needlework.
           </p>
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700 leading-none">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
                 80+ Hours
               </p>
-              <p className="mt-1 text-xs text-slate-500 font-medium">Hand-embroidery per piece</p>
+              <p className="mt-1.5 text-xs text-slate-600 font-medium">Hand-embroidery per piece</p>
             </div>
             <div>
-              <p className="font-display text-2xl sm:text-3xl font-bold text-amber-700 leading-none">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
                 100% Pure
               </p>
-              <p className="mt-1 text-xs text-slate-500 font-medium">Mulberry &amp; raw silks</p>
+              <p className="mt-1.5 text-xs text-slate-600 font-medium">Mulberry &amp; raw silks</p>
             </div>
           </div>
         </Reveal>
@@ -491,13 +497,13 @@ function Testimonials() {
                       <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-xs sm:text-sm leading-relaxed text-slate-600 italic">
+                  <p className="text-xs sm:text-sm leading-relaxed text-slate-700 italic">
                     &ldquo;{r.text}&rdquo;
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100">
                   <p className="text-xs font-semibold text-slate-900">{r.author}</p>
-                  <p className="text-[11px] text-slate-500">{r.city}</p>
+                  <p className="text-[11px] text-slate-600">{r.city}</p>
                 </div>
               </div>
             </Reveal>
@@ -541,7 +547,7 @@ function Newsletter() {
         <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-white leading-none">
           Join the Bansal-nx Circle
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-300">
+        <p className="mt-2 text-sm leading-relaxed text-slate-200">
           Be first to know about new collections, private trunk shows, and member-only offers.
         </p>
         <form
@@ -561,8 +567,9 @@ function Newsletter() {
             placeholder="Your email address"
             aria-invalid={!!error}
             aria-describedby={error ? "home-newsletter-error" : undefined}
-            className="h-11 w-full max-w-sm border border-white/20 bg-white/5 px-4 text-sm text-white rounded-md placeholder:text-slate-400 focus:border-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-300"
-          />
+            className="h-11 w-full max-w-sm border border-white/20 bg-white/5 px-4 text-sm text-white rounded-md placeholder:text-slate-300 focus:border-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-300"
+          >
+          </input>
           <Button
             type="submit"
             variant="luxe"
@@ -591,9 +598,9 @@ function Story({ story }: { story: HomepageContent["story"] }) {
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 leading-none">
           {story.heading}
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600">{story.body}</p>
+        <p className="text-sm leading-relaxed text-slate-700">{story.body}</p>
         <Button asChild variant="luxe" size="lg" className="font-semibold">
-          <Link to="/products">{story.cta}</Link>
+          <Link to="/about">{story.cta}</Link>
         </Button>
       </Reveal>
     </section>
