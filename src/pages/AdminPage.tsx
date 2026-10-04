@@ -2231,12 +2231,38 @@ function ShippingManagerTab() {
 function ContentManagerTab() {
   const { content, updateContent, products, collections } = useStore();
   const [form, setForm] = useState(content);
+  const [uploadingSection, setUploadingSection] = useState<string | null>(null);
 
   // Content loads asynchronously (GET /api/content) after this tab's initial
   // render — resync the form once the real values arrive, same as Settings.
   useEffect(() => {
     setForm(content);
   }, [content]);
+
+  async function handleBannerUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    sectionKey: "hero" | "editorial" | "promo",
+  ) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingSection(sectionKey);
+    try {
+      const url = await uploadImageRequest(file, "content");
+      setForm((f) => ({
+        ...f,
+        [sectionKey]: {
+          ...f[sectionKey],
+          image: url,
+        },
+      }));
+      toast.success(`${sectionKey.toUpperCase()} banner image uploaded`);
+    } catch {
+      toast.error("Couldn't upload image. Please try again.");
+    } finally {
+      setUploadingSection(null);
+    }
+  }
 
   function toggleSection(key: string) {
     setForm((f) => ({
@@ -2267,7 +2293,7 @@ function ContentManagerTab() {
     e.preventDefault();
     try {
       await updateContent(form);
-      toast.success("Homepage content updated successfully");
+      toast.success("Homepage content & banners updated successfully");
     } catch {
       toast.error("Couldn't update homepage content. Please try again.");
     }
@@ -2276,10 +2302,9 @@ function ContentManagerTab() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-slate-900">Homepage Content</h2>
+        <h2 className="font-display text-2xl font-bold text-slate-900">Homepage Content &amp; Banners</h2>
         <p className="text-xs text-slate-500">
-          Edit the announcement bar, hero, editorial copy, and which sections and products appear on
-          the homepage.
+          Upload banner images, edit announcement copy, hero, editorial sections, and manage featured products.
         </p>
       </div>
 
@@ -2311,8 +2336,53 @@ function ContentManagerTab() {
           </div>
         </div>
 
+        {/* Hero Section */}
         <div className="border border-border/80 bg-card p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-900">Hero</h3>
+          <h3 className="text-sm font-semibold text-slate-900">Hero Section &amp; Banner</h3>
+          <div>
+            <Label>Hero Background Banner Image</Label>
+            {form.hero.image ? (
+              <div className="relative mt-2 aspect-[21/9] w-full overflow-hidden rounded-lg border border-border bg-muted">
+                <img
+                  src={form.hero.image}
+                  alt="Hero banner preview"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, hero: { ...f.hero, image: "" } }))}
+                  className="absolute right-2 top-2 rounded-md bg-black/70 p-1.5 text-white hover:bg-black"
+                  aria-label="Remove image"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 text-xs text-muted-foreground">Default hero image is active</div>
+            )}
+            <div className="mt-2 flex gap-2">
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBannerUpload(e, "hero")}
+                  disabled={uploadingSection === "hero"}
+                />
+                <span className="inline-flex h-9 items-center rounded-none border border-input bg-background px-4 text-xs font-medium hover:bg-accent">
+                  {uploadingSection === "hero" ? "Uploading…" : "Upload Hero Banner Image"}
+                </span>
+              </label>
+              <Input
+                placeholder="Or paste image URL"
+                value={form.hero.image ?? ""}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, hero: { ...f.hero, image: e.target.value } }))
+                }
+                className="rounded-none text-xs"
+              />
+            </div>
+          </div>
           <div>
             <Label htmlFor="hero-eyebrow">Eyebrow</Label>
             <Input
@@ -2372,8 +2442,55 @@ function ContentManagerTab() {
           </div>
         </div>
 
+        {/* Editorial Banner */}
         <div className="border border-border/80 bg-card p-6 space-y-4">
           <h3 className="text-sm font-semibold text-slate-900">Editorial Banner</h3>
+          <div>
+            <Label>Editorial Background Banner Image</Label>
+            {form.editorial.image ? (
+              <div className="relative mt-2 aspect-[21/9] w-full overflow-hidden rounded-lg border border-border bg-muted">
+                <img
+                  src={form.editorial.image}
+                  alt="Editorial banner preview"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, editorial: { ...f.editorial, image: "" } }))
+                  }
+                  className="absolute right-2 top-2 rounded-md bg-black/70 p-1.5 text-white hover:bg-black"
+                  aria-label="Remove image"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 text-xs text-muted-foreground">Default editorial portrait image is active</div>
+            )}
+            <div className="mt-2 flex gap-2">
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBannerUpload(e, "editorial")}
+                  disabled={uploadingSection === "editorial"}
+                />
+                <span className="inline-flex h-9 items-center rounded-none border border-input bg-background px-4 text-xs font-medium hover:bg-accent">
+                  {uploadingSection === "editorial" ? "Uploading…" : "Upload Editorial Banner"}
+                </span>
+              </label>
+              <Input
+                placeholder="Or paste image URL"
+                value={form.editorial.image ?? ""}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, editorial: { ...f.editorial, image: e.target.value } }))
+                }
+                className="rounded-none text-xs"
+              />
+            </div>
+          </div>
           <div>
             <Label htmlFor="editorial-heading">Heading</Label>
             <Input
@@ -2409,6 +2526,7 @@ function ContentManagerTab() {
           </div>
         </div>
 
+        {/* Promotional Banner */}
         <div className="border border-border/80 bg-card p-6 space-y-4">
           <h3 className="text-sm font-semibold text-slate-900">Promotional Banner</h3>
           <div>

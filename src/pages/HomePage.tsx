@@ -23,7 +23,7 @@ const newsletterEmailSchema = z.string().trim().email().max(255);
 function buildHeroSlides(hero: HomepageContent["hero"]) {
   return [
     {
-      image: imagery.hero,
+      image: hero.image || imagery.hero,
       eyebrow: hero.eyebrow,
       heading: hero.heading,
       subheading: hero.subheading,
@@ -215,28 +215,8 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
           </div>
         </div>
 
-        {/* Carousel Indicators & Controls */}
-        <div className="mt-10 flex items-center justify-between">
-          <div className="flex items-center gap-1" role="tablist" aria-label="Hero slides">
-            {heroSlides.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                role="tab"
-                aria-selected={current === idx}
-                onClick={() => setCurrent(idx)}
-                aria-label={`Go to slide ${idx + 1} of ${heroSlides.length}`}
-                className="flex h-11 min-w-[36px] items-center justify-center p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-md"
-              >
-                <span
-                  className={cn(
-                    "block h-1.5 transition-all duration-300 rounded-full",
-                    current === idx ? "w-8 bg-white" : "w-2.5 bg-white/50 hover:bg-white/80",
-                  )}
-                />
-              </button>
-            ))}
-          </div>
+        {/* Navigation Controls */}
+        <div className="mt-8 flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -244,7 +224,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
                 setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
               }
               aria-label="Previous hero slide"
-              className="grid h-11 w-11 place-items-center rounded-lg border border-white/30 text-white hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="grid h-10 w-10 place-items-center rounded-lg border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -252,7 +232,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
               type="button"
               onClick={() => setCurrent((prev) => (prev + 1) % heroSlides.length)}
               aria-label="Next hero slide"
-              className="grid h-11 w-11 place-items-center rounded-lg border border-white/30 text-white hover:bg-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="grid h-10 w-10 place-items-center rounded-lg border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -353,7 +333,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
     <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-6">
       <Reveal className="group relative isolate overflow-hidden bg-[#183d40]/80 py-12 px-6 sm:py-16 sm:px-10 rounded-[24px] text-white text-center shadow-[0_22px_45px_-28px_rgba(17,43,47,0.55)] backdrop-blur-lg">
         <img
-          src={imagery.editorial}
+          src={editorial.image || imagery.editorial}
           alt="Bansal-nx couture portrait"
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover opacity-25 transition-transform duration-[1200ms] ease-out group-hover:scale-105"

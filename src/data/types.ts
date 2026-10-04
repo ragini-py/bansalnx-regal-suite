@@ -250,14 +250,15 @@ export interface Order {
 export interface HomepageContent {
   announcement: { enabled: boolean; text: string };
   hero: {
+    image?: string;
     eyebrow: string;
     heading: string;
     subheading: string;
     primaryCta: string;
     secondaryCta: string;
   };
-  editorial: { heading: string; caption: string; cta: string };
-  promo: { heading: string; caption: string; cta: string };
+  editorial: { image?: string; heading: string; caption: string; cta: string };
+  promo: { image?: string; heading: string; caption: string; cta: string };
   story: { heading: string; body: string; cta: string };
   sections: { key: string; label: string; visible: boolean }[];
   featuredCollectionIds: string[];
