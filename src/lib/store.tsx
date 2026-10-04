@@ -33,6 +33,8 @@ import {
   meRequest,
   refreshRequest,
   registerRequest,
+  resendVerificationRequest,
+  verifyEmailRequest,
 } from "@/lib/api/auth";
 import { setAuthFailureHandler } from "@/lib/api/client";
 import {
@@ -183,7 +185,9 @@ interface StoreValue {
     email: string;
     phone: string;
     password: string;
-  }) => Promise<{ ok: boolean; error?: string; user?: User }>;
+  }) => Promise<{ ok: boolean; error?: string; requiresVerification?: boolean; email?: string }>;
+  verifyEmail: (token: string) => Promise<{ ok: boolean; error?: string; user?: User }>;
+  resendVerification: (email: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
   /* intent preservation */
   pendingIntent: PendingIntent | null;
@@ -607,13 +611,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback<StoreValue["register"]>(async (input) => {
     try {
-      const newUser = await registerRequest({ ...input, email: input.email.trim() });
-      isExplicitLoginForCartRef.current = true;
-      isExplicitLoginForWishlistRef.current = true;
-      setAuthUser(newUser);
-      return { ok: true, user: newUser };
+      const res = await registerRequest({ ...input, email: input.email.trim() });
+      return { ok: true, requiresVerification: true, email: res.email };
     } catch (err) {
       return { ok: false, error: extractApiErrorMessage(err, "Unable to create your account.") };
+    }
+  }, []);
+
+  const verifyEmail = useCallback<StoreValue["verifyEmail"]>(async (token: string) => {
+    try {
+      const verifiedUser = await verifyEmailRequest(token);
+      isExplicitLoginForCartRef.current = true;
+      isExplicitLoginForWishlistRef.current = true;
+      setAuthUser(verifiedUser);
+      return { ok: true, user: verifiedUser };
+    } catch (err) {
+      return { ok: false, error: extractApiErrorMessage(err, "Unable to verify email.") };
+    }
+  }, []);
+
+  const resendVerification = useCallback<StoreValue["resendVerification"]>(async (email: string) => {
+    try {
+      await resendVerificationRequest(email);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: extractApiErrorMessage(err, "Unable to resend verification email.") };
     }
   }, []);
 
@@ -916,6 +938,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     hasPermission: (p) => permissions.includes(p),
     login,
     register,
+    verifyEmail,
+    resendVerification,
     logout,
     pendingIntent,
     setPendingIntent,

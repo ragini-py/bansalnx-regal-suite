@@ -136,6 +136,7 @@ export interface User {
   password?: string; // mock-seed-data only; a real (backend-authenticated) user never has this client-side
   role: "customer" | AdminRole;
   status: "active" | "blocked";
+  isEmailVerified?: boolean;
   createdAt: string;
   addresses: Address[];
 }

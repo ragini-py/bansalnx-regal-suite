@@ -10,7 +10,7 @@ import { apiClient, setAccessToken, setCsrfToken, setRefreshHandler } from "@/li
 
 export type AuthUser = Omit<User, "password">;
 
-interface AuthResponse {
+export interface AuthResponse {
   user: AuthUser;
   accessToken: string;
   csrfToken: string;
@@ -22,6 +22,12 @@ export interface RegisterInput {
   email: string;
   phone: string;
   password: string;
+}
+
+export interface RegisterResult {
+  message: string;
+  email: string;
+  requiresVerification: true;
 }
 
 export interface LoginInput {
@@ -37,11 +43,20 @@ export function extractApiErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
-export async function registerRequest(input: RegisterInput): Promise<AuthUser> {
-  const { data } = await apiClient.post<AuthResponse>("/auth/register", input);
+export async function registerRequest(input: RegisterInput): Promise<RegisterResult> {
+  const { data } = await apiClient.post<RegisterResult>("/auth/register", input);
+  return data;
+}
+
+export async function verifyEmailRequest(token: string): Promise<AuthUser> {
+  const { data } = await apiClient.post<AuthResponse>("/auth/verify-email", { token });
   setAccessToken(data.accessToken);
   setCsrfToken(data.csrfToken);
   return data.user;
+}
+
+export async function resendVerificationRequest(email: string): Promise<void> {
+  await apiClient.post("/auth/resend-verification", { email: email.trim().toLowerCase() });
 }
 
 export async function loginRequest(input: LoginInput): Promise<AuthUser> {

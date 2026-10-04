@@ -119,6 +119,13 @@ export function LoginPage() {
                 className="mt-6 border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive"
               >
                 {formError}
+                {formError.toLowerCase().includes("verify") && (
+                  <div className="mt-2 text-xs">
+                    <Link to="/verify-email" className="font-medium underline hover:text-foreground">
+                      Need a new verification link? Click here.
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
