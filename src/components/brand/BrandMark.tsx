@@ -30,8 +30,8 @@ export function BrandMark({
   tone?: "default" | "onDark" | "gold";
 }) {
   const sizeMap = {
-    sm: "h-9 sm:h-10",
-    md: "h-11 sm:h-13",
+    sm: "h-10 sm:h-12",
+    md: "h-14 sm:h-16 lg:h-18",
     lg: "h-24 sm:h-32",
   };
 

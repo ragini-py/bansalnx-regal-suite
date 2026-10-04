@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight, Mail, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Mail, Sparkles, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -212,30 +212,6 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             >
               <Link to={slide.secondaryTo}>{slide.secondaryCta}</Link>
             </Button>
-          </div>
-        </div>
-
-        {/* Navigation Controls */}
-        <div className="mt-8 flex items-center justify-end">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
-              }
-              aria-label="Previous hero slide"
-              className="grid h-10 w-10 place-items-center rounded-lg border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrent((prev) => (prev + 1) % heroSlides.length)}
-              aria-label="Next hero slide"
-              className="grid h-10 w-10 place-items-center rounded-lg border border-white/20 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>

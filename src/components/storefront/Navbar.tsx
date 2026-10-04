@@ -180,19 +180,19 @@ export function Navbar() {
           scrolled ? "shadow-[0_10px_28px_-24px_rgba(17,43,47,0.35)]" : "",
         )}
       >
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-4 px-5 sm:h-16 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1400px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
           {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
-            className="grid h-9 w-9 place-items-center lg:hidden text-slate-700"
+            className="grid h-10 w-10 place-items-center lg:hidden text-slate-700"
           >
             <Menu className="h-5 w-5" strokeWidth={1.5} />
           </button>
 
           {/* Logo */}
-          <Link to="/" className="lg:order-1" aria-label="Bansal-nx home">
+          <Link to="/" className="flex items-center py-1 lg:order-1" aria-label="Bansal-nx home">
             <BrandMark size="sm" className="sm:hidden" />
             <BrandMark size="md" className="hidden sm:inline-flex" />
           </Link>
