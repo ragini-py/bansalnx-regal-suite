@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { EmptyState } from "@/components/common/SectionHeading";
@@ -10,6 +11,28 @@ export function CollectionDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { collections, products } = useStore();
   const collection = collections.find((c) => c.slug === slug && c.published);
+
+  const items = useMemo(() => {
+    if (!collection) return [];
+    // 1. Direct ID / slug matches from collection.productIds
+    const byId = collection.productIds
+      .map((id) =>
+        products.find(
+          (p) => p.id === id || (p as any)._id === id || p.slug === id,
+        ),
+      )
+      .filter((p): p is (typeof products)[0] => !!p && p.published);
+
+    if (byId.length > 0) return byId;
+
+    // 2. Category name fallback match
+    const normSlug = collection.slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return products.filter((p) => {
+      if (!p.published) return false;
+      const catNorm = (p.category || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      return catNorm.includes(normSlug) || normSlug.includes(catNorm);
+    });
+  }, [collection, products]);
 
   if (!collection) {
     return (
@@ -28,11 +51,6 @@ export function CollectionDetailPage() {
       </SiteLayout>
     );
   }
-
-  const items = collection.productIds
-    .map((id) => products.find((p) => p.id === id))
-    .filter((p) => !!p && p.published)
-    .map((p) => p!);
 
   return (
     <SiteLayout>

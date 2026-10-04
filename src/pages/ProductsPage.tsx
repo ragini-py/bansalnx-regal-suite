@@ -111,12 +111,17 @@ export function ProductsPage() {
       const targetCategory = categories.find(
         (c) => c.slug === search.category || c.id === search.category,
       );
+      const searchCatNorm = search.category.toLowerCase().replace(/[^a-z0-9]/g, "");
       list = list.filter((p) => {
         if (targetCategory) {
           if (p.categoryIds && p.categoryIds.includes(targetCategory.id)) return true;
           if (slug(p.category) === targetCategory.slug) return true;
         }
+        const pCatNorm = (p.category || "").toLowerCase().replace(/[^a-z0-9]/g, "");
         return (
+          pCatNorm === searchCatNorm ||
+          pCatNorm.includes(searchCatNorm) ||
+          searchCatNorm.includes(pCatNorm) ||
           slug(p.category) === search.category ||
           Boolean(p.categoryIds && p.categoryIds.includes(search.category!))
         );
