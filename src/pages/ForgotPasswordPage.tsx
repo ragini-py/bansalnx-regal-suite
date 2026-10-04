@@ -46,10 +46,10 @@ export function ForgotPasswordPage() {
       <PageHeader
         breadcrumb={
           <Breadcrumbs
-            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Reset Password" }]}
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Forgot Password" }]}
           />
         }
-        title="Reset Password"
+        title="Forgot Password"
       />
       <div className="flex min-h-[60vh] items-center justify-center bg-secondary/20 px-5 py-16 sm:px-10">
         <div className="w-full max-w-sm border border-border bg-background px-6 py-10 sm:px-10">
@@ -59,7 +59,7 @@ export function ForgotPasswordPage() {
 
           {!sent ? (
             <>
-              <h1 className="mt-6 text-center text-2xl">Reset your password</h1>
+              <h1 className="mt-6 text-center text-2xl font-serif">Forgot your password?</h1>
               <p className="mt-2 text-center text-sm text-muted-foreground">
                 Enter your account email and we'll send you a link to reset your password.
               </p>
