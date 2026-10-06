@@ -1150,24 +1150,54 @@ function ProductsManagerTab() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [inspectedProduct, setInspectedProduct] = useState<Product | null>(null);
   const [editCategoryIds, setEditCategoryIds] = useState<string[]>([]);
+  const [editImages, setEditImages] = useState<string[]>([]);
+  const [editUploading, setEditUploading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, field: "images") {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!file) return;
+    if (files.length === 0) return;
     setUploading(true);
     try {
-      const url = await uploadImageRequest(file, "products");
-      setForm((f) => ({ ...f, [field]: f[field] ? `${f[field]}\n${url}` : url }));
-      toast.success("Image uploaded");
+      const urls: string[] = [];
+      for (const file of files) {
+        const url = await uploadImageRequest(file, "products");
+        urls.push(url);
+      }
+      setForm((f) => {
+        const existing = f[field] ? f[field].trim() : "";
+        const combined = existing ? `${existing}\n${urls.join("\n")}` : urls.join("\n");
+        return { ...f, [field]: combined };
+      });
+      toast.success(files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`);
     } catch {
-      toast.error("Couldn't upload that image. Please try again.");
+      toast.error("Couldn't upload image(s). Please try again.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleEditImagesUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+    setEditUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of files) {
+        const url = await uploadImageRequest(file, "products");
+        urls.push(url);
+      }
+      setEditImages((prev) => [...prev, ...urls]);
+      toast.success(files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`);
+    } catch {
+      toast.error("Couldn't upload image(s). Please try again.");
+    } finally {
+      setEditUploading(false);
     }
   }
 
@@ -1211,6 +1241,7 @@ function ProductsManagerTab() {
 
   function handleStartEdit(prod: Product) {
     setEditingProduct(prod);
+    setEditImages(prod.images ? [...prod.images] : []);
     if (prod.categoryIds && prod.categoryIds.length > 0) {
       setEditCategoryIds(prod.categoryIds);
     } else if (prod.category) {
@@ -1225,7 +1256,12 @@ function ProductsManagerTab() {
     }
   }
 
-  async function handleSaveEditProduct(prod: Product, newPrice: number, catIds: string[]) {
+  async function handleSaveEditProduct(
+    prod: Product,
+    newPrice: number,
+    catIds: string[],
+    imagesToSave: string[],
+  ) {
     try {
       const primaryCat = categories.find((c) => catIds.includes(c.id));
       const primaryCatName = primaryCat ? primaryCat.name : (catIds.length > 0 ? "" : prod.category);
@@ -1234,6 +1270,7 @@ function ProductsManagerTab() {
         price: newPrice,
         categoryIds: catIds,
         category: primaryCatName,
+        images: imagesToSave.length > 0 ? imagesToSave : prod.images,
       };
       await saveProduct(updated);
       if (inspectedProduct && inspectedProduct.id === prod.id) {
@@ -1562,25 +1599,76 @@ function ProductsManagerTab() {
                 />
               </div>
               <div>
-                <Label htmlFor="p-images">Image URLs (one per line)</Label>
+                <Label htmlFor="p-images">Product Images (URLs or Upload)</Label>
                 <Textarea
                   id="p-images"
-                  rows={3}
+                  rows={2}
                   value={form.images}
                   onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))}
-                  placeholder="/products/example.jpg"
-                  className="mt-1 rounded-none"
+                  placeholder="/products/example.jpg (one URL per line)"
+                  className="mt-1 rounded-none text-xs font-mono"
                 />
-                <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-gold-deep hover:underline">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => void handleImageUpload(e, "images")}
-                  />
-                  {uploading ? "Uploading…" : "+ Upload an image"}
-                </label>
+                <div className="mt-2 flex items-center justify-between">
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-amber-800 hover:text-amber-900 bg-amber-50 px-2.5 py-1.5 rounded border border-amber-200">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => void handleImageUpload(e, "images")}
+                    />
+                    <Plus className="h-3.5 w-3.5" />
+                    {uploading ? "Uploading images…" : "+ Upload images (supports multiple)"}
+                  </label>
+                  <span className="text-[11px] text-slate-500">
+                    {form.images.split("\n").filter((u) => u.trim()).length} image(s)
+                  </span>
+                </div>
+                {form.images.trim() && (
+                  <div className="mt-3 flex flex-wrap gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200 max-h-36 overflow-y-auto">
+                    {form.images
+                      .split("\n")
+                      .map((u) => u.trim())
+                      .filter(Boolean)
+                      .map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="relative group w-16 h-20 rounded border border-slate-200 overflow-hidden bg-white shadow-xs shrink-0"
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/products/p1.jpg";
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const list = form.images
+                                .split("\n")
+                                .map((u) => u.trim())
+                                .filter(Boolean);
+                              list.splice(idx, 1);
+                              setForm((f) => ({ ...f, images: list.join("\n") }));
+                            }}
+                            className="absolute top-1 right-1 p-0.5 rounded-full bg-slate-900/80 text-white hover:bg-rose-600 transition-colors"
+                            title="Remove image"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          {idx === 0 && (
+                            <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[8px] text-white text-center py-0.5">
+                              Primary
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1647,7 +1735,7 @@ function ProductsManagerTab() {
                 e.preventDefault();
                 const formEl = e.target as HTMLFormElement;
                 const price = Number((formEl.elements.namedItem("price") as HTMLInputElement).value);
-                if (price > 0) void handleSaveEditProduct(editingProduct, price, editCategoryIds);
+                if (price > 0) void handleSaveEditProduct(editingProduct, price, editCategoryIds, editImages);
               }}
               className="mt-4 space-y-5"
             >
@@ -1660,6 +1748,63 @@ function ProductsManagerTab() {
                   defaultValue={editingProduct.price}
                   className="mt-1 rounded-none"
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label>Product Imagery ({editImages.length})</Label>
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-amber-800 hover:text-amber-900 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      disabled={editUploading}
+                      onChange={(e) => void handleEditImagesUpload(e)}
+                    />
+                    <Plus className="h-3.5 w-3.5" />
+                    {editUploading ? "Uploading…" : "+ Upload images"}
+                  </label>
+                </div>
+                {editImages.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-200 max-h-48 overflow-y-auto">
+                    {editImages.map((url, idx) => (
+                      <div
+                        key={idx}
+                        className="relative group w-16 h-20 rounded border border-slate-200 overflow-hidden bg-white shadow-xs shrink-0"
+                      >
+                        <img
+                          src={url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "/products/p1.jpg";
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditImages((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="absolute top-1 right-1 p-0.5 rounded-full bg-slate-900/80 text-white hover:bg-rose-600 transition-colors"
+                          title="Remove image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {idx === 0 && (
+                          <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[8px] text-white text-center py-0.5">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-lg text-center">
+                    No images uploaded. Click &quot;+ Upload images&quot; to add.
+                  </p>
+                )}
               </div>
 
               <div>

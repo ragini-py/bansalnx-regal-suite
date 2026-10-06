@@ -13,5 +13,9 @@ export async function uploadImageRequest(
   form.append("image", file);
   form.append("folder", folder);
   const { data } = await apiClient.post<{ url: string }>("/uploads", form);
-  return new URL(data.url, apiClient.defaults.baseURL).toString();
+  const base = apiClient.defaults.baseURL;
+  if (base && /^https?:\/\//i.test(base)) {
+    return new URL(data.url, base).toString();
+  }
+  return data.url;
 }
