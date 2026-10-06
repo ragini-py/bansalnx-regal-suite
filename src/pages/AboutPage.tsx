@@ -26,7 +26,11 @@ export function AboutPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Our Story" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Our Story" }]}
+          />
+        }
         title="Our Story"
         description="Founded in Jaipur, built by hand."
       />
@@ -42,19 +46,19 @@ export function AboutPage() {
               <p>
                 Bansal-nx began in Jaipur — a city where centuries of embroidery, block-printing and
                 hand-loom weaving live in the same lanes as its bazaars. We started as a dedicated
-                design studio working with a handful of karigars, and that intimacy remains the spine of
-                everything we make.
+                design studio working with a handful of karigars, and that intimacy remains the
+                spine of everything we make.
               </p>
               <p>
                 We build made-to-order: each garment is cut and finished only once it's chosen,
-                rather than pulled from a warehouse of unsold stock. It takes longer, and it means
-                a great deal more — to the hands that make it, and to the one who wears it.
+                rather than pulled from a warehouse of unsold stock. It takes longer, and it means a
+                great deal more — to the hands that make it, and to the one who wears it.
               </p>
               <p>
-                Our emblem is the peacock, native to Rajasthan and long a symbol of grace and
-                regal confidence. It appears quietly through our world, from the mark on our
-                garments to the language of our stores — a reminder that true luxury doesn't need
-                to announce itself.
+                Our emblem is the peacock, native to Rajasthan and long a symbol of grace and regal
+                confidence. It appears quietly through our world, from the mark on our garments to
+                the language of our stores — a reminder that true luxury doesn't need to announce
+                itself.
               </p>
             </div>
           </div>

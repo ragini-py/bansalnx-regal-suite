@@ -42,9 +42,13 @@ export function PageHeader({
         {breadcrumb}
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <h1 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-slate-900 tracking-tight">{title}</h1>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-slate-900 tracking-tight">
+              {title}
+            </h1>
             {description && (
-              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500">{description}</p>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500">
+                {description}
+              </p>
             )}
           </div>
           {meta}
@@ -60,8 +64,16 @@ export function Breadcrumbs({ items }: { items: { label: string; href?: ReactNod
       <ol className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
         {items.map((item, i) => (
           <li key={item.label} className="flex items-center gap-2">
-            {item.href ?? <span aria-current="page" className="text-slate-800 font-semibold">{item.label}</span>}
-            {i < items.length - 1 && <span aria-hidden="true" className="text-slate-300">/</span>}
+            {item.href ?? (
+              <span aria-current="page" className="text-slate-800 font-semibold">
+                {item.label}
+              </span>
+            )}
+            {i < items.length - 1 && (
+              <span aria-hidden="true" className="text-slate-300">
+                /
+              </span>
+            )}
           </li>
         ))}
       </ol>

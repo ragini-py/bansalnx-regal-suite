@@ -258,7 +258,8 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
                     {collection.description}
                   </p>
                   <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-amber-200 transition-colors">
-                    Explore Collection <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                    Explore Collection{" "}
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </div>
               </div>
@@ -296,7 +297,8 @@ function ProductBlock({
       <div className="mt-10 text-center">
         <Button asChild variant="luxeOutline" size="lg" className="font-semibold group">
           <Link to={href}>
-            {cta} <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            {cta}{" "}
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>
       </div>
@@ -524,8 +526,7 @@ function Newsletter() {
             aria-invalid={!!error}
             aria-describedby={error ? "home-newsletter-error" : undefined}
             className="h-11 w-full max-w-sm border border-white/20 bg-white/5 px-4 text-sm text-white rounded-md placeholder:text-slate-300 focus:border-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-300"
-          >
-          </input>
+          ></input>
           <Button
             type="submit"
             variant="luxe"

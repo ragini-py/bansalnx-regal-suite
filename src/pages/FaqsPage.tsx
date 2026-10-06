@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 
 const faqs = [
@@ -46,7 +51,11 @@ export function FaqsPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "FAQs" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "FAQs" }]}
+          />
+        }
         title="Frequently Asked Questions"
         description="Everything you might want to know before, during and after your order."
       />

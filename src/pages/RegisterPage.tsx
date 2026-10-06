@@ -130,7 +130,8 @@ export function RegisterPage() {
                 </p>
                 <p className="mt-1 font-semibold text-foreground">{verificationPendingEmail}</p>
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                  Click the link inside the email to verify your address and immediately log in to your Bansal-nx customer dashboard.
+                  Click the link inside the email to verify your address and immediately log in to
+                  your Bansal-nx customer dashboard.
                 </p>
 
                 {resendSuccess && (
@@ -289,7 +290,11 @@ export function RegisterPage() {
                         aria-label={showPassword ? "Hide password" : "Show password"}
                         className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                     {errors.password && (
@@ -307,9 +312,13 @@ export function RegisterPage() {
                       autoComplete="new-password"
                       className="mt-1.5 rounded-none"
                       value={values.confirmPassword}
-                      onChange={(e) => setValues((v) => ({ ...v, confirmPassword: e.target.value }))}
+                      onChange={(e) =>
+                        setValues((v) => ({ ...v, confirmPassword: e.target.value }))
+                      }
                       aria-invalid={!!errors.confirmPassword}
-                      aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
+                      aria-describedby={
+                        errors.confirmPassword ? "confirmPassword-error" : undefined
+                      }
                     />
                     {errors.confirmPassword && (
                       <p id="confirmPassword-error" className="mt-1.5 text-xs text-destructive">

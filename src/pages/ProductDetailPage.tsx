@@ -73,7 +73,7 @@ export function ProductDetailPage() {
     setQuantity(1);
     setSizeError(false);
     setColour(product?.colours[0] ?? "");
-  }, [slug, product?.id]);
+  }, [slug, product?.id, product?.colours]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -83,7 +83,8 @@ export function ProductDetailPage() {
           p.published &&
           p.id !== product.id &&
           (p.category === product.category ||
-            (product.categoryIds && p.categoryIds?.some((id) => product.categoryIds?.includes(id))) ||
+            (product.categoryIds &&
+              p.categoryIds?.some((id) => product.categoryIds?.includes(id))) ||
             p.collections.some((c) => product.collections.includes(c))),
       )
       .slice(0, 4);
@@ -110,7 +111,8 @@ export function ProductDetailPage() {
   const saving = discountPercent(product.mrp, product.price);
   const wished = isWishlisted(product.id);
   const selectedAvailable = size ? isVariantAvailable(product, size, colour) : false;
-  const colourSoldOut = (c: string) => !product.sizes.some((s) => isVariantAvailable(product, s, c));
+  const colourSoldOut = (c: string) =>
+    !product.sizes.some((s) => isVariantAvailable(product, s, c));
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
@@ -180,7 +182,14 @@ export function ProductDetailPage() {
       <div className="mx-auto max-w-[1400px] px-5 pb-32 pt-10 sm:px-8 sm:pb-24 sm:pt-14 lg:pb-20 lg:pt-16 lg:px-12">
         <Breadcrumbs
           items={[
-            { label: "Home", href: <Link to="/" className="link-underline">Home</Link> },
+            {
+              label: "Home",
+              href: (
+                <Link to="/" className="link-underline">
+                  Home
+                </Link>
+              ),
+            },
             {
               label: "Shop",
               href: (
@@ -254,7 +263,9 @@ export function ProductDetailPage() {
                   aria-current={i === activeImage}
                   className={cn(
                     "relative aspect-3/4 w-20 shrink-0 overflow-hidden border transition-colors sm:w-24",
-                    i === activeImage ? "border-gold ring-1 ring-gold" : "border-border hover:border-foreground/40",
+                    i === activeImage
+                      ? "border-gold ring-1 ring-gold"
+                      : "border-border hover:border-foreground/40",
                   )}
                 >
                   <img
@@ -287,7 +298,9 @@ export function ProductDetailPage() {
             {/* Price section */}
             <div className="border-y border-border/80 py-4">
               <div className="flex flex-wrap items-baseline gap-3">
-                <span className="font-display text-3xl font-normal">{formatINR(product.price)}</span>
+                <span className="font-display text-3xl font-normal">
+                  {formatINR(product.price)}
+                </span>
                 {product.mrp > product.price && (
                   <>
                     <span className="text-sm text-muted-foreground line-through">
@@ -308,7 +321,11 @@ export function ProductDetailPage() {
             <div className="flex items-center justify-between border border-gold/40 bg-gold/5 px-4 py-3 text-xs">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-3.5 w-3.5 text-gold" />
-                <span>Use code <strong className="font-mono text-gold-deep font-medium">WELCOME10</strong> for 10% off</span>
+                <span>
+                  Use code{" "}
+                  <strong className="font-mono text-gold-deep font-medium">WELCOME10</strong> for
+                  10% off
+                </span>
               </div>
               <button
                 type="button"
@@ -483,7 +500,9 @@ export function ProductDetailPage() {
                   <ul className="space-y-2 text-sm leading-relaxed text-muted-foreground">
                     {product.details.map((detail) => (
                       <li key={detail} className="flex gap-2.5">
-                        <span aria-hidden="true" className="text-gold">—</span>
+                        <span aria-hidden="true" className="text-gold">
+                          —
+                        </span>
                         {detail}
                       </li>
                     ))}
@@ -498,7 +517,9 @@ export function ProductDetailPage() {
                   <ul className="space-y-2 text-sm leading-relaxed text-muted-foreground">
                     {product.care.map((item) => (
                       <li key={item} className="flex gap-2.5">
-                        <span aria-hidden="true" className="text-gold">—</span>
+                        <span aria-hidden="true" className="text-gold">
+                          —
+                        </span>
                         {item}
                       </li>
                     ))}
@@ -510,7 +531,10 @@ export function ProductDetailPage() {
                   Shipping &amp; Delivery Timeline
                 </AccordionTrigger>
                 <AccordionContent className="space-y-2 text-sm leading-relaxed text-muted-foreground">
-                  <p>In-stock items are dispatched in 1–3 business days. Made-to-order creations are crafted and dispatched within 7–12 business days.</p>
+                  <p>
+                    In-stock items are dispatched in 1–3 business days. Made-to-order creations are
+                    crafted and dispatched within 7–12 business days.
+                  </p>
                   <p>All parcels are insured and shipped via Delhivery Express.</p>
                 </AccordionContent>
               </AccordionItem>
@@ -541,7 +565,9 @@ export function ProductDetailPage() {
       {/* Sticky Mobile Add to Bag Bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between border-t border-border bg-background/95 p-4 backdrop-blur-md lg:hidden">
         <div>
-          <p className="text-xs font-medium text-foreground truncate max-w-[160px]">{product.name}</p>
+          <p className="text-xs font-medium text-foreground truncate max-w-[160px]">
+            {product.name}
+          </p>
           <p className="text-sm font-display text-gold-deep">{formatINR(product.price)}</p>
         </div>
         <Button variant="luxe" size="sm" onClick={handleAddToCart}>
@@ -554,7 +580,9 @@ export function ProductDetailPage() {
         <DialogContent className="max-w-lg rounded-none border border-border bg-background p-6">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">Bespoke Size Guide</DialogTitle>
-            <DialogDescription>Garment body measurements in inches (standard Indian sizing).</DialogDescription>
+            <DialogDescription>
+              Garment body measurements in inches (standard Indian sizing).
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-4 overflow-x-auto border border-border">
             <table className="w-full text-xs text-left">
@@ -588,7 +616,8 @@ export function ProductDetailPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Need custom made-to-measure tailoring? Add your exact measurements in order notes at checkout or write to our styling concierge.
+            Need custom made-to-measure tailoring? Add your exact measurements in order notes at
+            checkout or write to our styling concierge.
           </p>
         </DialogContent>
       </Dialog>

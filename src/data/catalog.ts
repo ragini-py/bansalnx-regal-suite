@@ -27,6 +27,10 @@ export function isVariantAvailable(product: Product, size: string, colour: strin
   );
 }
 
-export function findVariant(product: Product, size: string, colour: string): ProductVariant | undefined {
+export function findVariant(
+  product: Product,
+  size: string,
+  colour: string,
+): ProductVariant | undefined {
   return product.variants.find((v) => v.size === size && v.colour === colour);
 }

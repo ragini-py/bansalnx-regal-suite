@@ -151,7 +151,6 @@ function load(): PersistedState {
   }
 }
 
-
 export interface CartLineView extends CartLine {
   product: Product;
   lineTotal: number;
@@ -630,14 +629,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const resendVerification = useCallback<StoreValue["resendVerification"]>(async (email: string) => {
-    try {
-      await resendVerificationRequest(email);
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, error: extractApiErrorMessage(err, "Unable to resend verification email.") };
-    }
-  }, []);
+  const resendVerification = useCallback<StoreValue["resendVerification"]>(
+    async (email: string) => {
+      try {
+        await resendVerificationRequest(email);
+        return { ok: true };
+      } catch (err) {
+        return {
+          ok: false,
+          error: extractApiErrorMessage(err, "Unable to resend verification email."),
+        };
+      }
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     isExplicitLoginForCartRef.current = false;
@@ -802,7 +807,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Re-checks whenever the cart's contents change; appliedCouponCode itself
     // triggering this too (right after applyCoupon sets it) is a harmless
     // extra check, not a bug.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartLines, appliedCouponCode]);
 
   const totals = useCallback<StoreValue["totals"]>(

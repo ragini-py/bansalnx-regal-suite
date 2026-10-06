@@ -290,7 +290,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                         <StatusBadge status="info" label={`Return: ${o.returnRequest.status}`} />
                       )}
                     </TableCell>
-                    <TableCell className="font-semibold text-slate-900">{formatINR(o.total)}</TableCell>
+                    <TableCell className="font-semibold text-slate-900">
+                      {formatINR(o.total)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="luxeOutline"
@@ -336,7 +338,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                 <TableHead className="text-xs font-semibold text-slate-500">Items</TableHead>
                 <TableHead className="text-xs font-semibold text-slate-500">Total</TableHead>
                 <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-                <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+                <TableHead className="text-right text-xs font-semibold text-slate-500">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -350,7 +354,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                   <TableCell className="text-xs font-medium text-slate-700">
                     {o.customerName}
                   </TableCell>
-                  <TableCell className="text-xs text-slate-500">{formatDate(o.createdAt)}</TableCell>
+                  <TableCell className="text-xs text-slate-500">
+                    {formatDate(o.createdAt)}
+                  </TableCell>
                   <TableCell className="max-w-[200px] truncate text-xs text-slate-500">
                     {o.lines.map((l) => l.name).join(", ")}
                   </TableCell>
@@ -463,9 +469,16 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                     Shipping &amp; Recipient Details
                   </p>
                   <div className="mt-2 text-xs text-slate-700 leading-relaxed space-y-0.5">
-                    <p className="font-semibold text-slate-900">{selectedOrder.address.fullName} — {selectedOrder.address.phone}</p>
-                    <p>{selectedOrder.address.line1}, {selectedOrder.address.locality}</p>
-                    <p>{selectedOrder.address.city}, {selectedOrder.address.state} — {selectedOrder.address.pincode}</p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedOrder.address.fullName} — {selectedOrder.address.phone}
+                    </p>
+                    <p>
+                      {selectedOrder.address.line1}, {selectedOrder.address.locality}
+                    </p>
+                    <p>
+                      {selectedOrder.address.city}, {selectedOrder.address.state} —{" "}
+                      {selectedOrder.address.pincode}
+                    </p>
                     <p className="text-slate-500">Contact Email: {selectedOrder.email}</p>
                   </div>
                 </div>
@@ -479,7 +492,11 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                   {selectedOrder.lines.map((line, idx) => (
                     <li key={idx} className="flex items-center justify-between py-2.5 text-sm">
                       <div className="flex items-center gap-3">
-                        <img src={line.image} alt={line.name} className="h-12 w-10 rounded-md object-cover border border-slate-200" />
+                        <img
+                          src={line.image}
+                          alt={line.name}
+                          className="h-12 w-10 rounded-md object-cover border border-slate-200"
+                        />
                         <div>
                           <p className="font-medium text-slate-900">{line.name}</p>
                           <p className="text-xs text-slate-500">
@@ -487,7 +504,9 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                           </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-slate-900">{formatINR(line.price * line.quantity)}</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatINR(line.price * line.quantity)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -503,10 +522,18 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                     Payment Information
                   </p>
                   <div className="mt-2 text-xs space-y-1">
-                    <p><span className="text-slate-500">Method:</span> <strong className="uppercase">{selectedOrder.payment.method}</strong></p>
-                    <p><span className="text-slate-500">Status:</span> <strong className="capitalize">{selectedOrder.payment.status}</strong></p>
+                    <p>
+                      <span className="text-slate-500">Method:</span>{" "}
+                      <strong className="uppercase">{selectedOrder.payment.method}</strong>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">Status:</span>{" "}
+                      <strong className="capitalize">{selectedOrder.payment.status}</strong>
+                    </p>
                     {selectedOrder.payment.transactionId && (
-                      <p className="font-mono text-[11px] text-slate-600 truncate">Txn: {selectedOrder.payment.transactionId}</p>
+                      <p className="font-mono text-[11px] text-slate-600 truncate">
+                        Txn: {selectedOrder.payment.transactionId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -516,8 +543,14 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
                     Logistics / Delhivery
                   </p>
                   <div className="mt-2 text-xs space-y-1">
-                    <p><span className="text-slate-500">Courier:</span> <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong></p>
-                    <p><span className="text-slate-500">AWB:</span> <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong></p>
+                    <p>
+                      <span className="text-slate-500">Courier:</span>{" "}
+                      <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">AWB:</span>{" "}
+                      <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -729,11 +762,11 @@ function OrdersManagerTab() {
                       className={cn(
                         "rounded-full text-[11px] font-semibold capitalize",
                         o.status === "delivered" &&
-                        "border-emerald-200 bg-emerald-50 text-emerald-700",
+                          "border-emerald-200 bg-emerald-50 text-emerald-700",
                         ["ndr", "rto", "cancelled"].includes(o.status) &&
-                        "border-rose-200 bg-rose-50 text-rose-700",
+                          "border-rose-200 bg-rose-50 text-rose-700",
                         !["delivered", "ndr", "rto", "cancelled"].includes(o.status) &&
-                        "border-slate-200 bg-slate-50 text-slate-700",
+                          "border-slate-200 bg-slate-50 text-slate-700",
                       )}
                     >
                       {orderStatusLabels[o.status] || o.status}
@@ -796,9 +829,16 @@ function OrdersManagerTab() {
                     Shipping &amp; Recipient Details
                   </p>
                   <div className="mt-2 text-xs text-slate-700 leading-relaxed space-y-0.5">
-                    <p className="font-semibold text-slate-900">{selectedOrder.address.fullName} — {selectedOrder.address.phone}</p>
-                    <p>{selectedOrder.address.line1}, {selectedOrder.address.locality}</p>
-                    <p>{selectedOrder.address.city}, {selectedOrder.address.state} — {selectedOrder.address.pincode}</p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedOrder.address.fullName} — {selectedOrder.address.phone}
+                    </p>
+                    <p>
+                      {selectedOrder.address.line1}, {selectedOrder.address.locality}
+                    </p>
+                    <p>
+                      {selectedOrder.address.city}, {selectedOrder.address.state} —{" "}
+                      {selectedOrder.address.pincode}
+                    </p>
                     <p className="text-slate-500">Contact Email: {selectedOrder.email}</p>
                   </div>
                 </div>
@@ -813,7 +853,11 @@ function OrdersManagerTab() {
                   {selectedOrder.lines.map((line, idx) => (
                     <li key={idx} className="flex items-center justify-between py-2.5 text-sm">
                       <div className="flex items-center gap-3">
-                        <img src={line.image} alt={line.name} className="h-12 w-10 rounded-md object-cover border border-slate-200" />
+                        <img
+                          src={line.image}
+                          alt={line.name}
+                          className="h-12 w-10 rounded-md object-cover border border-slate-200"
+                        />
                         <div>
                           <p className="font-medium text-slate-900">{line.name}</p>
                           <p className="text-xs text-slate-500">
@@ -821,7 +865,9 @@ function OrdersManagerTab() {
                           </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-slate-900">{formatINR(line.price * line.quantity)}</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatINR(line.price * line.quantity)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -838,10 +884,18 @@ function OrdersManagerTab() {
                     Payment Information
                   </p>
                   <div className="mt-2 text-xs space-y-1">
-                    <p><span className="text-slate-500">Method:</span> <strong className="uppercase">{selectedOrder.payment.method}</strong></p>
-                    <p><span className="text-slate-500">Status:</span> <strong className="capitalize">{selectedOrder.payment.status}</strong></p>
+                    <p>
+                      <span className="text-slate-500">Method:</span>{" "}
+                      <strong className="uppercase">{selectedOrder.payment.method}</strong>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">Status:</span>{" "}
+                      <strong className="capitalize">{selectedOrder.payment.status}</strong>
+                    </p>
                     {selectedOrder.payment.transactionId && (
-                      <p className="font-mono text-[11px] text-slate-600 truncate">Txn: {selectedOrder.payment.transactionId}</p>
+                      <p className="font-mono text-[11px] text-slate-600 truncate">
+                        Txn: {selectedOrder.payment.transactionId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -851,8 +905,14 @@ function OrdersManagerTab() {
                     Logistics / Delhivery
                   </p>
                   <div className="mt-2 text-xs space-y-1">
-                    <p><span className="text-slate-500">Courier:</span> <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong></p>
-                    <p><span className="text-slate-500">AWB:</span> <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong></p>
+                    <p>
+                      <span className="text-slate-500">Courier:</span>{" "}
+                      <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">AWB:</span>{" "}
+                      <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong>
+                    </p>
                     {selectedOrder.shipment?.awb && (
                       <Link
                         to={`/track?id=${selectedOrder.id}&email=${encodeURIComponent(selectedOrder.email)}`}
@@ -906,7 +966,9 @@ function OrdersManagerTab() {
                   <p className="text-xs uppercase tracking-wider text-amber-800 font-bold">
                     Return Request Pending
                   </p>
-                  <p className="mt-1 text-sm text-slate-800">Reason: {selectedOrder.returnRequest.reason}</p>
+                  <p className="mt-1 text-sm text-slate-800">
+                    Reason: {selectedOrder.returnRequest.reason}
+                  </p>
                   <p className="text-xs text-slate-600 mt-0.5">
                     Current status: {selectedOrder.returnRequest.status}
                   </p>
@@ -1085,7 +1147,7 @@ function CategoryPillsSelector({
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border shadow-xs cursor-pointer",
                   isSelected
                     ? "bg-amber-700 text-white border-amber-800"
-                    : "bg-background text-foreground/80 border-border hover:border-foreground/30 hover:bg-muted/60"
+                    : "bg-background text-foreground/80 border-border hover:border-foreground/30 hover:bg-muted/60",
                 )}
               >
                 {isSelected ? (
@@ -1173,7 +1235,9 @@ function ProductsManagerTab() {
         const combined = existing ? `${existing}\n${urls.join("\n")}` : urls.join("\n");
         return { ...f, [field]: combined };
       });
-      toast.success(files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`);
+      toast.success(
+        files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`,
+      );
     } catch {
       toast.error("Couldn't upload image(s). Please try again.");
     } finally {
@@ -1193,7 +1257,9 @@ function ProductsManagerTab() {
         urls.push(url);
       }
       setEditImages((prev) => [...prev, ...urls]);
-      toast.success(files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`);
+      toast.success(
+        files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`,
+      );
     } catch {
       toast.error("Couldn't upload image(s). Please try again.");
     } finally {
@@ -1206,7 +1272,7 @@ function ProductsManagerTab() {
     try {
       await saveProduct({ ...prod, published: nextPublished });
       if (inspectedProduct && inspectedProduct.id === prod.id) {
-        setInspectedProduct((prev) => prev ? { ...prev, published: nextPublished } : null);
+        setInspectedProduct((prev) => (prev ? { ...prev, published: nextPublished } : null));
       }
       toast.success(`${prod.name} ${nextPublished ? "published to store" : "unpublished"}`);
     } catch {
@@ -1247,8 +1313,7 @@ function ProductsManagerTab() {
     } else if (prod.category) {
       const match = categories.find(
         (c) =>
-          c.name.toLowerCase() === prod.category.toLowerCase() ||
-          c.slug === slugify(prod.category),
+          c.name.toLowerCase() === prod.category.toLowerCase() || c.slug === slugify(prod.category),
       );
       setEditCategoryIds(match ? [match.id] : []);
     } else {
@@ -1264,7 +1329,7 @@ function ProductsManagerTab() {
   ) {
     try {
       const primaryCat = categories.find((c) => catIds.includes(c.id));
-      const primaryCatName = primaryCat ? primaryCat.name : (catIds.length > 0 ? "" : prod.category);
+      const primaryCatName = primaryCat ? primaryCat.name : catIds.length > 0 ? "" : prod.category;
       const updated: Product = {
         ...prod,
         price: newPrice,
@@ -1369,7 +1434,9 @@ function ProductsManagerTab() {
               <TableHead className="text-xs font-semibold text-slate-500">MRP</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Variants</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -1381,7 +1448,11 @@ function ProductsManagerTab() {
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <img src={p.images[0]} alt={p.name} className="h-12 w-10 object-cover rounded-md border border-slate-200" />
+                    <img
+                      src={p.images[0]}
+                      alt={p.name}
+                      className="h-12 w-10 object-cover rounded-md border border-slate-200"
+                    />
                     <div>
                       <p className="font-semibold text-slate-900 text-xs">{p.name}</p>
                       <p className="text-[11px] text-slate-400">Slug: {p.slug}</p>
@@ -1393,14 +1464,20 @@ function ProductsManagerTab() {
                     ? categories
                         .filter((c) => p.categoryIds?.includes(c.id))
                         .map((c) => c.name)
-                        .join(", ") || p.category || "—"
+                        .join(", ") ||
+                      p.category ||
+                      "—"
                     : p.category || "—"}
                 </TableCell>
-                <TableCell className="text-xs font-bold text-slate-900">{formatINR(p.price)}</TableCell>
+                <TableCell className="text-xs font-bold text-slate-900">
+                  {formatINR(p.price)}
+                </TableCell>
                 <TableCell className="text-xs text-slate-400 line-through">
                   {formatINR(p.mrp)}
                 </TableCell>
-                <TableCell className="text-xs text-slate-600 font-medium">{p.variants.length} SKU(s)</TableCell>
+                <TableCell className="text-xs text-slate-600 font-medium">
+                  {p.variants.length} SKU(s)
+                </TableCell>
                 <TableCell>
                   <button
                     type="button"
@@ -1734,8 +1811,11 @@ function ProductsManagerTab() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formEl = e.target as HTMLFormElement;
-                const price = Number((formEl.elements.namedItem("price") as HTMLInputElement).value);
-                if (price > 0) void handleSaveEditProduct(editingProduct, price, editCategoryIds, editImages);
+                const price = Number(
+                  (formEl.elements.namedItem("price") as HTMLInputElement).value,
+                );
+                if (price > 0)
+                  void handleSaveEditProduct(editingProduct, price, editCategoryIds, editImages);
               }}
               className="mt-4 space-y-5"
             >
@@ -1834,7 +1914,9 @@ function ProductsManagerTab() {
                         type="button"
                         variant={variant.availability === "available" ? "luxe" : "outline"}
                         size="sm"
-                        onClick={() => void handleToggleVariantAvailability(editingProduct, variant.id)}
+                        onClick={() =>
+                          void handleToggleVariantAvailability(editingProduct, variant.id)
+                        }
                       >
                         {variant.availability === "available" ? "Available" : "Unavailable"}
                       </Button>
@@ -1870,7 +1952,10 @@ function ProductsManagerTab() {
                 </div>
                 <div className="flex items-center gap-2">
                   {inspectedProduct.badge && (
-                    <Badge variant="outline" className="rounded-full text-xs uppercase bg-amber-50 text-amber-800 border-amber-200">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full text-xs uppercase bg-amber-50 text-amber-800 border-amber-200"
+                    >
                       {inspectedProduct.badge}
                     </Badge>
                   )}
@@ -1897,8 +1982,15 @@ function ProductsManagerTab() {
                 </p>
                 <div className="flex gap-2.5 overflow-x-auto pb-1">
                   {inspectedProduct.images.map((img, idx) => (
-                    <div key={idx} className="relative shrink-0 w-24 h-32 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
-                      <img src={img} alt={`${inspectedProduct.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div
+                      key={idx}
+                      className="relative shrink-0 w-24 h-32 rounded-lg overflow-hidden border border-slate-200 bg-slate-50"
+                    >
+                      <img
+                        src={img}
+                        alt={`${inspectedProduct.name} ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
                       {idx === 0 && (
                         <span className="absolute bottom-1 left-1 bg-slate-900/80 text-white text-[9px] px-1.5 py-0.5 rounded">
                           Primary
@@ -1913,11 +2005,15 @@ function ProductsManagerTab() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50/70 border border-slate-200 rounded-xl">
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Selling Price</p>
-                  <p className="text-base font-bold text-slate-900 mt-0.5">{formatINR(inspectedProduct.price)}</p>
+                  <p className="text-base font-bold text-slate-900 mt-0.5">
+                    {formatINR(inspectedProduct.price)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">MRP</p>
-                  <p className="text-sm font-medium text-slate-400 line-through mt-0.5">{formatINR(inspectedProduct.mrp)}</p>
+                  <p className="text-sm font-medium text-slate-400 line-through mt-0.5">
+                    {formatINR(inspectedProduct.mrp)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Category</p>
@@ -1926,13 +2022,17 @@ function ProductsManagerTab() {
                       ? categories
                           .filter((c) => inspectedProduct.categoryIds?.includes(c.id))
                           .map((c) => c.name)
-                          .join(", ") || inspectedProduct.category || "—"
+                          .join(", ") ||
+                        inspectedProduct.category ||
+                        "—"
                       : inspectedProduct.category || "—"}
                   </p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Total SKUs</p>
-                  <p className="text-sm font-bold text-slate-800 mt-0.5">{inspectedProduct.variants.length} Variants</p>
+                  <p className="text-sm font-bold text-slate-800 mt-0.5">
+                    {inspectedProduct.variants.length} Variants
+                  </p>
                 </div>
               </div>
 
@@ -1944,10 +2044,16 @@ function ProductsManagerTab() {
                 {(inspectedProduct.material || inspectedProduct.clothMaterial) && (
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {inspectedProduct.material && (
-                      <p><span className="text-slate-500">Material:</span> <strong className="text-slate-800">{inspectedProduct.material}</strong></p>
+                      <p>
+                        <span className="text-slate-500">Material:</span>{" "}
+                        <strong className="text-slate-800">{inspectedProduct.material}</strong>
+                      </p>
                     )}
                     {inspectedProduct.clothMaterial && (
-                      <p><span className="text-slate-500">Fabric:</span> <strong className="text-slate-800">{inspectedProduct.clothMaterial}</strong></p>
+                      <p>
+                        <span className="text-slate-500">Fabric:</span>{" "}
+                        <strong className="text-slate-800">{inspectedProduct.clothMaterial}</strong>
+                      </p>
                     )}
                   </div>
                 )}
@@ -1959,7 +2065,10 @@ function ProductsManagerTab() {
                 {inspectedProduct.tags && inspectedProduct.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {inspectedProduct.tags.map((tag) => (
-                      <span key={tag} className="text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                      <span
+                        key={tag}
+                        className="text-[10px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"
+                      >
                         #{tag}
                       </span>
                     ))}
@@ -1991,7 +2100,9 @@ function ProductsManagerTab() {
                         variant={variant.availability === "available" ? "luxe" : "outline"}
                         size="sm"
                         className="text-xs h-7"
-                        onClick={() => void handleToggleVariantAvailability(inspectedProduct, variant.id)}
+                        onClick={() =>
+                          void handleToggleVariantAvailability(inspectedProduct, variant.id)
+                        }
                       >
                         {variant.availability === "available" ? "In Stock" : "Unavailable"}
                       </Button>
@@ -2185,7 +2296,9 @@ function CollectionsManagerTab() {
               <TableHead className="text-xs font-semibold text-slate-500">Products</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Featured</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -2198,7 +2311,11 @@ function CollectionsManagerTab() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     {c.coverImage && (
-                      <img src={c.coverImage} alt={c.name} className="h-12 w-16 object-cover rounded-md border border-slate-200" />
+                      <img
+                        src={c.coverImage}
+                        alt={c.name}
+                        className="h-12 w-16 object-cover rounded-md border border-slate-200"
+                      />
                     )}
                     <div>
                       <p className="font-semibold text-slate-900 text-xs">{c.name}</p>
@@ -2206,13 +2323,20 @@ function CollectionsManagerTab() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-slate-700 font-medium">{c.productIds.length} items</TableCell>
+                <TableCell className="text-xs text-slate-700 font-medium">
+                  {c.productIds.length} items
+                </TableCell>
                 <TableCell className="text-xs text-slate-600">
                   {c.featured ? (
-                    <Badge variant="outline" className="rounded-full text-[10px] bg-amber-50 text-amber-800 border-amber-200">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full text-[10px] bg-amber-50 text-amber-800 border-amber-200"
+                    >
                       Featured
                     </Badge>
-                  ) : "No"}
+                  ) : (
+                    "No"
+                  )}
                 </TableCell>
                 <TableCell>
                   <StatusBadge
@@ -2404,12 +2528,16 @@ function CollectionsManagerTab() {
                     {inspectedCollection.name}
                   </DialogTitle>
                   <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                    Slug: <span className="font-mono text-slate-700">{inspectedCollection.slug}</span>
+                    Slug:{" "}
+                    <span className="font-mono text-slate-700">{inspectedCollection.slug}</span>
                   </DialogDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   {inspectedCollection.featured && (
-                    <Badge variant="outline" className="rounded-full text-xs uppercase bg-amber-50 text-amber-800 border-amber-200">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full text-xs uppercase bg-amber-50 text-amber-800 border-amber-200"
+                    >
                       Featured
                     </Badge>
                   )}
@@ -2436,8 +2564,12 @@ function CollectionsManagerTab() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent flex items-end p-4">
                       <div>
-                        <p className="text-white font-display text-lg font-bold">{inspectedCollection.name}</p>
-                        <p className="text-white/80 text-xs">{inspectedCollection.productIds.length} Curated Pieces</p>
+                        <p className="text-white font-display text-lg font-bold">
+                          {inspectedCollection.name}
+                        </p>
+                        <p className="text-white/80 text-xs">
+                          {inspectedCollection.productIds.length} Curated Pieces
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -2457,7 +2589,9 @@ function CollectionsManagerTab() {
                   <p className="text-xs text-slate-700 leading-relaxed">
                     {inspectedCollection.description}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-2">Display Sort Order: {inspectedCollection.order}</p>
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    Display Sort Order: {inspectedCollection.order}
+                  </p>
                 </div>
               )}
 
@@ -2467,7 +2601,9 @@ function CollectionsManagerTab() {
                   Assigned Products ({inspectedCollection.productIds.length})
                 </p>
                 {inspectedCollection.productIds.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-3 text-center">No products assigned to this collection yet.</p>
+                  <p className="text-xs text-slate-400 py-3 text-center">
+                    No products assigned to this collection yet.
+                  </p>
                 ) : (
                   <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
                     {products
@@ -2607,11 +2743,15 @@ function CouponsManagerTab() {
             <TableRow className="border-b border-slate-100 bg-slate-50/50">
               <TableHead className="text-xs font-semibold text-slate-500">Code</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Discount</TableHead>
-              <TableHead className="text-xs font-semibold text-slate-500">Min Order Value</TableHead>
+              <TableHead className="text-xs font-semibold text-slate-500">
+                Min Order Value
+              </TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Expires</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Visibility</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -2621,18 +2761,21 @@ function CouponsManagerTab() {
                 onClick={() => setInspectedCoupon(c)}
                 className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
               >
-                <TableCell className="font-mono font-semibold text-slate-900 text-xs">{c.code}</TableCell>
+                <TableCell className="font-mono font-semibold text-slate-900 text-xs">
+                  {c.code}
+                </TableCell>
                 <TableCell className="font-bold text-amber-800 text-xs">
                   {c.type === "percent" ? `${c.value}% OFF` : `${formatINR(c.value)} OFF`}
                 </TableCell>
                 <TableCell className="text-xs text-slate-600">
                   {formatINR(c.minOrder ?? 0)}
                 </TableCell>
-                <TableCell className="text-xs text-slate-500">
-                  {formatDate(c.expiresAt)}
-                </TableCell>
+                <TableCell className="text-xs text-slate-500">{formatDate(c.expiresAt)}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700"
+                  >
                     {c.isPublic ? "Public" : "Hidden"}
                   </Badge>
                 </TableCell>
@@ -2641,7 +2784,9 @@ function CouponsManagerTab() {
                     variant="outline"
                     className={cn(
                       "rounded-full text-[11px] font-semibold",
-                      c.active ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-500",
+                      c.active
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-slate-200 bg-slate-50 text-slate-500",
                     )}
                   >
                     {c.active ? "Active" : "Expired"}
@@ -2694,8 +2839,12 @@ function CouponsManagerTab() {
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogContent className="max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="font-display font-bold text-xl text-slate-900">Create Promo Coupon</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">Create a promotional voucher code for checkout.</DialogDescription>
+              <DialogTitle className="font-display font-bold text-xl text-slate-900">
+                Create Promo Coupon
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Create a promotional voucher code for checkout.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateCoupon} className="mt-4 space-y-4">
               <div>
@@ -2760,9 +2909,7 @@ function CouponsManagerTab() {
                   checked={newIsPublic}
                   onCheckedChange={(c) => setNewIsPublic(c === true)}
                 />
-                <span>
-                  List publicly (shown to customers in Account &gt; Coupons)
-                </span>
+                <span>List publicly (shown to customers in Account &gt; Coupons)</span>
               </label>
 
               <Button type="submit" variant="luxe" className="w-full">
@@ -2827,19 +2974,27 @@ function CouponsManagerTab() {
               <div className="grid grid-cols-2 gap-3 text-xs border border-slate-200 rounded-xl p-4">
                 <div>
                   <p className="text-slate-400 font-medium">Valid From</p>
-                  <p className="text-slate-700 font-semibold mt-0.5">{formatDate(inspectedCoupon.startsAt)}</p>
+                  <p className="text-slate-700 font-semibold mt-0.5">
+                    {formatDate(inspectedCoupon.startsAt)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-slate-400 font-medium">Expires On</p>
-                  <p className="text-slate-700 font-semibold mt-0.5">{formatDate(inspectedCoupon.expiresAt)}</p>
+                  <p className="text-slate-700 font-semibold mt-0.5">
+                    {formatDate(inspectedCoupon.expiresAt)}
+                  </p>
                 </div>
                 <div className="mt-2">
                   <p className="text-slate-400 font-medium">Times Used</p>
-                  <p className="text-slate-700 font-semibold mt-0.5">{inspectedCoupon.timesUsed} times</p>
+                  <p className="text-slate-700 font-semibold mt-0.5">
+                    {inspectedCoupon.timesUsed} times
+                  </p>
                 </div>
                 <div className="mt-2">
                   <p className="text-slate-400 font-medium">Visibility</p>
-                  <p className="text-slate-700 font-semibold mt-0.5">{inspectedCoupon.isPublic ? "Public Showcase" : "Targeted / Private"}</p>
+                  <p className="text-slate-700 font-semibold mt-0.5">
+                    {inspectedCoupon.isPublic ? "Public Showcase" : "Targeted / Private"}
+                  </p>
                 </div>
               </div>
 
@@ -2897,7 +3052,7 @@ function CustomersManagerTab() {
     try {
       await updateUser(target.id, { role: nextRole });
       if (selectedCustomer && selectedCustomer.id === target.id) {
-        setSelectedCustomer((prev) => prev ? { ...prev, role: nextRole } : null);
+        setSelectedCustomer((prev) => (prev ? { ...prev, role: nextRole } : null));
       }
       toast.success(
         `${target.firstName} ${target.lastName} is now ${nextRole === "admin" ? "an admin" : "a customer"}`,
@@ -2912,7 +3067,7 @@ function CustomersManagerTab() {
     try {
       await updateUser(target.id, { status: nextStatus });
       if (selectedCustomer && selectedCustomer.id === target.id) {
-        setSelectedCustomer((prev) => prev ? { ...prev, status: nextStatus } : null);
+        setSelectedCustomer((prev) => (prev ? { ...prev, status: nextStatus } : null));
       }
       toast.success(
         `${target.firstName} ${target.lastName} ${nextStatus === "blocked" ? "blocked" : "unblocked"}`,
@@ -2926,7 +3081,8 @@ function CustomersManagerTab() {
     ? orders.filter(
         (o) =>
           o.email.toLowerCase() === selectedCustomer.email.toLowerCase() ||
-          o.customerName.toLowerCase() === `${selectedCustomer.firstName} ${selectedCustomer.lastName}`.toLowerCase(),
+          o.customerName.toLowerCase() ===
+            `${selectedCustomer.firstName} ${selectedCustomer.lastName}`.toLowerCase(),
       )
     : [];
 
@@ -2956,7 +3112,9 @@ function CustomersManagerTab() {
               <TableHead className="text-xs font-semibold text-slate-500">Role</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Joined</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -3030,7 +3188,9 @@ function CustomersManagerTab() {
                         }}
                         className={cn(
                           "text-xs",
-                          u.status === "blocked" ? "text-emerald-700 hover:bg-emerald-50" : "text-rose-600 hover:bg-rose-50",
+                          u.status === "blocked"
+                            ? "text-emerald-700 hover:bg-emerald-50"
+                            : "text-rose-600 hover:bg-rose-50",
                         )}
                       >
                         {u.status === "blocked" ? "Unblock" : "Block"}
@@ -3095,15 +3255,21 @@ function CustomersManagerTab() {
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Member Since</p>
-                  <p className="text-xs font-bold text-slate-800 mt-1">{formatDate(selectedCustomer.createdAt)}</p>
+                  <p className="text-xs font-bold text-slate-800 mt-1">
+                    {formatDate(selectedCustomer.createdAt)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Saved Addresses</p>
-                  <p className="text-xs font-bold text-slate-800 mt-1">{selectedCustomer.addresses?.length ?? 0} Saved</p>
+                  <p className="text-xs font-bold text-slate-800 mt-1">
+                    {selectedCustomer.addresses?.length ?? 0} Saved
+                  </p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Total Orders</p>
-                  <p className="text-xs font-bold text-amber-800 mt-1">{customerOrders.length} Placed</p>
+                  <p className="text-xs font-bold text-amber-800 mt-1">
+                    {customerOrders.length} Placed
+                  </p>
                 </div>
               </div>
 
@@ -3113,7 +3279,9 @@ function CustomersManagerTab() {
                   Saved Delivery Addresses ({selectedCustomer.addresses?.length ?? 0})
                 </p>
                 {!selectedCustomer.addresses || selectedCustomer.addresses.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-3 text-center">No delivery addresses on file.</p>
+                  <p className="text-xs text-slate-400 py-3 text-center">
+                    No delivery addresses on file.
+                  </p>
                 ) : (
                   <div className="space-y-2.5">
                     {selectedCustomer.addresses.map((addr) => (
@@ -3122,15 +3290,21 @@ function CustomersManagerTab() {
                         className="p-3 rounded-lg border border-slate-100 bg-slate-50/60 text-xs text-slate-700 leading-relaxed"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-slate-900">{addr.fullName} ({addr.label})</span>
+                          <span className="font-semibold text-slate-900">
+                            {addr.fullName} ({addr.label})
+                          </span>
                           {addr.isDefault && (
                             <span className="text-[10px] font-bold uppercase bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
                               Default Address
                             </span>
                           )}
                         </div>
-                        <p>{addr.line1}, {addr.locality}</p>
-                        <p>{addr.city}, {addr.state} — {addr.pincode}</p>
+                        <p>
+                          {addr.line1}, {addr.locality}
+                        </p>
+                        <p>
+                          {addr.city}, {addr.state} — {addr.pincode}
+                        </p>
                         <p className="text-slate-500 text-[11px] mt-0.5">Phone: {addr.phone}</p>
                       </div>
                     ))}
@@ -3144,7 +3318,9 @@ function CustomersManagerTab() {
                   Customer Order History ({customerOrders.length})
                 </p>
                 {customerOrders.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-3 text-center">No order records found for this account.</p>
+                  <p className="text-xs text-slate-400 py-3 text-center">
+                    No order records found for this account.
+                  </p>
                 ) : (
                   <div className="max-h-44 overflow-y-auto space-y-2 pr-1">
                     {customerOrders.map((ord) => (
@@ -3154,11 +3330,15 @@ function CustomersManagerTab() {
                       >
                         <div>
                           <p className="font-semibold text-slate-900">{ord.id}</p>
-                          <p className="text-[11px] text-slate-400">{formatDateTime(ord.createdAt)} · {ord.lines.length} piece(s)</p>
+                          <p className="text-[11px] text-slate-400">
+                            {formatDateTime(ord.createdAt)} · {ord.lines.length} piece(s)
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-slate-900">{formatINR(ord.total)}</p>
-                          <span className="text-[10px] uppercase font-semibold text-slate-600">{ord.status}</span>
+                          <span className="text-[10px] uppercase font-semibold text-slate-600">
+                            {ord.status}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -3183,10 +3363,13 @@ function CustomersManagerTab() {
                     onClick={() => void handleToggleStatus(selectedCustomer)}
                     className={cn(
                       "flex-1",
-                      selectedCustomer.status !== "blocked" && "text-rose-600 border-rose-200 hover:bg-rose-50",
+                      selectedCustomer.status !== "blocked" &&
+                        "text-rose-600 border-rose-200 hover:bg-rose-50",
                     )}
                   >
-                    {selectedCustomer.status === "blocked" ? "Unblock Account Access" : "Block Customer Account"}
+                    {selectedCustomer.status === "blocked"
+                      ? "Unblock Account Access"
+                      : "Block Customer Account"}
                   </Button>
                 </div>
               )}
@@ -3279,13 +3462,21 @@ function ShippingManagerTab() {
             Carrier Status
           </p>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-base font-semibold text-slate-900">Delhivery Surface Express</span>
+            <span className="text-base font-semibold text-slate-900">
+              Delhivery Surface Express
+            </span>
             {settings.delhiveryConnected ? (
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs">
+              <Badge
+                variant="outline"
+                className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs"
+              >
                 Active
               </Badge>
             ) : (
-              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800 rounded-full text-xs">
+              <Badge
+                variant="outline"
+                className="border-amber-200 bg-amber-50 text-amber-800 rounded-full text-xs"
+              >
                 Simulated / Sandbox
               </Badge>
             )}
@@ -3302,7 +3493,10 @@ function ShippingManagerTab() {
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-base font-semibold text-slate-900">Webhook Real-time Sync</span>
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs">
+            <Badge
+              variant="outline"
+              className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs"
+            >
               Live &amp; Synchronized
             </Badge>
           </div>
@@ -3325,7 +3519,9 @@ function ShippingManagerTab() {
               <TableHead className="text-xs font-semibold text-slate-500">Customer</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">AWB Code</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
-              <TableHead className="text-right text-xs font-semibold text-slate-500">Action</TableHead>
+              <TableHead className="text-right text-xs font-semibold text-slate-500">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -3444,10 +3640,17 @@ function ShippingManagerTab() {
                   </p>
                   <div className="text-xs text-slate-700 leading-relaxed space-y-0.5">
                     <p className="font-semibold text-slate-900">
-                      {selectedShipmentOrder.address.fullName} — {selectedShipmentOrder.address.phone}
+                      {selectedShipmentOrder.address.fullName} —{" "}
+                      {selectedShipmentOrder.address.phone}
                     </p>
-                    <p>{selectedShipmentOrder.address.line1}, {selectedShipmentOrder.address.locality}</p>
-                    <p>{selectedShipmentOrder.address.city}, {selectedShipmentOrder.address.state} — {selectedShipmentOrder.address.pincode}</p>
+                    <p>
+                      {selectedShipmentOrder.address.line1},{" "}
+                      {selectedShipmentOrder.address.locality}
+                    </p>
+                    <p>
+                      {selectedShipmentOrder.address.city}, {selectedShipmentOrder.address.state} —{" "}
+                      {selectedShipmentOrder.address.pincode}
+                    </p>
                   </div>
                 </div>
               )}
@@ -3459,12 +3662,21 @@ function ShippingManagerTab() {
                 </p>
                 <div className="space-y-2">
                   {selectedShipmentOrder.lines.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-none">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 last:border-none"
+                    >
                       <div className="flex items-center gap-3">
-                        <img src={item.image} alt={item.name} className="h-10 w-8 object-cover rounded border border-slate-200" />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-10 w-8 object-cover rounded border border-slate-200"
+                        />
                         <div>
                           <p className="font-semibold text-slate-900">{item.name}</p>
-                          <p className="text-slate-500">{item.size} · {item.colour}</p>
+                          <p className="text-slate-500">
+                            {item.size} · {item.colour}
+                          </p>
                         </div>
                       </div>
                       <span className="font-medium text-slate-700">Qty: {item.quantity}</span>
@@ -3478,14 +3690,17 @@ function ShippingManagerTab() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-600 mb-3">
                   Tracking Event Log
                 </p>
-                {selectedShipmentOrder.shipment?.events && selectedShipmentOrder.shipment.events.length > 0 ? (
+                {selectedShipmentOrder.shipment?.events &&
+                selectedShipmentOrder.shipment.events.length > 0 ? (
                   <div className="space-y-3">
                     {selectedShipmentOrder.shipment.events.map((evt, idx) => (
                       <div key={idx} className="flex items-start gap-3 text-xs">
                         <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
                         <div>
                           <p className="font-semibold text-slate-900">{evt.label}</p>
-                          <p className="text-slate-500">{evt.location} · {formatDateTime(evt.at)}</p>
+                          <p className="text-slate-500">
+                            {evt.location} · {formatDateTime(evt.at)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -3603,9 +3818,12 @@ function ContentManagerTab() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-slate-900">Homepage Content &amp; Banners</h2>
+        <h2 className="font-display text-2xl font-bold text-slate-900">
+          Homepage Content &amp; Banners
+        </h2>
         <p className="text-xs text-slate-500">
-          Upload banner images, edit announcement copy, hero, editorial sections, and manage featured products.
+          Upload banner images, edit announcement copy, hero, editorial sections, and manage
+          featured products.
         </p>
       </div>
 
@@ -3767,7 +3985,9 @@ function ContentManagerTab() {
                 </button>
               </div>
             ) : (
-              <div className="mt-2 text-xs text-muted-foreground">Default editorial portrait image is active</div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Default editorial portrait image is active
+              </div>
             )}
             <div className="mt-2 flex gap-2">
               <label className="cursor-pointer">

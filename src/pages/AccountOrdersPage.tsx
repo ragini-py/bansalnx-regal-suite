@@ -152,9 +152,13 @@ export function AccountOrdersPage() {
                   <TableHead className="text-xs font-semibold text-slate-600">Products</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-600">Total</TableHead>
                   <TableHead className="text-xs font-semibold text-slate-600">Payment</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Order Status</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-600">
+                    Order Status
+                  </TableHead>
                   <TableHead className="text-xs font-semibold text-slate-600">Shipping</TableHead>
-                  <TableHead className="text-right text-xs font-semibold text-slate-600">Action</TableHead>
+                  <TableHead className="text-right text-xs font-semibold text-slate-600">
+                    Action
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -164,14 +168,26 @@ export function AccountOrdersPage() {
                     onClick={() => setSelectedOrder(order)}
                     className="cursor-pointer border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
                   >
-                    <TableCell className="font-semibold text-slate-900 text-xs">{order.id}</TableCell>
-                    <TableCell className="text-xs text-slate-500">{formatDate(order.createdAt)}</TableCell>
-                    <TableCell className="text-xs text-slate-700 max-w-[200px] truncate" title={order.lines.map((l) => l.name).join(", ")}>
+                    <TableCell className="font-semibold text-slate-900 text-xs">
+                      {order.id}
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-500">
+                      {formatDate(order.createdAt)}
+                    </TableCell>
+                    <TableCell
+                      className="text-xs text-slate-700 max-w-[200px] truncate"
+                      title={order.lines.map((l) => l.name).join(", ")}
+                    >
                       {order.lines.map((l) => l.name).join(", ")}
                     </TableCell>
-                    <TableCell className="text-xs font-bold text-slate-900">{formatINR(order.total)}</TableCell>
+                    <TableCell className="text-xs font-bold text-slate-900">
+                      {formatINR(order.total)}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700">
+                      <Badge
+                        variant="outline"
+                        className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700"
+                      >
                         {paymentStatusLabels[order.payment.status]}
                       </Badge>
                     </TableCell>
@@ -180,9 +196,12 @@ export function AccountOrdersPage() {
                         variant="outline"
                         className={cn(
                           "rounded-full text-[11px] font-semibold capitalize",
-                          order.status === "delivered" && "border-emerald-200 bg-emerald-50 text-emerald-700",
-                          ["ndr", "rto", "cancelled"].includes(order.status) && "border-rose-200 bg-rose-50 text-rose-700",
-                          !["delivered", "ndr", "rto", "cancelled"].includes(order.status) && "border-slate-200 bg-slate-50 text-slate-700",
+                          order.status === "delivered" &&
+                            "border-emerald-200 bg-emerald-50 text-emerald-700",
+                          ["ndr", "rto", "cancelled"].includes(order.status) &&
+                            "border-rose-200 bg-rose-50 text-rose-700",
+                          !["delivered", "ndr", "rto", "cancelled"].includes(order.status) &&
+                            "border-slate-200 bg-slate-50 text-slate-700",
                         )}
                       >
                         {orderStatusLabels[order.status]}
@@ -262,7 +281,9 @@ export function AccountOrdersPage() {
                           </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-slate-900">{formatINR(line.price * line.quantity)}</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatINR(line.price * line.quantity)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -280,8 +301,13 @@ export function AccountOrdersPage() {
                   </p>
                   <div className="mt-2 text-xs text-slate-700 space-y-0.5 leading-relaxed">
                     <p className="font-semibold text-slate-900">{selectedOrder.address.fullName}</p>
-                    <p>{selectedOrder.address.line1}, {selectedOrder.address.locality}</p>
-                    <p>{selectedOrder.address.city}, {selectedOrder.address.state} — {selectedOrder.address.pincode}</p>
+                    <p>
+                      {selectedOrder.address.line1}, {selectedOrder.address.locality}
+                    </p>
+                    <p>
+                      {selectedOrder.address.city}, {selectedOrder.address.state} —{" "}
+                      {selectedOrder.address.pincode}
+                    </p>
                     <p className="text-slate-500">Phone: {selectedOrder.address.phone}</p>
                   </div>
                 </div>
@@ -311,7 +337,9 @@ export function AccountOrdersPage() {
                         <span className="h-2 w-2 rounded-full bg-emerald-500 mt-1 shrink-0" />
                         <div>
                           <p className="font-medium text-slate-800">{evt.label}</p>
-                          <p className="text-[11px] text-slate-400">{evt.location} · {formatDateTime(evt.at)}</p>
+                          <p className="text-[11px] text-slate-400">
+                            {evt.location} · {formatDateTime(evt.at)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -329,7 +357,9 @@ export function AccountOrdersPage() {
                 </Button>
                 {selectedOrder.shipment?.awb && (
                   <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link to={`/track?id=${selectedOrder.id}&email=${encodeURIComponent(selectedOrder.email)}`}>
+                    <Link
+                      to={`/track?id=${selectedOrder.id}&email=${encodeURIComponent(selectedOrder.email)}`}
+                    >
                       <Truck className="h-3.5 w-3.5 mr-1.5" />
                       Track Live Package
                     </Link>

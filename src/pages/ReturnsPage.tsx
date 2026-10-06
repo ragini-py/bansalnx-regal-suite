@@ -16,7 +16,11 @@ export function ReturnsPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Returns" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Returns" }]}
+          />
+        }
         title="Returns & Exchanges"
         description="A considered process for a considered purchase."
       />
@@ -28,8 +32,8 @@ export function ReturnsPage() {
             defective on arrival. Exchanges for a different size are subject to availability.
           </p>
           <p>
-            To start a return, go to <span className="text-foreground">Account → Orders</span>,
-            open the order and choose "Request Return". Refunds are issued to the original payment
+            To start a return, go to <span className="text-foreground">Account → Orders</span>, open
+            the order and choose "Request Return". Refunds are issued to the original payment
             method; cash-on-delivery orders are refunded to a bank account you provide.
           </p>
         </div>

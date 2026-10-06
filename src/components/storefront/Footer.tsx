@@ -180,7 +180,11 @@ export function Footer() {
                   label: "Follow Bansal-nx on Facebook",
                   href: "https://www.facebook.com/bansalnx",
                 },
-                { Icon: YoutubeIcon, label: "Subscribe to Bansal-nx on YouTube", href: "https://www.youtube.com/@bansalnx" },
+                {
+                  Icon: YoutubeIcon,
+                  label: "Subscribe to Bansal-nx on YouTube",
+                  href: "https://www.youtube.com/@bansalnx",
+                },
               ].map(({ Icon, label, href }) => (
                 <a
                   key={label}

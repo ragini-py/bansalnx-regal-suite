@@ -17,6 +17,7 @@ export type ProductBadge = "new" | "bestseller" | "exclusive" | null;
 
 export interface Product {
   id: string;
+  _id?: string;
   slug: string;
   productCode?: string;
   styleNumber?: string;

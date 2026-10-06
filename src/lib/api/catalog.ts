@@ -11,9 +11,12 @@ import { apiClient } from "@/lib/api/client";
 // still returns the full catalog, so this keeps the app's existing
 // fetch-once-on-boot pattern working unchanged.
 export async function getProducts(): Promise<Product[]> {
-  const { data } = await apiClient.get<{ products: Product[]; total: number; page: number; limit: number }>(
-    "/products",
-  );
+  const { data } = await apiClient.get<{
+    products: Product[];
+    total: number;
+    page: number;
+    limit: number;
+  }>("/products");
   return data.products;
 }
 
@@ -62,4 +65,3 @@ export {
   updateCategoryRequest,
   deleteCategoryRequest,
 } from "./categories";
-

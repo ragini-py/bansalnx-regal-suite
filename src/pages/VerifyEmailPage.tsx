@@ -16,8 +16,14 @@ export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const navigate = useNavigate();
-  const { verifyEmail, resendVerification, pendingIntent, setPendingIntent, toggleWishlist, addToCart } =
-    useStore();
+  const {
+    verifyEmail,
+    resendVerification,
+    pendingIntent,
+    setPendingIntent,
+    toggleWishlist,
+    addToCart,
+  } = useStore();
 
   const [status, setStatus] = useState<"verifying" | "success" | "error" | "no_token">(
     token ? "verifying" : "no_token",
@@ -161,7 +167,11 @@ export function VerifyEmailPage() {
               <div>
                 <div className="text-center">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-                    {status === "error" ? <AlertCircle className="h-9 w-9" /> : <Mail className="h-9 w-9 text-primary" />}
+                    {status === "error" ? (
+                      <AlertCircle className="h-9 w-9" />
+                    ) : (
+                      <Mail className="h-9 w-9 text-primary" />
+                    )}
                   </div>
                   <p className="eyebrow mt-6 text-muted-foreground">
                     {status === "error" ? "Verification Failed" : "Email Verification"}

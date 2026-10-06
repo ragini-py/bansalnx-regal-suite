@@ -9,7 +9,11 @@ export function ShippingPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Shipping" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Shipping" }]}
+          />
+        }
         title="Shipping Policy"
         description="How and when your order reaches you."
       />
@@ -27,24 +31,29 @@ export function ShippingPage() {
           <div>
             <h2 className="text-xl text-foreground">Shipping charges</h2>
             <p className="mt-3">
-              Orders above {formatINR(settings.freeShippingThreshold)} ship free across India. Orders
-              below this threshold carry a flat shipping fee of {formatINR(settings.shippingFee)}.
-              {settings.codEnabled && ` A COD handling fee of ${formatINR(settings.codFee)} applies to cash-on-delivery orders.`}
+              Orders above {formatINR(settings.freeShippingThreshold)} ship free across India.
+              Orders below this threshold carry a flat shipping fee of{" "}
+              {formatINR(settings.shippingFee)}.
+              {settings.codEnabled &&
+                ` A COD handling fee of ${formatINR(settings.codFee)} applies to cash-on-delivery orders.`}
             </p>
           </div>
           <div>
             <h2 className="text-xl text-foreground">Courier partner</h2>
             <p className="mt-3">
               Deliveries are fulfilled through Delhivery. Live tracking and automated status updates
-              are pending final integration with our courier partner — order pages currently show the
-              latest status we have on file.
+              are pending final integration with our courier partner — order pages currently show
+              the latest status we have on file.
             </p>
           </div>
           <div>
             <h2 className="text-xl text-foreground">International shipping</h2>
             <p className="mt-3">
               We currently ship within India. For international orders, please write to us at{" "}
-              <a href={`mailto:${settings.supportEmail}`} className="link-underline text-foreground">
+              <a
+                href={`mailto:${settings.supportEmail}`}
+                className="link-underline text-foreground"
+              >
                 {settings.supportEmail}
               </a>{" "}
               and our team will arrange a bespoke shipping quote.

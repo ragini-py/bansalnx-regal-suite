@@ -24,8 +24,21 @@ const badgeLabel: Record<string, string> = {
   exclusive: "Exclusive",
 };
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
-  const { isWishlisted, toggleWishlist, isAuthenticated, setPendingIntent, addToCart, setCartDrawerOpen } = useStore();
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
+  const {
+    isWishlisted,
+    toggleWishlist,
+    isAuthenticated,
+    setPendingIntent,
+    addToCart,
+    setCartDrawerOpen,
+  } = useStore();
   const location = useLocation();
   const [promptOpen, setPromptOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -35,7 +48,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const saved = isWishlisted(product.id);
   const off = discountPercent(product.mrp, product.price);
   const soldOut = product.variants.every((v) => v.availability === "unavailable");
-  const selectedAvailable = selectedSize ? isVariantAvailable(product, selectedSize, selectedColour) : false;
+  const selectedAvailable = selectedSize
+    ? isVariantAvailable(product, selectedSize, selectedColour)
+    : false;
 
   function onWishlist(event: React.MouseEvent) {
     event.preventDefault();
@@ -138,7 +153,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <button
           type="button"
           onClick={onWishlist}
-          aria-label={saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
+          aria-label={
+            saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`
+          }
           aria-pressed={saved}
           className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-700 shadow-sm transition-transform duration-200 hover:bg-white hover:scale-105"
         >
@@ -180,8 +197,12 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <Dialog open={quickAddOpen} onOpenChange={setQuickAddOpen}>
           <DialogContent className="max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
             <DialogHeader>
-              <DialogTitle className="font-sans font-bold text-lg text-slate-900">{product.name}</DialogTitle>
-              <DialogDescription className="text-xs font-medium text-slate-500">{product.category} · {formatINR(product.price)}</DialogDescription>
+              <DialogTitle className="font-sans font-bold text-lg text-slate-900">
+                {product.name}
+              </DialogTitle>
+              <DialogDescription className="text-xs font-medium text-slate-500">
+                {product.category} · {formatINR(product.price)}
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
               <div className="flex gap-4">
@@ -208,7 +229,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                           }}
                           className={cn(
                             "border px-2.5 py-1 text-xs transition-colors",
-                            selectedColour === c ? "border-gold bg-gold text-ink font-medium" : "border-border hover:border-foreground/50",
+                            selectedColour === c
+                              ? "border-gold bg-gold text-ink font-medium"
+                              : "border-border hover:border-foreground/50",
                           )}
                         >
                           {c}
@@ -217,7 +240,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Select Size</p>
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Select Size
+                    </p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                       {product.sizes.map((s) => {
                         const available = isVariantAvailable(product, s, selectedColour);
@@ -230,7 +255,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                             title={available ? undefined : "Currently unavailable"}
                             className={cn(
                               "border px-2.5 py-1 text-xs transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-40",
-                              selectedSize === s ? "border-gold bg-gold text-ink font-medium" : "border-border hover:border-foreground/50",
+                              selectedSize === s
+                                ? "border-gold bg-gold text-ink font-medium"
+                                : "border-border hover:border-foreground/50",
                             )}
                           >
                             {s}
@@ -239,14 +266,21 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                       })}
                     </div>
                     {selectedSize && !selectedAvailable && (
-                      <p className="mt-1.5 text-xs text-destructive">This combination is unavailable.</p>
+                      <p className="mt-1.5 text-xs text-destructive">
+                        This combination is unavailable.
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
 
               <div className="pt-2 flex gap-3">
-                <Button variant="luxe" className="flex-1" onClick={handleQuickAdd} disabled={!selectedSize || !selectedAvailable}>
+                <Button
+                  variant="luxe"
+                  className="flex-1"
+                  onClick={handleQuickAdd}
+                  disabled={!selectedSize || !selectedAvailable}
+                >
                   {selectedSize ? `Add to Bag — ${formatINR(product.price)}` : "Select a size"}
                 </Button>
                 <Button asChild variant="luxeOutline">
@@ -263,13 +297,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   );
 }
 
-export function ProductGrid({
-  products,
-  columns = 4,
-}: {
-  products: Product[];
-  columns?: 3 | 4;
-}) {
+export function ProductGrid({ products, columns = 4 }: { products: Product[]; columns?: 3 | 4 }) {
   return (
     <div
       className={cn(

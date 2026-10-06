@@ -24,7 +24,12 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 export function ContactPage() {
   const { settings } = useStore();
-  const [values, setValues] = useState<FormValues>({ name: "", email: "", subject: "", message: "" });
+  const [values, setValues] = useState<FormValues>({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
@@ -56,7 +61,11 @@ export function ContactPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Contact" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Contact" }]}
+          />
+        }
         title="Contact Us"
         description="We're here for styling advice, order questions and everything in between."
       />
@@ -76,7 +85,11 @@ export function ContactPage() {
                   aria-invalid={!!errors.name}
                   aria-describedby={errors.name ? "name-error" : undefined}
                 />
-                {errors.name && <p id="name-error" className="mt-1.5 text-xs text-destructive">{errors.name}</p>}
+                {errors.name && (
+                  <p id="name-error" className="mt-1.5 text-xs text-destructive">
+                    {errors.name}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -89,7 +102,11 @@ export function ContactPage() {
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
                 />
-                {errors.email && <p id="email-error" className="mt-1.5 text-xs text-destructive">{errors.email}</p>}
+                {errors.email && (
+                  <p id="email-error" className="mt-1.5 text-xs text-destructive">
+                    {errors.email}
+                  </p>
+                )}
               </div>
             </div>
             <div>
@@ -102,7 +119,11 @@ export function ContactPage() {
                 aria-invalid={!!errors.subject}
                 aria-describedby={errors.subject ? "subject-error" : undefined}
               />
-              {errors.subject && <p id="subject-error" className="mt-1.5 text-xs text-destructive">{errors.subject}</p>}
+              {errors.subject && (
+                <p id="subject-error" className="mt-1.5 text-xs text-destructive">
+                  {errors.subject}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="message">Message</Label>
@@ -115,7 +136,11 @@ export function ContactPage() {
                 aria-invalid={!!errors.message}
                 aria-describedby={errors.message ? "message-error" : undefined}
               />
-              {errors.message && <p id="message-error" className="mt-1.5 text-xs text-destructive">{errors.message}</p>}
+              {errors.message && (
+                <p id="message-error" className="mt-1.5 text-xs text-destructive">
+                  {errors.message}
+                </p>
+              )}
             </div>
             <Button type="submit" variant="luxe" size="luxe" disabled={loading}>
               {loading ? "Sending…" : "Send message"}
@@ -128,7 +153,9 @@ export function ContactPage() {
               <div className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
                 <div>
-                  <dt className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Address</dt>
+                  <dt className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    Address
+                  </dt>
                   <dd className="mt-1 text-slate-700">
                     Bansal·nx Studio, C-Scheme,
                     <br />
@@ -139,7 +166,9 @@ export function ContactPage() {
               <div className="flex gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
                 <div>
-                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Email</dt>
+                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                    Email
+                  </dt>
                   <dd className="mt-1">
                     <a href={`mailto:${settings.supportEmail}`} className="link-underline">
                       {settings.supportEmail}
@@ -150,7 +179,9 @@ export function ContactPage() {
               <div className="flex gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
                 <div>
-                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Phone</dt>
+                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                    Phone
+                  </dt>
                   <dd className="mt-1">
                     <a href={`tel:${settings.supportPhone}`} className="link-underline">
                       {settings.supportPhone}
@@ -161,7 +192,9 @@ export function ContactPage() {
               <div className="flex gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
                 <div>
-                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">Hours</dt>
+                  <dt className="text-xs uppercase tracking-[0.15em] text-muted-foreground">
+                    Hours
+                  </dt>
                   <dd className="mt-1">Monday – Saturday, 10:00 AM – 7:00 PM IST</dd>
                 </div>
               </div>

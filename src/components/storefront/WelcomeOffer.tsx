@@ -56,10 +56,15 @@ export function WelcomeOffer() {
                 {code}
               </p>
               <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                Valid on orders above ₹10,000 · one use per customer · applies at the coupon field in
-                your bag or at checkout.
+                Valid on orders above ₹10,000 · one use per customer · applies at the coupon field
+                in your bag or at checkout.
               </p>
-              <Button variant="luxe" size="luxe" className="mt-8 w-full" onClick={() => close(false)}>
+              <Button
+                variant="luxe"
+                size="luxe"
+                className="mt-8 w-full"
+                onClick={() => close(false)}
+              >
                 Start shopping
               </Button>
             </>

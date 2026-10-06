@@ -251,7 +251,9 @@ export function CheckoutPage() {
     }
 
     if (cartHasUnavailableItems) {
-      setFormError("One or more items in your bag are no longer available. Please remove them to continue.");
+      setFormError(
+        "One or more items in your bag are no longer available. Please remove them to continue.",
+      );
       return;
     }
 
@@ -286,7 +288,12 @@ export function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === "razorpay" && !isDummyRazorpayKey && razorpayScriptReady && window.Razorpay) {
+    if (
+      paymentMethod === "razorpay" &&
+      !isDummyRazorpayKey &&
+      razorpayScriptReady &&
+      window.Razorpay
+    ) {
       const checkout = new window.Razorpay({
         key: env.razorpayKeyId,
         amount: Math.round(t.total * 100),
@@ -427,7 +434,8 @@ export function CheckoutPage() {
               <div className="text-sm">
                 <p className="font-medium">Some items in your cart are currently unavailable</p>
                 <p className="mt-0.5 text-xs text-destructive/80">
-                  One or more items or selected variants are out of stock or unpublished. Please update your bag to continue.
+                  One or more items or selected variants are out of stock or unpublished. Please
+                  update your bag to continue.
                 </p>
               </div>
             </div>
@@ -689,7 +697,8 @@ export function CheckoutPage() {
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             {cartHasUnavailableItems && !formError && (
               <p className="text-sm text-destructive">
-                One or more items in your bag are no longer available. Please remove them to continue.
+                One or more items in your bag are no longer available. Please remove them to
+                continue.
               </p>
             )}
           </div>

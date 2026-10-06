@@ -93,8 +93,11 @@ export function ProductsPage() {
     );
   };
 
-  const selectedSizes = search.size ? search.size.split(",") : [];
-  const selectedColours = search.colour ? search.colour.split(",") : [];
+  const selectedSizes = useMemo(() => (search.size ? search.size.split(",") : []), [search.size]);
+  const selectedColours = useMemo(
+    () => (search.colour ? search.colour.split(",") : []),
+    [search.colour],
+  );
 
   const results = useMemo(() => {
     let list = products.filter((p) => p.published);
@@ -156,12 +159,11 @@ export function ProductsPage() {
     return sorted;
   }, [
     products,
+    categories,
     search.q,
     search.category,
     search.collection,
     search.sort,
-    search.size,
-    search.colour,
     selectedSizes,
     selectedColours,
   ]);
@@ -334,7 +336,9 @@ export function ProductsPage() {
 
                 {search.category && (
                   <Chip
-                    label={liveCategories.find((c) => c.slug === search.category)?.name ?? "Category"}
+                    label={
+                      liveCategories.find((c) => c.slug === search.category)?.name ?? "Category"
+                    }
                     onRemove={() => setSearch({ category: undefined })}
                   />
                 )}

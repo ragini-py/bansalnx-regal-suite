@@ -76,7 +76,12 @@ export function AccountPage() {
       toast.success("Delivery address added");
       setAddAddressOpen(false);
     } catch (err) {
-      toast.error(extractApiErrorMessage(err, "Couldn't add that address. Please check your details and try again."));
+      toast.error(
+        extractApiErrorMessage(
+          err,
+          "Couldn't add that address. Please check your details and try again.",
+        ),
+      );
     }
   }
 

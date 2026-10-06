@@ -16,11 +16,7 @@ export function CollectionDetailPage() {
     if (!collection) return [];
     // 1. Direct ID / slug matches from collection.productIds
     const byId = collection.productIds
-      .map((id) =>
-        products.find(
-          (p) => p.id === id || (p as any)._id === id || p.slug === id,
-        ),
-      )
+      .map((id) => products.find((p) => p.id === id || p._id === id || p.slug === id))
       .filter((p): p is (typeof products)[0] => !!p && p.published);
 
     if (byId.length > 0) return byId;
@@ -119,9 +115,7 @@ export function CollectionDetailPage() {
               .filter((c) => c.published && c.slug !== collection.slug)
               .map((c) => (
                 <Button key={c.id} asChild variant="luxeOutline" size="luxeSm">
-                  <Link to={`/collections/${c.slug}`}>
-                    {c.name}
-                  </Link>
+                  <Link to={`/collections/${c.slug}`}>{c.name}</Link>
                 </Button>
               ))}
           </div>

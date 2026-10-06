@@ -8,7 +8,14 @@ export function TermsPage() {
   return (
     <SiteLayout>
       <PageHeader
-        breadcrumb={<Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Terms of Service" }]} />}
+        breadcrumb={
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: <Link to="/">Home</Link> },
+              { label: "Terms of Service" },
+            ]}
+          />
+        }
         title="Terms of Service"
         description="The terms that govern your use of Bansal-nx."
       />
@@ -27,16 +34,16 @@ export function TermsPage() {
             <p className="mt-3">
               All prices are listed in Indian Rupees (INR) and inclusive of applicable taxes unless
               stated otherwise. We reserve the right to refuse or cancel an order — for example in
-              cases of pricing errors, suspected fraud, or unavailable stock — and will notify you if
-              this happens.
+              cases of pricing errors, suspected fraud, or unavailable stock — and will notify you
+              if this happens.
             </p>
           </div>
           <div>
             <h2 className="text-xl text-foreground">Made-to-order &amp; custom pieces</h2>
             <p className="mt-3">
-              Ceremonial and bespoke garments are cut and finished specifically for your order. These
-              pieces are final sale unless received defective or materially different from what was
-              ordered — see our{" "}
+              Ceremonial and bespoke garments are cut and finished specifically for your order.
+              These pieces are final sale unless received defective or materially different from
+              what was ordered — see our{" "}
               <Link to="/returns" className="link-underline text-foreground">
                 Returns &amp; Exchanges
               </Link>{" "}
@@ -54,7 +61,10 @@ export function TermsPage() {
             <h2 className="text-xl text-foreground">Contact</h2>
             <p className="mt-3">
               Questions about these terms can be sent to{" "}
-              <a href={`mailto:${settings.supportEmail}`} className="link-underline text-foreground">
+              <a
+                href={`mailto:${settings.supportEmail}`}
+                className="link-underline text-foreground"
+              >
                 {settings.supportEmail}
               </a>
               .

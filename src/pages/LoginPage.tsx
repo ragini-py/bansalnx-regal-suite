@@ -121,7 +121,10 @@ export function LoginPage() {
                 {formError}
                 {formError.toLowerCase().includes("verify") && (
                   <div className="mt-2 text-xs">
-                    <Link to="/verify-email" className="font-medium underline hover:text-foreground">
+                    <Link
+                      to="/verify-email"
+                      className="font-medium underline hover:text-foreground"
+                    >
                       Need a new verification link? Click here.
                     </Link>
                   </div>
@@ -198,13 +201,17 @@ export function LoginPage() {
             </form>
 
             {/* Quick-fill testing credentials (only rendered in dev mode or with explicit demo flag) */}
-            {Boolean(import.meta.env.DEV || import.meta.env["VITE_SHOW_DEMO_ACCOUNTS"] === "true") && (
+            {Boolean(
+              import.meta.env.DEV || import.meta.env["VITE_SHOW_DEMO_ACCOUNTS"] === "true",
+            ) && (
               <div className="mt-8 border border-border/70 bg-muted/30 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground">
                     Quick-Fill Test Accounts
                   </span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">Dev Testing</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
+                    Dev Testing
+                  </span>
                 </div>
 
                 <div className="mt-3 space-y-2.5">
@@ -227,7 +234,9 @@ export function LoginPage() {
                       variant="outline"
                       size="sm"
                       className="h-7 text-[11px] px-2.5 shrink-0 rounded-none border-border hover:bg-muted"
-                      onClick={() => handleAutofill("bansalnxindia@gmail.com", "Admin@12345", "Admin")}
+                      onClick={() =>
+                        handleAutofill("bansalnxindia@gmail.com", "Admin@12345", "Admin")
+                      }
                     >
                       Autofill
                     </Button>

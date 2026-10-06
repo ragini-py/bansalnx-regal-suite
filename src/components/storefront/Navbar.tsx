@@ -5,12 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -44,7 +39,13 @@ export function AnnouncementBar() {
   );
 }
 
-function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+function SearchDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
   const { products } = useStore();
   const [query, setQuery] = useState("");
 
@@ -94,7 +95,9 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
         <div className="max-h-[60vh] overflow-y-auto p-4">
           {query.trim().length < 2 ? (
             <div className="py-6 text-center text-xs text-slate-500">
-              <p className="font-semibold uppercase tracking-wider text-slate-400 mb-2">Popular Searches</p>
+              <p className="font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                Popular Searches
+              </p>
               <div className="mt-2 flex flex-wrap justify-center gap-2">
                 {["Silk Lehenga", "Handloom Saree", "Bridal Gown", "Raw Silk Kurta"].map((term) => (
                   <button
@@ -127,9 +130,15 @@ function SearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
                       className="h-12 w-12 object-cover rounded-md border border-slate-200"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">{product.category}</p>
-                      <p className="font-sans font-medium text-sm text-slate-900 truncate">{product.name}</p>
-                      <p className="text-xs text-slate-500 font-medium">{formatINR(product.price)}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                        {product.category}
+                      </p>
+                      <p className="font-sans font-medium text-sm text-slate-900 truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-slate-500 font-medium">
+                        {formatINR(product.price)}
+                      </p>
                     </div>
                   </Link>
                 </li>
@@ -152,12 +161,17 @@ function CountBadge({ count }: { count: number }) {
 }
 
 export function Navbar() {
-  const { wishlist, products, cartCount, user, isAuthenticated, isAdmin, setCartDrawerOpen } = useStore();
+  const { wishlist, products, cartCount, user, isAuthenticated, isAdmin, setCartDrawerOpen } =
+    useStore();
   const location = useLocation();
   const pathname = location.pathname;
 
   const accountHref = isAdmin ? "/admin" : isAuthenticated ? "/account" : "/login";
-  const accountLabel = isAdmin ? "Admin" : isAuthenticated ? (user?.firstName ?? "Account") : "Sign In";
+  const accountLabel = isAdmin
+    ? "Admin"
+    : isAuthenticated
+      ? (user?.firstName ?? "Account")
+      : "Sign In";
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -229,7 +243,9 @@ export function Navbar() {
             >
               <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
               <CountBadge
-                count={wishlist.filter((id) => products.some((p) => p.id === id && p.published)).length}
+                count={
+                  wishlist.filter((id) => products.some((p) => p.id === id && p.published)).length
+                }
               />
             </Link>
 
@@ -242,9 +258,19 @@ export function Navbar() {
               {isAdmin ? (
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
               ) : (
-                <User className={cn("h-3.5 w-3.5", isAuthenticated ? "text-amber-700" : "text-slate-500")} />
+                <User
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    isAuthenticated ? "text-amber-700" : "text-slate-500",
+                  )}
+                />
               )}
-              <span className={cn("hidden md:inline", isAuthenticated ? "font-semibold" : "font-medium")}>
+              <span
+                className={cn(
+                  "hidden md:inline",
+                  isAuthenticated ? "font-semibold" : "font-medium",
+                )}
+              >
                 {accountLabel}
               </span>
             </Link>
@@ -264,7 +290,10 @@ export function Navbar() {
 
       {/* Mobile Menu Drawer */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-[86%] border-border bg-background p-0 sm:max-w-sm rounded-none">
+        <SheetContent
+          side="left"
+          className="w-[86%] border-border bg-background p-0 sm:max-w-sm rounded-none"
+        >
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-border p-5">
@@ -298,9 +327,14 @@ export function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center justify-between py-1 text-gold-deep font-medium"
                   >
-                    <span>{isAdmin ? "Admin Management" : isAuthenticated ? "My Account" : "Sign In"}</span>
+                    <span>
+                      {isAdmin ? "Admin Management" : isAuthenticated ? "My Account" : "Sign In"}
+                    </span>
                     {isAuthenticated && (
-                      <Badge variant="outline" className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none">
+                      <Badge
+                        variant="outline"
+                        className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none"
+                      >
                         {isAdmin ? "Admin" : "Client"}
                       </Badge>
                     )}
@@ -320,7 +354,9 @@ export function Navbar() {
 
             <div className="border-t border-slate-200 p-5 text-xs text-slate-500 space-y-1.5">
               <p className="font-medium text-slate-700">Jaipur Studio · Handcrafted in India</p>
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Crafted for the Extraordinary You</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+                Crafted for the Extraordinary You
+              </p>
             </div>
           </div>
         </SheetContent>

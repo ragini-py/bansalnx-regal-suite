@@ -101,7 +101,9 @@ export function CartDrawer() {
                         <span className="w-8 text-center text-sm">{line.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => updateQuantity(line.variantId, Math.min(10, line.quantity + 1))}
+                          onClick={() =>
+                            updateQuantity(line.variantId, Math.min(10, line.quantity + 1))
+                          }
                           disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
                           className="grid h-8 w-8 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"

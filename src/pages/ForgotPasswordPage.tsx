@@ -46,7 +46,10 @@ export function ForgotPasswordPage() {
       <PageHeader
         breadcrumb={
           <Breadcrumbs
-            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Forgot Password" }]}
+            items={[
+              { label: "Home", href: <Link to="/">Home</Link> },
+              { label: "Forgot Password" },
+            ]}
           />
         }
         title="Forgot Password"

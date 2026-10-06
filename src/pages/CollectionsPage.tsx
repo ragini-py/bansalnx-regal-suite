@@ -15,7 +15,14 @@ export function CollectionsPage() {
         breadcrumb={
           <Breadcrumbs
             items={[
-              { label: "Home", href: <Link to="/" className="link-underline">Home</Link> },
+              {
+                label: "Home",
+                href: (
+                  <Link to="/" className="link-underline">
+                    Home
+                  </Link>
+                ),
+              },
               { label: "Collections & Categories" },
             ]}
           />
@@ -35,7 +42,7 @@ export function CollectionsPage() {
           </Link>
           {live.map((c) => {
             const count = c.productIds.filter((id) =>
-              products.some((p) => (p.id === id || (p as any)._id === id) && p.published),
+              products.some((p) => (p.id === id || p._id === id) && p.published),
             ).length;
             return (
               <Link
@@ -53,7 +60,7 @@ export function CollectionsPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {live.map((collection, index) => {
             const count = collection.productIds.filter((id) =>
-              products.some((p) => (p.id === id || (p as any)._id === id) && p.published),
+              products.some((p) => (p.id === id || p._id === id) && p.published),
             ).length;
 
             return (
@@ -75,7 +82,8 @@ export function CollectionsPage() {
                     {/* Top Badge */}
                     <div className="absolute top-4 left-4 z-10">
                       <span className="inline-flex items-center rounded-full bg-slate-950/70 backdrop-blur-md px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-amber-300 border border-amber-400/30">
-                        Edit {String(index + 1).padStart(2, "0")} · {count || "Curated"} {count === 1 ? "Piece" : "Pieces"}
+                        Edit {String(index + 1).padStart(2, "0")} · {count || "Curated"}{" "}
+                        {count === 1 ? "Piece" : "Pieces"}
                       </span>
                     </div>
 

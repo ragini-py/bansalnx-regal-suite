@@ -28,14 +28,21 @@ export async function updateSettingsRequest(
   return data.settings;
 }
 export async function checkPincodeRequest(pincode: string): Promise<{
-  provider: 'shiprocket';
-  mode: 'demo' | 'live';
+  provider: "shiprocket";
+  mode: "demo" | "live";
   available: boolean;
   pincode: string;
   pickupPincode: string;
   message: string;
 }> {
-  const { data } = await apiClient.get<{ provider: 'shiprocket'; mode: 'demo' | 'live'; available: boolean; pincode: string; pickupPincode: string; message: string }>('/settings/check-pincode', {
+  const { data } = await apiClient.get<{
+    provider: "shiprocket";
+    mode: "demo" | "live";
+    available: boolean;
+    pincode: string;
+    pickupPincode: string;
+    message: string;
+  }>("/settings/check-pincode", {
     params: { pincode },
   });
   return data;

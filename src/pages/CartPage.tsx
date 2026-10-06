@@ -56,10 +56,16 @@ export function CartPage() {
     <SiteLayout>
       <PageHeader
         breadcrumb={
-          <Breadcrumbs items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Bag" }]} />
+          <Breadcrumbs
+            items={[{ label: "Home", href: <Link to="/">Home</Link> }, { label: "Bag" }]}
+          />
         }
         title="Your Bag"
-        description={cartLines.length ? `${cartLines.length} ${cartLines.length === 1 ? "piece" : "pieces"} awaiting checkout.` : undefined}
+        description={
+          cartLines.length
+            ? `${cartLines.length} ${cartLines.length === 1 ? "piece" : "pieces"} awaiting checkout.`
+            : undefined
+        }
       />
 
       <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-12">
@@ -132,7 +138,9 @@ export function CartPage() {
                         <span className="w-9 text-center text-sm">{line.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => updateQuantity(line.variantId, Math.min(10, line.quantity + 1))}
+                          onClick={() =>
+                            updateQuantity(line.variantId, Math.min(10, line.quantity + 1))
+                          }
                           disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
                           className="grid h-9 w-9 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
@@ -142,7 +150,9 @@ export function CartPage() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleMoveToWishlist(line.productId, line.variantId, line.product.name)}
+                        onClick={() =>
+                          handleMoveToWishlist(line.productId, line.variantId, line.product.name)
+                        }
                         className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-gold-deep"
                       >
                         <Heart className="h-3.5 w-3.5" /> Move to wishlist
@@ -159,7 +169,10 @@ export function CartPage() {
                 <h2 className="font-display text-xl">Order Summary</h2>
 
                 <div className="mt-6">
-                  <label htmlFor="coupon" className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <label
+                    htmlFor="coupon"
+                    className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
+                  >
                     Coupon code
                   </label>
                   {appliedCoupon ? (
@@ -185,7 +198,12 @@ export function CartPage() {
                         placeholder="Enter code"
                         className="rounded-none"
                       />
-                      <Button type="button" variant="luxeOutline" size="luxeSm" onClick={handleApplyCoupon}>
+                      <Button
+                        type="button"
+                        variant="luxeOutline"
+                        size="luxeSm"
+                        onClick={handleApplyCoupon}
+                      >
                         Apply
                       </Button>
                     </div>
@@ -216,8 +234,8 @@ export function CartPage() {
 
                 {t.shippingFee > 0 && (
                   <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-                    Add {formatINR(settings.freeShippingThreshold - t.subtotal + t.discount)} more for
-                    complimentary shipping.
+                    Add {formatINR(settings.freeShippingThreshold - t.subtotal + t.discount)} more
+                    for complimentary shipping.
                   </p>
                 )}
 
