@@ -87,6 +87,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
               width={1000}
               height={1300}
               loading={priority ? "eager" : "lazy"}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/products/p1.jpg";
+              }}
               className="aspect-4/5 w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
             />
             {product.images[1] && (
@@ -97,6 +101,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
                 width={1000}
                 height={1300}
                 loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/products/p2.jpg";
+                }}
                 className="absolute inset-0 aspect-4/5 w-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
               />
             )}
@@ -177,7 +185,15 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             </DialogHeader>
             <div className="mt-4 space-y-4">
               <div className="flex gap-4">
-                <img src={product.images[0]} alt={product.name} className="h-24 w-20 object-cover rounded-lg border border-slate-200 shrink-0" />
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/products/p1.jpg";
+                  }}
+                  className="h-24 w-20 object-cover rounded-lg border border-slate-200 shrink-0"
+                />
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs font-medium text-slate-500 mb-1.5">Select Colour</p>

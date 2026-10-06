@@ -60,8 +60,8 @@ export function OrderConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   // My own order — not the admin-only `orders` list, which is empty for a
   // regular customer.
-  const { myOrders, ordersLoading, authReady, requestReturn, cancelOrder } = useStore();
-  const order = myOrders.find((o) => o.id === id);
+  const { myOrders, orders, ordersLoading, authReady, requestReturn, cancelOrder } = useStore();
+  const order = myOrders.find((o) => o.id === id) || orders.find((o) => o.id === id);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnReason, setReturnReason] = useState("");
   const [cancelling, setCancelling] = useState(false);

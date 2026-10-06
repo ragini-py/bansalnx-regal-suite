@@ -205,6 +205,10 @@ export function ProductDetailPage() {
               <img
                 src={product.images[activeImage] ?? product.images[0]}
                 alt={`${product.name} — view ${activeImage + 1}`}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/products/p1.jpg";
+                }}
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button
@@ -253,7 +257,16 @@ export function ProductDetailPage() {
                     i === activeImage ? "border-gold ring-1 ring-gold" : "border-border hover:border-foreground/40",
                   )}
                 >
-                  <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/products/p1.jpg";
+                    }}
+                  />
                 </button>
               ))}
             </div>
@@ -583,7 +596,15 @@ export function ProductDetailPage() {
       {/* Image Zoom Modal */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] rounded-none border border-border bg-ink p-2 overflow-hidden flex items-center justify-center">
-          <img src={product.images[activeImage] ?? product.images[0]} alt={product.name} className="max-h-[85vh] w-auto object-contain" />
+          <img
+            src={product.images[activeImage] ?? product.images[0]}
+            alt={product.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "/products/p1.jpg";
+            }}
+            className="max-h-[85vh] w-auto object-contain"
+          />
         </DialogContent>
       </Dialog>
 
