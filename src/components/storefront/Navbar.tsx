@@ -154,7 +154,7 @@ function SearchDialog({
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-slate-900 px-1 text-[8.5px] font-bold text-white sm:h-4 sm:min-w-4 sm:text-[9px]">
+    <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-slate-900 px-1 text-[8.5px] font-bold text-white sm:h-4 sm:min-w-4 sm:text-[9px] animate-scale-in shadow-xs">
       {count}
     </span>
   );
@@ -220,7 +220,7 @@ export function Navbar() {
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search creations"
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-all hover:text-slate-900 hover:scale-110 active:scale-95"
             >
               <Search className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.5} />
             </button>
@@ -228,7 +228,7 @@ export function Navbar() {
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-all hover:text-slate-900 hover:scale-110 active:scale-95"
             >
               <Heart className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.5} />
               <CountBadge
@@ -242,7 +242,7 @@ export function Navbar() {
               type="button"
               onClick={() => setCartDrawerOpen(true)}
               aria-label={`Open bag, ${cartCount} items`}
-              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-all hover:text-slate-900 hover:scale-110 active:scale-95"
             >
               <ShoppingBag className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.4} />
               <CountBadge count={cartCount} />
@@ -252,7 +252,7 @@ export function Navbar() {
             <Link
               to={accountHref}
               aria-label={accountLabel}
-              className="hidden lg:flex items-center gap-1.5 border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-700 rounded-md transition-colors hover:bg-slate-100 hover:text-slate-900 ml-1"
+              className="hidden lg:flex items-center gap-1.5 border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-700 rounded-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:scale-105 active:scale-95 ml-1"
             >
               {isAdmin ? (
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
@@ -279,7 +279,7 @@ export function Navbar() {
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center lg:hidden text-slate-700 hover:text-slate-900 ml-0.5"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center lg:hidden text-slate-700 hover:text-slate-900 hover:scale-110 active:scale-95 transition-all ml-0.5"
             >
               <Menu className="h-5 w-5" strokeWidth={1.5} />
             </button>
@@ -345,8 +345,12 @@ export function Navbar() {
 
             <nav className="flex-1 overflow-y-auto p-5" aria-label="Mobile">
               <ul className="space-y-4 font-display text-xl">
-                {primaryNav.map((item) => (
-                  <li key={item.label}>
+                {primaryNav.map((item, idx) => (
+                  <li
+                    key={item.label}
+                    style={{ animationDelay: `${(idx + 1) * 70}ms` }}
+                    className="animate-fade-up"
+                  >
                     <Link
                       to={item.to}
                       onClick={() => setMenuOpen(false)}
@@ -356,7 +360,7 @@ export function Navbar() {
                     </Link>
                   </li>
                 ))}
-                <li>
+                <li style={{ animationDelay: "350ms" }} className="animate-fade-up">
                   <Link
                     to="/wishlist"
                     onClick={() => setMenuOpen(false)}
@@ -368,7 +372,7 @@ export function Navbar() {
                     </span>
                   </Link>
                 </li>
-                <li>
+                <li style={{ animationDelay: "420ms" }} className="animate-fade-up">
                   <Link
                     to="/track"
                     onClick={() => setMenuOpen(false)}

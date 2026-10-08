@@ -39,9 +39,9 @@ export function WelcomeOffer() {
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-w-lg gap-0 rounded-none border-border bg-card p-0">
+      <DialogContent className="max-w-lg gap-0 rounded-2xl border border-gold/40 bg-card p-0 shadow-2xl overflow-hidden">
         <div className="px-8 py-10 text-center sm:px-12 sm:py-12">
-          <span className="mx-auto block h-10 w-10 text-gold">
+          <span className="mx-auto block h-10 w-10 text-gold animate-float">
             <PeacockGlyph />
           </span>
           {code ? (
@@ -52,7 +52,7 @@ export function WelcomeOffer() {
               <DialogDescription className="mt-3 text-sm text-muted-foreground">
                 Use this code at checkout to enjoy 10% off your first order.
               </DialogDescription>
-              <p className="mt-6 border border-dashed border-gold px-6 py-4 text-lg tracking-[0.3em] text-gold-deep">
+              <p className="mt-6 border border-dashed border-gold px-6 py-4 text-lg tracking-[0.3em] text-gold-deep animate-pulse-glow bg-gold/5 font-mono">
                 {code}
               </p>
               <p className="mt-4 text-xs leading-relaxed text-muted-foreground">

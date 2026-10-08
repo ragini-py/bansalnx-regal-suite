@@ -36,7 +36,7 @@ export function CollectionsPage() {
         <div className="mb-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Link
             to="/products"
-            className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground"
+            className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground hover:scale-105 active:scale-95"
           >
             All Pieces ({products.filter((p) => p.published).length})
           </Link>
@@ -48,7 +48,7 @@ export function CollectionsPage() {
               <Link
                 key={c.id}
                 to={`/collections/${c.slug}`}
-                className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground"
+                className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground hover:scale-105 active:scale-95"
               >
                 {c.name} {count > 0 ? `(${count})` : ""}
               </Link>
@@ -67,7 +67,7 @@ export function CollectionsPage() {
               <Reveal key={collection.id} delay={index * 60}>
                 <Link
                   to={`/collections/${collection.slug}`}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-amber-300/80"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-amber-300/80 shimmer-hover"
                 >
                   {/* Image Container with Luxury Aspect Ratio */}
                   <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">

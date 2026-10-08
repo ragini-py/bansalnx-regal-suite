@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Check,
   ChevronRight,
@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findVariant, isVariantAvailable } from "@/data/catalog";
+import { findVariant, getProductImagesForColour, isVariantAvailable } from "@/data/catalog";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,9 @@ import { cn } from "@/lib/utils";
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryColour = searchParams.get("colour");
+
   const {
     products,
     isAuthenticated,
@@ -54,7 +57,18 @@ export function ProductDetailPage() {
 
   const product = products.find((p) => p.slug === slug && p.published);
 
-  const [colour, setColour] = useState(product?.colours[0] ?? "");
+  const initialColour = useMemo(() => {
+    if (!product) return "";
+    if (queryColour) {
+      const match = product.colours.find(
+        (c) => c.toLowerCase() === queryColour.toLowerCase(),
+      );
+      if (match) return match;
+    }
+    return product.colours[0] ?? "";
+  }, [product, queryColour]);
+
+  const [colour, setColour] = useState(initialColour);
   const [size, setSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
@@ -71,8 +85,13 @@ export function ProductDetailPage() {
     setSize("");
     setQuantity(1);
     setSizeError(false);
-    setColour(product?.colours[0] ?? "");
-  }, [slug, product?.id, product?.colours]);
+    setColour(initialColour);
+  }, [slug, product?.id, initialColour]);
+
+  const currentImages = useMemo(() => {
+    if (!product) return ["/products/p1.jpg"];
+    return getProductImagesForColour(product, colour);
+  }, [product, colour]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -162,7 +181,7 @@ export function ProductDetailPage() {
     const delta = endX - touchStartX.current;
     if (Math.abs(delta) > 40) {
       wasSwipe.current = true;
-      const count = product.images.length;
+      const count = currentImages.length;
       setActiveImage((i) => (delta < 0 ? (i + 1) % count : (i - 1 + count) % count));
     }
     touchStartX.current = null;
@@ -211,13 +230,14 @@ export function ProductDetailPage() {
               onTouchEnd={handleGalleryTouchEnd}
             >
               <img
-                src={product.images[activeImage] ?? product.images[0]}
+                key={`${colour}-${activeImage}`}
+                src={currentImages[activeImage] ?? currentImages[0]}
                 alt={`${product.name} — view ${activeImage + 1}`}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = "/products/p1.jpg";
                 }}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 animate-fade-in"
               />
               <button
                 type="button"
@@ -235,9 +255,9 @@ export function ProductDetailPage() {
                       : "Exclusive"}
                 </span>
               )}
-              {product.images.length > 1 && (
+              {currentImages.length > 1 && (
                 <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 sm:hidden">
-                  {product.images.map((_, i) => (
+                  {currentImages.map((_, i) => (
                     <span
                       key={i}
                       aria-hidden="true"
@@ -253,7 +273,7 @@ export function ProductDetailPage() {
 
             {/* Thumbnails */}
             <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {product.images.map((image, i) => (
+              {currentImages.map((image, i) => (
                 <button
                   key={image + i}
                   type="button"
@@ -261,9 +281,9 @@ export function ProductDetailPage() {
                   aria-label={`View image ${i + 1} of ${product.name}`}
                   aria-current={i === activeImage}
                   className={cn(
-                    "relative aspect-3/4 w-20 shrink-0 overflow-hidden border transition-colors sm:w-24",
+                    "relative aspect-3/4 w-20 shrink-0 overflow-hidden border transition-all duration-300 hover:scale-105 active:scale-95 sm:w-24",
                     i === activeImage
-                      ? "border-gold ring-1 ring-gold"
+                      ? "border-gold ring-1 ring-gold shadow-xs"
                       : "border-border hover:border-foreground/40",
                   )}
                 >
@@ -350,11 +370,20 @@ export function ProductDetailPage() {
                       type="button"
                       onClick={() => {
                         setColour(c);
+                        setActiveImage(0);
                         setSize("");
+                        setSearchParams(
+                          (prev) => {
+                            const next = new URLSearchParams(prev);
+                            next.set("colour", c);
+                            return next;
+                          },
+                          { replace: true },
+                        );
                       }}
                       aria-pressed={colour === c}
                       disabled={colourSoldOut(c)}
-                      className="border border-border px-4 py-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-gold hover:text-foreground disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
+                      className="border border-border px-4 py-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-all duration-200 hover:border-gold hover:text-foreground active:scale-95 disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
                     >
                       {c}
                     </button>
@@ -391,7 +420,7 @@ export function ProductDetailPage() {
                       aria-pressed={size === s}
                       disabled={!available}
                       title={available ? undefined : "Currently unavailable"}
-                      className="min-w-[3.25rem] border border-border px-3.5 py-2.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-gold hover:text-foreground disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
+                      className="min-w-[3.25rem] border border-border px-3.5 py-2.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-all duration-200 hover:border-gold hover:text-foreground active:scale-95 disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
                     >
                       {s}
                     </button>
@@ -399,7 +428,7 @@ export function ProductDetailPage() {
                 })}
               </div>
               {sizeError && (
-                <p role="alert" className="mt-2 text-xs text-destructive">
+                <p role="alert" className="mt-2 text-xs text-destructive animate-fade-in">
                   Please select a size to continue.
                 </p>
               )}
@@ -413,7 +442,7 @@ export function ProductDetailPage() {
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   aria-label="Decrease quantity"
-                  className="p-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                  className="p-2.5 text-muted-foreground transition-all hover:text-foreground active:scale-90"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
@@ -424,7 +453,7 @@ export function ProductDetailPage() {
                   type="button"
                   onClick={() => setQuantity((q) => Math.min(5, q + 1))}
                   aria-label="Increase quantity"
-                  className="p-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                  className="p-2.5 text-muted-foreground transition-all hover:text-foreground active:scale-90"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
@@ -624,7 +653,7 @@ export function ProductDetailPage() {
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] rounded-none border border-border bg-ink p-2 overflow-hidden flex items-center justify-center">
           <img
-            src={product.images[activeImage] ?? product.images[0]}
+            src={currentImages[activeImage] ?? currentImages[0]}
             alt={product.name}
             onError={(e) => {
               e.currentTarget.onerror = null;

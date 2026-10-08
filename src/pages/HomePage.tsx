@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Mail, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Mail, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -147,55 +147,81 @@ export function HomePage() {
 
 function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const heroSlides = buildHeroSlides(hero);
 
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroSlides.length);
-    }, 6500);
+    }, 7000);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroSlides.length, isPaused, current]);
 
   const slide = heroSlides[current] ?? heroSlides[0]!;
 
+  const handlePrev = () => {
+    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const handleNext = () => {
+    setCurrent((prev) => (prev + 1) % heroSlides.length);
+  };
+
   return (
-    <section className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]">
+    <section
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]"
+    >
       {heroSlides.map((s, idx) => (
         <div
           key={idx}
           className={cn(
             "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-            current === idx ? "opacity-85" : "opacity-0 pointer-events-none",
+            current === idx ? "opacity-90" : "opacity-0 pointer-events-none",
           )}
         >
           <img
             src={s.image}
             alt={s.heading}
-            className="h-full w-full object-cover object-center scale-100 transition-transform duration-[8000ms]"
+            className={cn(
+              "h-full w-full object-cover object-center transition-transform duration-[7500ms] ease-out",
+              current === idx ? "scale-105" : "scale-100",
+            )}
           />
           <div
-            className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/45 to-transparent"
             aria-hidden="true"
           />
           <div
-            className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-slate-950/80 to-transparent"
+            className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent"
             aria-hidden="true"
           />
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
-        <div className="max-w-2xl fade-up">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4a76a] mb-3">
+      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-8 pt-28 sm:px-8 sm:pb-12 sm:pt-36 lg:pt-40 lg:px-12">
+        <div key={current} className="max-w-2xl animate-fade-in">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d4a76a] mb-3 animate-fade-up">
             {slide.eyebrow}
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+          <h1
+            style={{ animationDelay: "120ms" }}
+            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight animate-fade-up"
+          >
             {slide.heading}
           </h1>
-          <p className="mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-slate-200">
+          <p
+            style={{ animationDelay: "220ms" }}
+            className="mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-slate-200 animate-fade-up"
+          >
             {slide.subheading}
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+          <div
+            style={{ animationDelay: "320ms" }}
+            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3 animate-fade-up"
+          >
             <Button
               asChild
               variant="luxe"
@@ -212,6 +238,58 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             >
               <Link to={slide.secondaryTo}>{slide.secondaryCta}</Link>
             </Button>
+          </div>
+        </div>
+
+        {/* Luxury Hero Navigation & Progress Indicators */}
+        <div className="mt-10 flex items-center justify-between border-t border-white/15 pt-4 text-white/90">
+          <div className="flex items-center gap-3">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCurrent(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
+                className="group flex items-center gap-2 py-2 cursor-pointer focus-visible:outline-none"
+              >
+                <span
+                  className={cn(
+                    "text-[11px] font-mono transition-colors tracking-widest",
+                    current === idx ? "text-[#d4a76a] font-bold" : "text-white/40 group-hover:text-white/80",
+                  )}
+                >
+                  0{idx + 1}
+                </span>
+                <span className="relative h-0.5 w-10 sm:w-14 overflow-hidden rounded-full bg-white/20">
+                  {current === idx && (
+                    <span
+                      key={current}
+                      style={{ animationDuration: "7000ms" }}
+                      className="absolute inset-0 bg-[#d4a76a] animate-[heroProgress_7000ms_linear_forwards]"
+                    />
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous slide"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white hover:text-slate-950 active:scale-95 cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next slide"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white hover:text-slate-950 active:scale-95 cursor-pointer"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -234,24 +312,24 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
           <Reveal key={collection.id} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
             <Link
               to={`/collections/${collection.slug}`}
-              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-amber-300/80 shimmer-hover"
             >
               <div className="relative aspect-3/4 overflow-hidden bg-slate-100">
                 <img
                   src={collection.coverImage}
                   alt={collection.name}
                   loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                 />
                 <div
-                  className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent transition-opacity duration-300 group-hover:opacity-90"
                   aria-hidden="true"
                 />
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                  <p className="text-xs uppercase font-semibold tracking-wider text-amber-300">
+                  <p className="inline-block rounded-full border border-amber-400/30 bg-black/40 backdrop-blur-md px-2.5 py-0.5 text-[11px] uppercase font-semibold tracking-wider text-amber-300">
                     {collection.productIds.length} Creations
                   </p>
-                  <h3 className="mt-1 font-display font-bold text-2xl text-white sm:text-3xl">
+                  <h3 className="mt-2 font-display font-bold text-2xl text-white sm:text-3xl group-hover:text-amber-200 transition-colors">
                     {collection.name}
                   </h3>
                   <p className="mt-2 text-xs text-slate-200 line-clamp-2">
@@ -259,7 +337,7 @@ function CollectionsBlock({ collections }: { collections: Collection[] }) {
                   </p>
                   <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-amber-200 transition-colors">
                     Explore Collection{" "}
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
                   </span>
                 </div>
               </div>
@@ -309,12 +387,12 @@ function ProductBlock({
 function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-6">
-      <Reveal className="group relative isolate overflow-hidden bg-[#183d40]/80 py-12 px-6 sm:py-16 sm:px-10 rounded-[24px] text-white text-center shadow-[0_22px_45px_-28px_rgba(17,43,47,0.55)] backdrop-blur-lg">
+      <Reveal className="group relative isolate overflow-hidden bg-[#183d40]/80 py-12 px-6 sm:py-16 sm:px-10 rounded-[24px] text-white text-center shadow-[0_22px_45px_-28px_rgba(17,43,47,0.55)] backdrop-blur-lg border border-white/10 transition-all duration-500 hover:border-amber-300/40 hover:shadow-[0_28px_50px_-20px_rgba(17,43,47,0.7)] shimmer-hover">
         <img
           src={editorial.image || imagery.editorial}
           alt="Bansal-nx couture portrait"
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-25 transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover opacity-25 transition-transform duration-[1400ms] ease-out group-hover:scale-108"
         />
         <div className="relative mx-auto max-w-2xl">
           <p className="text-xs uppercase font-bold tracking-wider text-amber-300">
@@ -343,7 +421,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
 function Promo({ promo }: { promo: HomepageContent["promo"] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-5 sm:px-8 lg:px-12">
-      <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-8 sm:p-12 rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-[0_20px_45px_-28px_rgba(17,43,47,0.45)]">
+      <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-8 sm:p-12 rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
         <div className="relative z-10 max-w-xl">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
             Exclusive Client Privilege
@@ -360,7 +438,7 @@ function Promo({ promo }: { promo: HomepageContent["promo"] }) {
               asChild
               variant="outline"
               size="lg"
-              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium"
+              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium transition-all hover:scale-105 active:scale-95"
             >
               <Link to="/contact">Book Private Consultation</Link>
             </Button>
@@ -375,15 +453,15 @@ function Craft() {
   return (
     <section className="mx-auto max-w-[1400px] px-5 py-6 sm:px-8 sm:py-8 lg:px-12 border-t border-slate-200">
       <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
-        <Reveal className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
+        <Reveal className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 shimmer-hover">
           <img
             src={imagery.craft}
             alt="Artisan embroidering silk fabric"
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-108"
           />
         </Reveal>
-        <Reveal delay={150} className="space-y-3">
+        <Reveal delay={150} className="space-y-4">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
             Mastery &amp; Lineage
           </p>
@@ -396,13 +474,13 @@ function Craft() {
             hand-needlework.
           </p>
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
-            <div>
+            <div className="p-3 rounded-xl border border-transparent hover:border-amber-200/80 hover:bg-amber-50/40 transition-all duration-300">
               <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
                 80+ Hours
               </p>
               <p className="mt-1.5 text-xs text-slate-600 font-medium">Hand-embroidery per piece</p>
             </div>
-            <div>
+            <div className="p-3 rounded-xl border border-transparent hover:border-amber-200/80 hover:bg-amber-50/40 transition-all duration-300">
               <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
                 100% Pure
               </p>
@@ -448,11 +526,14 @@ function Testimonials() {
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {reviews.map((r, i) => (
             <Reveal key={i} delay={i === 0 ? 0 : i === 1 ? 100 : 200}>
-              <div className="h-full border border-slate-200 bg-white p-4 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-300">
+              <div className="group h-full border border-slate-200 bg-white p-5 rounded-xl shadow-sm flex flex-col justify-between transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:border-amber-300/70 shimmer-hover">
                 <div>
-                  <div className="flex gap-1 text-amber-500 mb-2">
+                  <div className="flex gap-1 text-amber-500 mb-2.5">
                     {[...Array(r.rating)].map((_, idx) => (
-                      <Star key={idx} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <Star
+                        key={idx}
+                        className="h-4 w-4 fill-amber-400 text-amber-400 transition-transform duration-300 group-hover:scale-110"
+                      />
                     ))}
                   </div>
                   <p className="text-xs sm:text-sm leading-relaxed text-slate-700 italic">
@@ -471,6 +552,7 @@ function Testimonials() {
     </section>
   );
 }
+
 
 function Newsletter() {
   const [email, setEmail] = useState("");
@@ -498,7 +580,7 @@ function Newsletter() {
   return (
     <section className="border-t border-[#214f6d]/20 bg-[#183d40] py-10 sm:py-14">
       <Reveal className="mx-auto max-w-2xl px-5 text-center sm:px-8">
-        <Mail className="mx-auto h-7 w-7 text-[#d4a76a]" aria-hidden="true" />
+        <Mail className="mx-auto h-7 w-7 text-[#d4a76a] animate-float" aria-hidden="true" />
         <p className="mt-3 text-xs font-bold uppercase tracking-wider text-[#d4a76a]">
           Stay in the know
         </p>

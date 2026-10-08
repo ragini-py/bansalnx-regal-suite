@@ -34,3 +34,18 @@ export function findVariant(
 ): ProductVariant | undefined {
   return product.variants.find((v) => v.size === size && v.colour === colour);
 }
+
+export function getProductImagesForColour(
+  product: Product,
+  colour?: string | null,
+): string[] {
+  if (colour && product.imagesByColour) {
+    const target = colour.toLowerCase().trim();
+    for (const [c, imgs] of Object.entries(product.imagesByColour)) {
+      if (c.toLowerCase().trim() === target && Array.isArray(imgs) && imgs.length > 0) {
+        return imgs;
+      }
+    }
+  }
+  return product.images && product.images.length > 0 ? product.images : ["/products/p1.jpg"];
+}

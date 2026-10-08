@@ -32,6 +32,7 @@ export interface Product {
   quantity?: number;
   currency: "INR";
   images: string[];
+  imagesByColour?: Record<string, string[]>;
   category: string;
   categoryIds?: string[];
   collections: string[];

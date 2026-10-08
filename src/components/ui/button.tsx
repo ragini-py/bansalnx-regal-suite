@@ -18,12 +18,12 @@ const buttonVariants = cva(
         ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         /* Minimalist luxury storefront variants */
-        luxe: "bg-[#183d40] text-white font-medium text-xs sm:text-sm hover:bg-[#123238] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
+        luxe: "luxe-btn-sheen bg-[#183d40] text-white font-medium text-xs sm:text-sm hover:bg-[#123238] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
         luxeOutline:
-          "border border-[#d8c7a6] bg-white text-[#183d40] font-medium text-xs sm:text-sm hover:bg-[#f8f1e5] hover:text-[#112b2f] hover:border-[#c9af7a] shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-md",
+          "luxe-btn-sheen border border-[#d8c7a6] bg-white text-[#183d40] font-medium text-xs sm:text-sm hover:bg-[#f8f1e5] hover:text-[#112b2f] hover:border-[#c9af7a] shadow-sm hover:shadow-md hover:-translate-y-0.5 rounded-md",
         onImage:
-          "border border-white/60 bg-white/15 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-[#112b2f] hover:-translate-y-0.5 rounded-md",
-        gold: "bg-[#c6903c] text-white font-medium text-xs sm:text-sm hover:bg-[#b8812f] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
+          "luxe-btn-sheen border border-white/60 bg-white/15 text-white backdrop-blur-md font-medium text-xs sm:text-sm hover:bg-white hover:text-[#112b2f] hover:-translate-y-0.5 rounded-md",
+        gold: "luxe-btn-sheen bg-[#c6903c] text-white font-medium text-xs sm:text-sm hover:bg-[#b8812f] shadow-sm hover:shadow-lg hover:-translate-y-0.5 rounded-md",
       },
       size: {
         default: "h-9 px-4 py-2",

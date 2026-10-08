@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { isVariantAvailable } from "@/data/catalog";
+import { getProductImagesForColour, isVariantAvailable } from "@/data/catalog";
 import type { Product } from "@/data/types";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -50,6 +50,13 @@ const colourMap: Record<string, string> = {
   wine: "#722f37",
   navy: "#1b2a47",
   mustard: "#e1ad01",
+  blush: "#f7cfcf",
+  "pearl grey": "#c5c6c7",
+  "royal purple": "#602b7a",
+  "peacock teal": "#0d6970",
+  "antique gold": "#cda14d",
+  "leaf green": "#5b7e47",
+  "antique rose": "#c48888",
 };
 
 export function ProductCard({
@@ -70,6 +77,7 @@ export function ProductCard({
   const location = useLocation();
   const [promptOpen, setPromptOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [activeColour, setActiveColour] = useState(product.colours[0] ?? "");
   const [selectedColour, setSelectedColour] = useState(product.colours[0] ?? "");
   const [selectedSize, setSelectedSize] = useState("");
 
@@ -77,8 +85,7 @@ export function ProductCard({
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const carouselIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const images =
-    product.images && product.images.length > 0 ? product.images : ["/products/p1.jpg"];
+  const images = getProductImagesForColour(product, activeColour);
 
   useEffect(() => {
     return () => {
@@ -164,11 +171,11 @@ export function ProductCard({
       <article
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="group relative flex flex-col rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-2 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-1.5 hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4]"
+        className="group relative flex flex-col rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-2 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-1.5 hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4] shimmer-hover"
       >
         <div className="relative aspect-4/5 w-full overflow-hidden rounded-xl bg-[#f5ede2]/40">
           <Link
-            to={`/products/${product.slug}`}
+            to={`/products/${product.slug}${activeColour ? `?colour=${encodeURIComponent(activeColour)}` : ""}`}
             className="relative block h-full w-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#c6903c]"
             aria-label={product.name}
           >
@@ -264,29 +271,48 @@ export function ProductCard({
                   </span>
                 )}
               </div>
-              {/* Available Colour Swatches Preview */}
+              {/* Interactive Colour Swatches */}
               {product.colours && product.colours.length > 1 && (
                 <div
-                  className="flex items-center gap-1 opacity-75 transition-opacity duration-300 group-hover:opacity-100"
+                  className="flex items-center gap-1.5"
                   title={`${product.colours.length} available colours`}
                 >
-                  {product.colours.slice(0, 3).map((col) => (
-                    <span
+                  {product.colours.slice(0, 4).map((col) => (
+                    <button
                       key={col}
-                      className="h-2 w-2 rounded-full border border-black/15 shadow-2xs"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveColour(col);
+                        setSelectedColour(col);
+                        setActiveImageIndex(0);
+                      }}
+                      onMouseEnter={() => {
+                        setActiveColour(col);
+                        setActiveImageIndex(0);
+                      }}
+                      title={col}
+                      aria-label={`Select colour ${col}`}
+                      className={cn(
+                        "h-2.5 w-2.5 rounded-full border border-black/20 shadow-2xs transition-all cursor-pointer hover:scale-130",
+                        activeColour.toLowerCase() === col.toLowerCase()
+                          ? "ring-1.5 ring-[#c6903c] ring-offset-1 scale-115 opacity-100"
+                          : "opacity-70 hover:opacity-100",
+                      )}
                       style={{ backgroundColor: colourMap[col.toLowerCase()] || "#c8bca9" }}
                     />
                   ))}
-                  {product.colours.length > 3 && (
+                  {product.colours.length > 4 && (
                     <span className="text-[9px] font-medium text-neutral-400">
-                      +{product.colours.length - 3}
+                      +{product.colours.length - 4}
                     </span>
                   )}
                 </div>
               )}
             </div>
             <Link
-              to={`/products/${product.slug}`}
+              to={`/products/${product.slug}${activeColour ? `?colour=${encodeURIComponent(activeColour)}` : ""}`}
               className="mt-1 block font-serif text-[14.5px] font-normal leading-snug tracking-tight text-[#24211e] transition-colors line-clamp-1 hover:text-[#9a7342]"
             >
               {product.name}
@@ -327,13 +353,14 @@ export function ProductCard({
             <div className="mt-4 space-y-4">
               <div className="flex gap-4">
                 <img
-                  src={product.images[0]}
+                  key={selectedColour}
+                  src={getProductImagesForColour(product, selectedColour)[0] ?? product.images[0]}
                   alt={product.name}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/products/p1.jpg";
                   }}
-                  className="h-24 w-20 object-cover rounded-xl border border-[#ebdcc9]/70 shrink-0 shadow-sm"
+                  className="h-24 w-20 object-cover rounded-xl border border-[#ebdcc9]/70 shrink-0 shadow-sm animate-fade-in"
                 />
                 <div className="space-y-3">
                   <div>
@@ -404,7 +431,11 @@ export function ProductCard({
                   {selectedSize ? `Add to Bag — ${formatINR(product.price)}` : "Select a size"}
                 </Button>
                 <Button asChild variant="luxeOutline">
-                  <Link to={`/products/${product.slug}`}>Full Details</Link>
+                  <Link
+                    to={`/products/${product.slug}${selectedColour ? `?colour=${encodeURIComponent(selectedColour)}` : ""}`}
+                  >
+                    Full Details
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -426,7 +457,13 @@ export function ProductGrid({ products, columns = 4 }: { products: Product[]; co
       )}
     >
       {products.map((product, i) => (
-        <ProductCard key={product.id} product={product} priority={i < 2} />
+        <div
+          key={product.id}
+          style={{ animationDelay: `${(i % 8) * 70}ms` }}
+          className="animate-fade-up"
+        >
+          <ProductCard product={product} priority={i < 2} />
+        </div>
       ))}
     </div>
   );

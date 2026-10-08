@@ -1213,6 +1213,8 @@ function ProductsManagerTab() {
   const [inspectedProduct, setInspectedProduct] = useState<Product | null>(null);
   const [editCategoryIds, setEditCategoryIds] = useState<string[]>([]);
   const [editImages, setEditImages] = useState<string[]>([]);
+  const [editImagesByColour, setEditImagesByColour] = useState<Record<string, string[]>>({});
+  const [activeColourTab, setActiveColourTab] = useState<string>("default");
   const [editUploading, setEditUploading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState<ProductFormValues>(emptyProductForm);
@@ -1256,7 +1258,14 @@ function ProductsManagerTab() {
         const url = await uploadImageRequest(file, "products");
         urls.push(url);
       }
-      setEditImages((prev) => [...prev, ...urls]);
+      if (activeColourTab === "default") {
+        setEditImages((prev) => [...prev, ...urls]);
+      } else {
+        setEditImagesByColour((prev) => ({
+          ...prev,
+          [activeColourTab]: [...(prev[activeColourTab] || []), ...urls],
+        }));
+      }
       toast.success(
         files.length === 1 ? "Image uploaded" : `${files.length} images uploaded successfully`,
       );
@@ -1308,6 +1317,8 @@ function ProductsManagerTab() {
   function handleStartEdit(prod: Product) {
     setEditingProduct(prod);
     setEditImages(prod.images ? [...prod.images] : []);
+    setEditImagesByColour(prod.imagesByColour ? { ...prod.imagesByColour } : {});
+    setActiveColourTab("default");
     if (prod.categoryIds && prod.categoryIds.length > 0) {
       setEditCategoryIds(prod.categoryIds);
     } else if (prod.category) {
@@ -1326,6 +1337,7 @@ function ProductsManagerTab() {
     newPrice: number,
     catIds: string[],
     imagesToSave: string[],
+    imagesByColourToSave: Record<string, string[]>,
   ) {
     try {
       const primaryCat = categories.find((c) => catIds.includes(c.id));
@@ -1336,6 +1348,7 @@ function ProductsManagerTab() {
         categoryIds: catIds,
         category: primaryCatName,
         images: imagesToSave.length > 0 ? imagesToSave : prod.images,
+        imagesByColour: imagesByColourToSave,
       };
       await saveProduct(updated);
       if (inspectedProduct && inspectedProduct.id === prod.id) {
@@ -1815,7 +1828,13 @@ function ProductsManagerTab() {
                   (formEl.elements.namedItem("price") as HTMLInputElement).value,
                 );
                 if (price > 0)
-                  void handleSaveEditProduct(editingProduct, price, editCategoryIds, editImages);
+                  void handleSaveEditProduct(
+                    editingProduct,
+                    price,
+                    editCategoryIds,
+                    editImages,
+                    editImagesByColour,
+                  );
               }}
               className="mt-4 space-y-5"
             >
@@ -1832,7 +1851,14 @@ function ProductsManagerTab() {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <Label>Product Imagery ({editImages.length})</Label>
+                  <Label>
+                    Product Imagery{" "}
+                    <span className="text-muted-foreground font-normal">
+                      {activeColourTab === "default"
+                        ? `(Default: ${editImages.length})`
+                        : `(${activeColourTab}: ${editImagesByColour[activeColourTab]?.length || 0})`}
+                    </span>
+                  </Label>
                   <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-amber-800 hover:text-amber-900 bg-amber-50 px-2 py-1 rounded border border-amber-200">
                     <input
                       type="file"
@@ -1843,48 +1869,115 @@ function ProductsManagerTab() {
                       onChange={(e) => void handleEditImagesUpload(e)}
                     />
                     <Plus className="h-3.5 w-3.5" />
-                    {editUploading ? "Uploading…" : "+ Upload images"}
+                    {editUploading
+                      ? "Uploading…"
+                      : activeColourTab === "default"
+                        ? "+ Upload default"
+                        : `+ Upload for ${activeColourTab}`}
                   </label>
                 </div>
-                {editImages.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-200 max-h-48 overflow-y-auto">
-                    {editImages.map((url, idx) => (
-                      <div
-                        key={idx}
-                        className="relative group w-16 h-20 rounded border border-slate-200 overflow-hidden bg-white shadow-xs shrink-0"
-                      >
-                        <img
-                          src={url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = "/products/p1.jpg";
-                          }}
-                        />
+
+                {editingProduct.colours && editingProduct.colours.length > 0 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-2.5 text-xs border-b border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setActiveColourTab("default")}
+                      className={cn(
+                        "px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap cursor-pointer",
+                        activeColourTab === "default"
+                          ? "bg-slate-900 text-white font-medium shadow-xs"
+                          : "text-slate-600 hover:bg-slate-100",
+                      )}
+                    >
+                      Default ({editImages.length})
+                    </button>
+                    {editingProduct.colours.map((col) => {
+                      const count = editImagesByColour[col]?.length || 0;
+                      return (
                         <button
+                          key={col}
                           type="button"
-                          onClick={() => {
-                            setEditImages((prev) => prev.filter((_, i) => i !== idx));
-                          }}
-                          className="absolute top-1 right-1 p-0.5 rounded-full bg-slate-900/80 text-white hover:bg-rose-600 transition-colors"
-                          title="Remove image"
+                          onClick={() => setActiveColourTab(col)}
+                          className={cn(
+                            "px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer",
+                            activeColourTab === col
+                              ? "bg-[#c6903c] text-white font-medium shadow-xs"
+                              : "text-slate-600 hover:bg-slate-100",
+                          )}
                         >
-                          <X className="h-3 w-3" />
-                        </button>
-                        {idx === 0 && (
-                          <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[8px] text-white text-center py-0.5">
-                            Primary
+                          <span>{col}</span>
+                          <span
+                            className={cn(
+                              "text-[10px] px-1.5 py-0.2 rounded-full",
+                              activeColourTab === col
+                                ? "bg-white/25 text-white"
+                                : "bg-slate-200 text-slate-700",
+                            )}
+                          >
+                            {count}
                           </span>
-                        )}
-                      </div>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
-                ) : (
-                  <p className="text-xs text-slate-400 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-lg text-center">
-                    No images uploaded. Click &quot;+ Upload images&quot; to add.
-                  </p>
                 )}
+
+                {(() => {
+                  const displayList =
+                    activeColourTab === "default"
+                      ? editImages
+                      : editImagesByColour[activeColourTab] || [];
+                  return displayList.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-200 max-h-48 overflow-y-auto">
+                      {displayList.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="relative group w-16 h-20 rounded border border-slate-200 overflow-hidden bg-white shadow-xs shrink-0"
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/products/p1.jpg";
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (activeColourTab === "default") {
+                                setEditImages((prev) => prev.filter((_, i) => i !== idx));
+                              } else {
+                                setEditImagesByColour((prev) => ({
+                                  ...prev,
+                                  [activeColourTab]: (prev[activeColourTab] || []).filter(
+                                    (_, i) => i !== idx,
+                                  ),
+                                }));
+                              }
+                            }}
+                            className="absolute top-1 right-1 p-0.5 rounded-full bg-slate-900/80 text-white hover:bg-rose-600 transition-colors"
+                            title="Remove image"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          {idx === 0 && (
+                            <span className="absolute bottom-0 inset-x-0 bg-slate-900/80 text-[8px] text-white text-center py-0.5">
+                              Primary
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-lg text-center">
+                      {activeColourTab === "default"
+                        ? 'No default images uploaded. Click "+ Upload default" to add.'
+                        : `No specific images uploaded for ${activeColourTab}. Storefront will fall back to default images.`}
+                    </p>
+                  );
+                })()}
               </div>
 
               <div>

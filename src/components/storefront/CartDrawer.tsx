@@ -32,6 +32,40 @@ export function CartDrawer() {
           </SheetTitle>
         </SheetHeader>
 
+        {/* Complimentary Shipping Progress Bar */}
+        {cartLines.length > 0 && (
+          <div className="border-b border-border/80 bg-[#fcf9f2] px-6 py-3">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-700">
+              <span>
+                {t.shippingFee === 0 ? (
+                  <span className="text-[#a97b41] font-semibold">
+                    Complimentary luxury delivery unlocked
+                  </span>
+                ) : (
+                  <span>
+                    Add{" "}
+                    <strong className="text-[#a97b41] font-semibold">
+                      {formatINR(settings.freeShippingThreshold - t.subtotal)}
+                    </strong>{" "}
+                    for complimentary delivery
+                  </span>
+                )}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                {Math.min(100, Math.round((t.subtotal / (settings.freeShippingThreshold || 1)) * 100))}%
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full bg-gradient-to-r from-[#d8b378] to-[#a97b41] transition-all duration-700 ease-out"
+                style={{
+                  width: `${Math.min(100, Math.round((t.subtotal / (settings.freeShippingThreshold || 1)) * 100))}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {cartLines.length === 0 ? (
           <div className="flex flex-1 items-center px-6">
             <div className="w-full">
@@ -50,12 +84,16 @@ export function CartDrawer() {
         ) : (
           <>
             <ul className="flex-1 divide-y divide-border overflow-y-auto px-6">
-              {cartLines.map((line) => (
-                <li key={line.variantId} className="flex gap-4 py-5">
+              {cartLines.map((line, idx) => (
+                <li
+                  key={line.variantId}
+                  style={{ animationDelay: `${idx * 60}ms` }}
+                  className="flex gap-4 py-5 animate-fade-up"
+                >
                   <Link
                     to={`/products/${line.product.slug}`}
                     onClick={() => setCartDrawerOpen(false)}
-                    className="shrink-0"
+                    className="shrink-0 overflow-hidden rounded-sm"
                   >
                     <img
                       src={line.product.images[0]}
@@ -63,7 +101,7 @@ export function CartDrawer() {
                       width={1000}
                       height={1300}
                       loading="lazy"
-                      className="h-28 w-22 object-cover"
+                      className="h-28 w-22 object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">
@@ -78,7 +116,7 @@ export function CartDrawer() {
                         type="button"
                         onClick={() => removeFromCart(line.variantId)}
                         aria-label={`Remove ${line.product.name}`}
-                        className="text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-muted-foreground transition-all hover:text-destructive active:scale-90"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -94,11 +132,11 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => updateQuantity(line.variantId, line.quantity - 1)}
                           aria-label="Decrease quantity"
-                          className="grid h-8 w-8 place-items-center transition-colors hover:bg-muted"
+                          className="grid h-8 w-8 place-items-center transition-all hover:bg-muted active:scale-90"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="w-8 text-center text-sm">{line.quantity}</span>
+                        <span className="w-8 text-center text-sm font-medium">{line.quantity}</span>
                         <button
                           type="button"
                           onClick={() =>
@@ -106,12 +144,12 @@ export function CartDrawer() {
                           }
                           disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
-                          className="grid h-8 w-8 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
+                          className="grid h-8 w-8 place-items-center transition-all hover:bg-muted active:scale-90 disabled:opacity-40 disabled:hover:bg-transparent"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      <span className="text-sm">{formatINR(line.lineTotal)}</span>
+                      <span className="text-sm font-medium">{formatINR(line.lineTotal)}</span>
                     </div>
                   </div>
                 </li>
