@@ -20,17 +20,19 @@ export function PeacockGlyph({ className }: { className?: string }) {
  */
 export function BrandMark({
   className,
+  imgClassName,
   size = "md",
   withTagline,
   tone = "default",
 }: {
   className?: string;
+  imgClassName?: string;
   size?: "sm" | "md" | "lg";
   withTagline?: boolean;
   tone?: "default" | "onDark" | "gold";
 }) {
   const sizeMap = {
-    sm: "h-10 sm:h-12",
+    sm: "h-11 sm:h-12",
     md: "h-14 sm:h-16 lg:h-18",
     lg: "h-24 sm:h-32",
   };
@@ -51,6 +53,7 @@ export function BrandMark({
           tone === "onDark"
             ? "drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]"
             : "drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]",
+          imgClassName,
         )}
         loading="eager"
         decoding="async"

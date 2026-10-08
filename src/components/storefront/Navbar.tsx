@@ -154,7 +154,7 @@ function SearchDialog({
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-900 px-1 text-[9px] font-bold text-white">
+    <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-slate-900 px-1 text-[8.5px] font-bold text-white sm:h-4 sm:min-w-4 sm:text-[9px]">
       {count}
     </span>
   );
@@ -194,25 +194,14 @@ export function Navbar() {
           scrolled ? "shadow-[0_10px_28px_-24px_rgba(17,43,47,0.35)]" : "",
         )}
       >
-        <div className="mx-auto flex h-16 sm:h-20 max-w-[1400px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
-          {/* Mobile Menu Button */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-            className="grid h-10 w-10 place-items-center lg:hidden text-slate-700"
-          >
-            <Menu className="h-5 w-5" strokeWidth={1.5} />
-          </button>
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center py-1 lg:order-1" aria-label="Bansal-nx home">
-            <BrandMark size="sm" className="sm:hidden" />
-            <BrandMark size="md" className="hidden sm:inline-flex" />
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1400px] items-center justify-between gap-2 sm:gap-4 px-4 sm:px-8 lg:px-12">
+          {/* Logo - Left Most */}
+          <Link to="/" className="flex items-center py-1 shrink-0" aria-label="Bansal-nx home">
+            <BrandMark size="md" imgClassName="h-12 sm:h-14 lg:h-16" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:order-2 lg:flex lg:items-center lg:gap-8" aria-label="Main">
+          <nav className="hidden lg:flex lg:items-center lg:gap-8" aria-label="Main">
             {primaryNav.map((item) => (
               <Link
                 key={item.label}
@@ -226,22 +215,22 @@ export function Navbar() {
           </nav>
 
           {/* Right Action Icons */}
-          <div className="flex items-center gap-1 sm:gap-2 lg:order-3">
+          <div className="flex items-center gap-0.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search creations"
-              className="grid h-9 w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
             >
-              <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              <Search className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.5} />
             </button>
 
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="relative grid h-9 w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
             >
-              <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
+              <Heart className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.5} />
               <CountBadge
                 count={
                   wishlist.filter((id) => products.some((p) => p.id === id && p.published)).length
@@ -249,11 +238,21 @@ export function Navbar() {
               />
             </Link>
 
-            {/* Account / Admin Link */}
+            <button
+              type="button"
+              onClick={() => setCartDrawerOpen(true)}
+              aria-label={`Open bag, ${cartCount} items`}
+              className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+            >
+              <ShoppingBag className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.4} />
+              <CountBadge count={cartCount} />
+            </button>
+
+            {/* Account / Admin Link - HIDDEN on mobile screens, shown on desktop */}
             <Link
               to={accountHref}
               aria-label={accountLabel}
-              className="relative flex items-center gap-1.5 border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-700 rounded-md transition-colors hover:bg-slate-100 hover:text-slate-900"
+              className="hidden lg:flex items-center gap-1.5 border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-medium text-slate-700 rounded-md transition-colors hover:bg-slate-100 hover:text-slate-900 ml-1"
             >
               {isAdmin ? (
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
@@ -275,14 +274,14 @@ export function Navbar() {
               </span>
             </Link>
 
+            {/* Mobile Menu Button - RIGHT MOST */}
             <button
               type="button"
-              onClick={() => setCartDrawerOpen(true)}
-              aria-label={`Open bag, ${cartCount} items`}
-              className="relative grid h-9 w-9 place-items-center text-slate-600 transition-colors hover:text-slate-900"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center lg:hidden text-slate-700 hover:text-slate-900 ml-0.5"
             >
-              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
-              <CountBadge count={cartCount} />
+              <Menu className="h-5 w-5" strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -291,21 +290,57 @@ export function Navbar() {
       {/* Mobile Menu Drawer */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
-          side="left"
+          side="right"
           className="w-[86%] border-border bg-background p-0 sm:max-w-sm rounded-none"
         >
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-border p-5">
-              <BrandMark size="sm" />
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-                className="grid h-8 w-8 place-items-center text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
+            {/* Header: Prominent logo, single close button (handled by SheetPrimitive.Close at top-right) */}
+            <div className="flex items-center justify-between border-b border-border/80 px-5 py-4 pr-12">
+              <BrandMark size="md" imgClassName="h-12 sm:h-14" />
+            </div>
+
+            {/* Account / Login Section inside Mobile Menu */}
+            <div className="border-b border-border/70 bg-[#faf6ee]/50 p-4">
+              {isAuthenticated ? (
+                <Link
+                  to={accountHref}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-between rounded-lg border border-[#e4d4bd] bg-white p-3 shadow-xs transition-colors hover:border-[#c6903c]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-9 w-9 place-items-center rounded-full bg-[#f4ecd8] text-[#9b7038]">
+                      {isAdmin ? <ShieldCheck className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-semibold text-slate-900">
+                        {isAdmin
+                          ? "Admin Console"
+                          : `${user?.firstName ?? "Valued Client"} ${user?.lastName ?? ""}`.trim()}
+                      </p>
+                      <p className="text-[11px] text-slate-500 truncate max-w-[150px]">
+                        {user?.email ?? "Account"}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none"
+                  >
+                    {isAdmin ? "Admin" : "Client"}
+                  </Badge>
+                </Link>
+              ) : (
+                <Button
+                  asChild
+                  variant="luxe"
+                  className="w-full justify-center text-xs tracking-wider uppercase font-semibold h-10 shadow-xs"
+                >
+                  <Link to="/login" onClick={() => setMenuOpen(false)}>
+                    <User className="h-4 w-4 mr-2" /> Sign In / Register
+                  </Link>
+                </Button>
+              )}
             </div>
 
             <nav className="flex-1 overflow-y-auto p-5" aria-label="Mobile">
@@ -323,28 +358,21 @@ export function Navbar() {
                 ))}
                 <li>
                   <Link
-                    to={accountHref}
+                    to="/wishlist"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between py-1 text-gold-deep font-medium"
+                    className="flex items-center justify-between py-1 text-slate-700 hover:text-gold-deep font-display"
                   >
-                    <span>
-                      {isAdmin ? "Admin Management" : isAuthenticated ? "My Account" : "Sign In"}
+                    <span>Wishlist</span>
+                    <span className="text-xs font-sans text-muted-foreground">
+                      ({wishlist.filter((id) => products.some((p) => p.id === id && p.published)).length})
                     </span>
-                    {isAuthenticated && (
-                      <Badge
-                        variant="outline"
-                        className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none"
-                      >
-                        {isAdmin ? "Admin" : "Client"}
-                      </Badge>
-                    )}
                   </Link>
                 </li>
                 <li>
                   <Link
                     to="/track"
                     onClick={() => setMenuOpen(false)}
-                    className="block py-1 text-sm uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
+                    className="block py-1 text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground font-sans pt-2"
                   >
                     Track Your Order
                   </Link>
