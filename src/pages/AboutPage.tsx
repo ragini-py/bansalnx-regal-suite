@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Gem, Hand, Sparkles } from "lucide-react";
+import { Gem, Hand, Scissors } from "lucide-react";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { imagery } from "@/data/catalog";
@@ -11,7 +11,7 @@ const values = [
     body: "Every piece passes through the hands of our karigars — master artisans whose techniques are inherited across generations.",
   },
   {
-    icon: Sparkles,
+    icon: Scissors,
     title: "Made-to-order",
     body: "We craft in small, considered batches, not for a season. Fewer pieces, made better, made for you.",
   },

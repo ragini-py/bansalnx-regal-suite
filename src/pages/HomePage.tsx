@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Mail, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Mail, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -186,8 +186,8 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
       <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
         <div className="max-w-2xl fade-up">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#d4a76a] flex items-center gap-2 mb-3">
-            <Sparkles className="h-3.5 w-3.5" /> {slide.eyebrow}
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4a76a] mb-3">
+            {slide.eyebrow}
           </p>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
             {slide.heading}

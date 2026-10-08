@@ -6,10 +6,13 @@ function Bar({ className }: { className?: string }) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
-      <Bar className="aspect-[4/5] w-full" />
-      <Bar className="h-3 w-2/3" />
-      <Bar className="h-3 w-1/3" />
+    <div className="flex flex-col rounded-2xl border border-border/50 bg-card/60 p-2 sm:p-2.5">
+      <Bar className="aspect-4/5 w-full rounded-xl" />
+      <div className="mt-2.5 space-y-2 px-1">
+        <Bar className="h-2.5 w-1/3 rounded" />
+        <Bar className="h-3.5 w-4/5 rounded" />
+        <Bar className="h-3 w-1/2 rounded" />
+      </div>
     </div>
   );
 }

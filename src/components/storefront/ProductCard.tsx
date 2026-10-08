@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { Eye, Heart, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { Heart, ShoppingBag } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 
 import { AuthPromptDialog } from "@/components/storefront/AuthPromptDialog";
@@ -24,6 +24,34 @@ const badgeLabel: Record<string, string> = {
   exclusive: "Exclusive",
 };
 
+const colourMap: Record<string, string> = {
+  ivory: "#fdfbf7",
+  cream: "#fffdd0",
+  gold: "#d4af37",
+  rose: "#e8a598",
+  peach: "#f8cbb6",
+  pink: "#f4a6b8",
+  emerald: "#2d5a43",
+  sapphire: "#2b4c7e",
+  ruby: "#9b111e",
+  black: "#1c1917",
+  white: "#ffffff",
+  beige: "#f5f0e6",
+  maroon: "#6b1724",
+  yellow: "#eedc82",
+  green: "#3b5323",
+  red: "#a52a2a",
+  blue: "#4682b4",
+  silver: "#c0c0c0",
+  rust: "#b7410e",
+  plum: "#5e2a40",
+  teal: "#005f73",
+  sage: "#9caf88",
+  wine: "#722f37",
+  navy: "#1b2a47",
+  mustard: "#e1ad01",
+};
+
 export function ProductCard({
   product,
   priority = false,
@@ -44,6 +72,50 @@ export function ProductCard({
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedColour, setSelectedColour] = useState(product.colours[0] ?? "");
   const [selectedSize, setSelectedSize] = useState("");
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const carouselIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const images =
+    product.images && product.images.length > 0 ? product.images : ["/products/p1.jpg"];
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      if (carouselIntervalRef.current) clearInterval(carouselIntervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [product.id]);
+
+  function handleMouseEnter() {
+    if (images.length <= 1) return;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    if (carouselIntervalRef.current) clearInterval(carouselIntervalRef.current);
+
+    // Wait 2 seconds before starting the carousel in cyclic order
+    hoverTimerRef.current = setTimeout(() => {
+      setActiveImageIndex((prev) => (prev + 1) % images.length);
+      carouselIntervalRef.current = setInterval(() => {
+        setActiveImageIndex((prev) => (prev + 1) % images.length);
+      }, 2000);
+    }, 2000);
+  }
+
+  function handleMouseLeave() {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    if (carouselIntervalRef.current) {
+      clearInterval(carouselIntervalRef.current);
+      carouselIntervalRef.current = null;
+    }
+    setActiveImageIndex(0);
+  }
 
   const saved = isWishlisted(product.id);
   const off = discountPercent(product.mrp, product.price);
@@ -89,104 +161,152 @@ export function ProductCard({
 
   return (
     <>
-      <article className="group relative flex flex-col">
-        <div className="relative overflow-hidden rounded-[22px] border border-[#e8dcc2] bg-[#f7f2ea]/80 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-md">
+      <article
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="group relative flex flex-col rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-2 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-1.5 hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4]"
+      >
+        <div className="relative aspect-4/5 w-full overflow-hidden rounded-xl bg-[#f5ede2]/40">
           <Link
             to={`/products/${product.slug}`}
-            className="block overflow-hidden rounded-t-[22px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#c6903c]"
+            className="relative block h-full w-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#c6903c]"
             aria-label={product.name}
           >
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              width={1000}
-              height={1300}
-              loading={priority ? "eager" : "lazy"}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/products/p1.jpg";
-              }}
-              className="aspect-4/5 w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-            />
-            {product.images[1] && (
+            {images.map((imgSrc, idx) => (
               <img
-                src={product.images[1]}
-                alt=""
-                aria-hidden="true"
+                key={idx}
+                src={imgSrc}
+                alt={idx === 0 ? product.name : ""}
+                aria-hidden={idx !== activeImageIndex}
                 width={1000}
                 height={1300}
-                loading="lazy"
+                loading={priority && idx === 0 ? "eager" : "lazy"}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/products/p2.jpg";
+                  e.currentTarget.src = idx % 2 === 0 ? "/products/p1.jpg" : "/products/p2.jpg";
                 }}
-                className="absolute inset-0 aspect-4/5 w-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out",
+                  idx === activeImageIndex
+                    ? "opacity-100 scale-[1.02]"
+                    : "opacity-0 scale-100 pointer-events-none",
+                )}
               />
-            )}
-            {product.badge && (
-              <span className="absolute left-3 top-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-800 rounded-md shadow-xs border border-slate-200/60">
-                {badgeLabel[product.badge]}
-              </span>
-            )}
+            ))}
             {soldOut && (
-              <span className="absolute bottom-0 left-0 right-0 bg-slate-950/80 py-2 text-center text-xs font-semibold uppercase tracking-wider text-white">
+              <span className="absolute bottom-0 left-0 right-0 z-10 bg-neutral-950/85 py-1.5 text-center text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-xs">
                 Currently unavailable
               </span>
             )}
           </Link>
 
-          {/* Quick Add Overlay on Hover */}
+          {/* Subtle Carousel Indicators (visible when cycling multi-image dresses) */}
+          {images.length > 1 && (
+            <div className="absolute top-2.5 inset-x-0 flex justify-center items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none z-10">
+              {images.map((_, dotIdx) => (
+                <span
+                  key={dotIdx}
+                  className={cn(
+                    "h-1 rounded-full transition-all duration-400",
+                    dotIdx === activeImageIndex
+                      ? "w-3.5 bg-white shadow-xs"
+                      : "w-1 bg-white/45 backdrop-blur-xs",
+                  )}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Floating Wishlist Heart Button */}
+          <button
+            type="button"
+            onClick={onWishlist}
+            aria-label={
+              saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`
+            }
+            aria-pressed={saved}
+            className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full border border-white/60 bg-white/75 text-neutral-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-110 active:scale-95 cursor-pointer"
+          >
+            <Heart
+              className={cn(
+                "h-3.5 w-3.5 transition-colors",
+                saved ? "fill-rose-500 text-rose-500" : "text-neutral-700",
+              )}
+            />
+          </button>
+
+          {/* Refined Quick Add Capsule Pill */}
           {!soldOut && (
-            <div className="absolute inset-x-3 bottom-3 hidden sm:flex opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0">
+            <div className="absolute inset-x-0 bottom-3 hidden sm:flex justify-center opacity-0 translate-y-2 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-y-0">
               <button
                 type="button"
                 onClick={() => setQuickAddOpen(true)}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-3 text-xs font-semibold rounded-lg shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#1d1a17]/90 px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-white shadow-lg backdrop-blur-md transition-all hover:bg-black hover:scale-105 active:scale-95 cursor-pointer"
               >
-                <ShoppingBag className="h-3.5 w-3.5" /> Quick Add
+                <ShoppingBag className="h-3 w-3" />
+                <span>Quick Add</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Wishlist Button */}
-        <button
-          type="button"
-          onClick={onWishlist}
-          aria-label={
-            saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`
-          }
-          aria-pressed={saved}
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-700 shadow-sm transition-transform duration-200 hover:bg-white hover:scale-105"
-        >
-          <Heart
-            className={cn(
-              "h-4 w-4 transition-colors",
-              saved ? "fill-rose-500 text-rose-500" : "text-slate-700",
-            )}
-          />
-        </button>
-
-        {/* Card Details */}
-        <div className="mt-3 flex flex-col gap-1 px-1 pb-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-            {product.category}
-          </p>
-          <Link
-            to={`/products/${product.slug}`}
-            className="self-start font-sans font-medium text-sm text-slate-900 hover:text-amber-800 transition-colors line-clamp-1"
-          >
-            {product.name}
-          </Link>
-          <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-sm font-bold text-slate-900">{formatINR(product.price)}</span>
-            {off > 0 && (
-              <>
-                <span className="text-xs text-slate-400 line-through">
+        {/* Anchored Bottom Information */}
+        <div className="flex flex-1 flex-col justify-between px-3 pt-3 pb-2.5">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#9a7342]">
+                  {product.category}
+                </p>
+                {product.badge && (
+                  <span className="rounded-full border border-[#e4d4be] bg-[#f8f1e7] px-2 py-0.5 text-[8.5px] font-semibold uppercase tracking-[0.16em] text-[#8a6335]">
+                    {badgeLabel[product.badge]}
+                  </span>
+                )}
+              </div>
+              {/* Available Colour Swatches Preview */}
+              {product.colours && product.colours.length > 1 && (
+                <div
+                  className="flex items-center gap-1 opacity-75 transition-opacity duration-300 group-hover:opacity-100"
+                  title={`${product.colours.length} available colours`}
+                >
+                  {product.colours.slice(0, 3).map((col) => (
+                    <span
+                      key={col}
+                      className="h-2 w-2 rounded-full border border-black/15 shadow-2xs"
+                      style={{ backgroundColor: colourMap[col.toLowerCase()] || "#c8bca9" }}
+                    />
+                  ))}
+                  {product.colours.length > 3 && (
+                    <span className="text-[9px] font-medium text-neutral-400">
+                      +{product.colours.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+            <Link
+              to={`/products/${product.slug}`}
+              className="mt-1 block font-serif text-[14.5px] font-normal leading-snug tracking-tight text-[#24211e] transition-colors line-clamp-1 hover:text-[#9a7342]"
+            >
+              {product.name}
+            </Link>
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between gap-2 border-t border-[#f0e6d6]/60 pt-2">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[14px] font-semibold text-[#24211e]">
+                {formatINR(product.price)}
+              </span>
+              {off > 0 && (
+                <span className="text-[11px] text-neutral-400 line-through">
                   {formatINR(product.mrp)}
                 </span>
-                <span className="text-xs font-semibold text-emerald-600">{off}% off</span>
-              </>
+              )}
+            </div>
+            {off > 0 && (
+              <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9.5px] font-semibold tracking-wider text-emerald-800 border border-emerald-200/50">
+                {off}% off
+              </span>
             )}
           </div>
         </div>
@@ -195,12 +315,12 @@ export function ProductCard({
       {/* Quick Add Modal */}
       {quickAddOpen && (
         <Dialog open={quickAddOpen} onOpenChange={setQuickAddOpen}>
-          <DialogContent className="max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+          <DialogContent className="max-w-md rounded-2xl border border-[#ebdcc9] bg-[#fffdfb] p-6 shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="font-sans font-bold text-lg text-slate-900">
+              <DialogTitle className="font-serif text-xl font-medium text-[#24211e]">
                 {product.name}
               </DialogTitle>
-              <DialogDescription className="text-xs font-medium text-slate-500">
+              <DialogDescription className="text-xs font-medium text-[#9a7342]">
                 {product.category} · {formatINR(product.price)}
               </DialogDescription>
             </DialogHeader>
@@ -213,11 +333,11 @@ export function ProductCard({
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/products/p1.jpg";
                   }}
-                  className="h-24 w-20 object-cover rounded-lg border border-slate-200 shrink-0"
+                  className="h-24 w-20 object-cover rounded-xl border border-[#ebdcc9]/70 shrink-0 shadow-sm"
                 />
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1.5">Select Colour</p>
+                    <p className="text-xs font-medium text-neutral-600 mb-1.5">Select Colour</p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                       {product.colours.map((c) => (
                         <button
@@ -228,10 +348,10 @@ export function ProductCard({
                             setSelectedSize("");
                           }}
                           className={cn(
-                            "border px-2.5 py-1 text-xs transition-colors",
+                            "rounded-md border px-2.5 py-1 text-xs transition-colors cursor-pointer",
                             selectedColour === c
-                              ? "border-gold bg-gold text-ink font-medium"
-                              : "border-border hover:border-foreground/50",
+                              ? "border-[#c6903c] bg-[#c6903c] text-white font-medium shadow-xs"
+                              : "border-[#e3d7c3] text-neutral-700 hover:border-neutral-400 bg-white",
                           )}
                         >
                           {c}
@@ -240,7 +360,7 @@ export function ProductCard({
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                    <p className="text-[11px] uppercase tracking-[0.15em] text-neutral-500">
                       Select Size
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
@@ -254,10 +374,10 @@ export function ProductCard({
                             disabled={!available}
                             title={available ? undefined : "Currently unavailable"}
                             className={cn(
-                              "border px-2.5 py-1 text-xs transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-40",
+                              "rounded-md border px-2.5 py-1 text-xs transition-colors cursor-pointer disabled:cursor-not-allowed disabled:line-through disabled:opacity-40",
                               selectedSize === s
-                                ? "border-gold bg-gold text-ink font-medium"
-                                : "border-border hover:border-foreground/50",
+                                ? "border-[#c6903c] bg-[#c6903c] text-white font-medium shadow-xs"
+                                : "border-[#e3d7c3] text-neutral-700 hover:border-neutral-400 bg-white",
                             )}
                           >
                             {s}

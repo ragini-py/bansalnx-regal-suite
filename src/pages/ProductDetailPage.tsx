@@ -8,7 +8,6 @@ import {
   RefreshCcw,
   Ruler,
   ShieldCheck,
-  Sparkles,
   Truck,
   ZoomIn,
 } from "lucide-react";
@@ -319,8 +318,7 @@ export function ProductDetailPage() {
 
             {/* Special Promo Coupon Pill */}
             <div className="flex items-center justify-between border border-gold/40 bg-gold/5 px-4 py-3 text-xs">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-gold" />
+              <div>
                 <span>
                   Use code{" "}
                   <strong className="font-mono text-gold-deep font-medium">WELCOME10</strong> for
