@@ -242,6 +242,13 @@ export function ProductCard({
             />
           </button>
 
+          {/* Badge Tag Pill at bottom of image */}
+          {product.badge && !soldOut && (
+            <span className="absolute bottom-2 left-2 z-10 inline-flex items-center rounded-full border border-white/60 bg-white/90 px-2 py-0.5 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.12em] text-[#8a6335] shadow-xs backdrop-blur-md transition-opacity duration-300 pointer-events-none sm:group-hover:opacity-0">
+              {badgeLabel[product.badge] ?? product.badge}
+            </span>
+          )}
+
           {/* Refined Quick Add Capsule Pill */}
           {!soldOut && (
             <div className="absolute inset-x-0 bottom-3 hidden sm:flex justify-center opacity-0 translate-y-2 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-y-0">
@@ -261,16 +268,9 @@ export function ProductCard({
         <div className="flex flex-1 flex-col justify-between px-3 pt-3 pb-2.5">
           <div>
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#9a7342]">
-                  {product.category}
-                </p>
-                {product.badge && (
-                  <span className="rounded-full border border-[#e4d4be] bg-[#f8f1e7] px-2 py-0.5 text-[8.5px] font-semibold uppercase tracking-[0.16em] text-[#8a6335]">
-                    {badgeLabel[product.badge]}
-                  </span>
-                )}
-              </div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#9a7342] truncate">
+                {product.category}
+              </p>
               {/* Interactive Colour Swatches */}
               {product.colours && product.colours.length > 1 && (
                 <div
@@ -318,20 +318,20 @@ export function ProductCard({
               {product.name}
             </Link>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between gap-2 border-t border-[#f0e6d6]/60 pt-2">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[14px] font-semibold text-[#24211e]">
+          <div className="mt-2.5 flex items-baseline justify-between gap-1.5 sm:gap-2 border-t border-[#f0e6d6]/60 pt-2">
+            <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
+              <span className="text-[13.5px] sm:text-[14px] font-semibold text-[#24211e] whitespace-nowrap">
                 {formatINR(product.price)}
               </span>
               {off > 0 && (
-                <span className="text-[11px] text-neutral-400 line-through">
+                <span className="text-[10.5px] sm:text-[11px] text-neutral-400 line-through whitespace-nowrap">
                   {formatINR(product.mrp)}
                 </span>
               )}
             </div>
             {off > 0 && (
-              <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9.5px] font-semibold tracking-wider text-emerald-800 border border-emerald-200/50">
-                {off}% off
+              <span className="shrink-0 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] sm:text-[9.5px] font-semibold tracking-wider text-emerald-800 border border-emerald-200/60 whitespace-nowrap">
+                {off}%<span className="hidden sm:inline"> off</span>
               </span>
             )}
           </div>

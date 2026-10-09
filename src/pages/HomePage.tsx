@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight, Mail, Star } from "lucide-react";
+import { ArrowRight, Mail, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -160,13 +160,6 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
   const slide = heroSlides[current] ?? heroSlides[0]!;
 
-  const handlePrev = () => {
-    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
-
-  const handleNext = () => {
-    setCurrent((prev) => (prev + 1) % heroSlides.length);
-  };
 
   return (
     <section
@@ -201,7 +194,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-8 pt-28 sm:px-8 sm:pb-12 sm:pt-36 lg:pt-40 lg:px-12">
+      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
         <div key={current} className="max-w-2xl animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d4a76a] mb-3 animate-fade-up">
             {slide.eyebrow}
@@ -220,76 +213,22 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
           </p>
           <div
             style={{ animationDelay: "320ms" }}
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3 animate-fade-up"
+            className="mt-6 sm:mt-8 flex flex-row items-center gap-2.5 sm:gap-3.5 animate-fade-up"
           >
             <Button
               asChild
               variant="luxe"
-              size="lg"
-              className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md"
+              className="h-8 px-3.5 text-xs sm:h-11 sm:px-6 sm:text-sm bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md whitespace-nowrap tracking-wide uppercase"
             >
               <Link to={slide.primaryTo}>{slide.primaryCta}</Link>
             </Button>
             <Button
               asChild
               variant="onImage"
-              size="lg"
-              className="border-white/30 text-white hover:bg-white/10 font-medium"
+              className="h-8 px-3.5 text-xs sm:h-11 sm:px-6 sm:text-sm border-white/35 text-white hover:bg-white/10 font-medium whitespace-nowrap tracking-wide uppercase"
             >
               <Link to={slide.secondaryTo}>{slide.secondaryCta}</Link>
             </Button>
-          </div>
-        </div>
-
-        {/* Luxury Hero Navigation & Progress Indicators */}
-        <div className="mt-10 flex items-center justify-between border-t border-white/15 pt-4 text-white/90">
-          <div className="flex items-center gap-3">
-            {heroSlides.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrent(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className="group flex items-center gap-2 py-2 cursor-pointer focus-visible:outline-none"
-              >
-                <span
-                  className={cn(
-                    "text-[11px] font-mono transition-colors tracking-widest",
-                    current === idx ? "text-[#d4a76a] font-bold" : "text-white/40 group-hover:text-white/80",
-                  )}
-                >
-                  0{idx + 1}
-                </span>
-                <span className="relative h-0.5 w-10 sm:w-14 overflow-hidden rounded-full bg-white/20">
-                  {current === idx && (
-                    <span
-                      key={current}
-                      style={{ animationDuration: "7000ms" }}
-                      className="absolute inset-0 bg-[#d4a76a] animate-[heroProgress_7000ms_linear_forwards]"
-                    />
-                  )}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous slide"
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white hover:text-slate-950 active:scale-95 cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next slide"
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white hover:text-slate-950 active:scale-95 cursor-pointer"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </div>
