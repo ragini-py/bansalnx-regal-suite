@@ -79,6 +79,17 @@ export function ProductDetailPage() {
   const [zoomOpen, setZoomOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const wasSwipe = useRef(false);
+  const sizeSectionRef = useRef<HTMLFieldSetElement>(null);
+
+  const handleStickyCta = () => {
+    if (!size) {
+      setSizeError(true);
+      sizeSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("Please choose a size first");
+      return;
+    }
+    handleAddToCart();
+  };
 
   useEffect(() => {
     setActiveImage(0);
@@ -224,8 +235,7 @@ export function ProductDetailPage() {
           {/* Gallery */}
           <div>
             <div
-              className="group relative aspect-3/4 overflow-hidden bg-secondary cursor-zoom-in touch-pan-y"
-              onClick={handleGalleryClick}
+              className="group relative aspect-3/4 overflow-hidden bg-secondary select-none touch-pan-y"
               onTouchStart={handleGalleryTouchStart}
               onTouchEnd={handleGalleryTouchEnd}
             >
@@ -233,21 +243,40 @@ export function ProductDetailPage() {
                 key={`${colour}-${activeImage}`}
                 src={currentImages[activeImage] ?? currentImages[0]}
                 alt={`${product.name} — view ${activeImage + 1}`}
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.innerWidth >= 768) {
+                    setZoomOpen(true);
+                  }
+                }}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = "/products/p1.jpg";
                 }}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 animate-fade-in"
+                className="h-full w-full object-cover transition-transform duration-700 md:cursor-zoom-in md:group-hover:scale-105 animate-fade-in"
               />
+
+              {/* Photo Counter Badge for Mobile & Desktop */}
+              {currentImages.length > 1 && (
+                <div className="absolute top-3.5 right-3.5 z-10 rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-medium tracking-widest text-pearl backdrop-blur-xs">
+                  {activeImage + 1} / {currentImages.length}
+                </div>
+              )}
+
+              {/* Explicit Zoom Button (Always easily tappable on mobile, hover on desktop) */}
               <button
                 type="button"
-                className="absolute right-4 bottom-4 bg-ink/80 text-pearl p-2.5 rounded-full backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomOpen(true);
+                }}
+                className="absolute right-3.5 bottom-3.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-ink/85 text-pearl shadow-md backdrop-blur-xs transition-transform duration-200 hover:scale-110 active:scale-95"
                 aria-label="Zoom image"
               >
                 <ZoomIn className="h-4 w-4" />
               </button>
+
               {product.badge && (
-                <span className="absolute left-4 top-4 bg-ink px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-ivory">
+                <span className="absolute left-3.5 top-3.5 z-10 bg-ink px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-ivory sm:px-3 sm:py-1.5 sm:text-[10px]">
                   {product.badge === "new"
                     ? "New"
                     : product.badge === "bestseller"
@@ -255,15 +284,17 @@ export function ProductDetailPage() {
                       : "Exclusive"}
                 </span>
               )}
+
+              {/* Mobile Carousel Progress Dots */}
               {currentImages.length > 1 && (
-                <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 sm:hidden">
+                <div className="absolute inset-x-0 bottom-3.5 flex justify-center gap-1.5 sm:hidden pointer-events-none">
                   {currentImages.map((_, i) => (
                     <span
                       key={i}
                       aria-hidden="true"
                       className={cn(
-                        "h-1.5 rounded-full transition-all",
-                        i === activeImage ? "w-5 bg-white" : "w-1.5 bg-white/50",
+                        "h-1 rounded-full transition-all duration-300",
+                        i === activeImage ? "w-5 bg-white shadow-xs" : "w-1.5 bg-white/50",
                       )}
                     />
                   ))}
@@ -271,42 +302,44 @@ export function ProductDetailPage() {
               )}
             </div>
 
-            {/* Thumbnails */}
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {currentImages.map((image, i) => (
-                <button
-                  key={image + i}
-                  type="button"
-                  onClick={() => setActiveImage(i)}
-                  aria-label={`View image ${i + 1} of ${product.name}`}
-                  aria-current={i === activeImage}
-                  className={cn(
-                    "relative aspect-3/4 w-20 shrink-0 overflow-hidden border transition-all duration-300 hover:scale-105 active:scale-95 sm:w-24",
-                    i === activeImage
-                      ? "border-gold ring-1 ring-gold shadow-xs"
-                      : "border-border hover:border-foreground/40",
-                  )}
-                >
-                  <img
-                    src={image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/products/p1.jpg";
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
+            {/* Thumbnails Strip */}
+            {currentImages.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x sm:mt-4 sm:gap-3">
+                {currentImages.map((image, i) => (
+                  <button
+                    key={image + i}
+                    type="button"
+                    onClick={() => setActiveImage(i)}
+                    aria-label={`View image ${i + 1} of ${product.name}`}
+                    aria-current={i === activeImage}
+                    className={cn(
+                      "relative aspect-3/4 w-16 shrink-0 snap-start overflow-hidden border transition-all duration-200 active:scale-95 sm:w-22",
+                      i === activeImage
+                        ? "border-gold ring-1 ring-gold shadow-xs"
+                        : "border-border hover:border-foreground/40 opacity-70 hover:opacity-100",
+                    )}
+                  >
+                    <img
+                      src={image}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/products/p1.jpg";
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Details */}
           <div className="lg:sticky lg:top-28 lg:self-start space-y-6">
             <div>
               <p className="eyebrow text-gold-deep font-medium">{product.category}</p>
-              <h1 className="mt-2 text-3xl font-light leading-tight sm:text-4xl lg:text-[2.6rem]">
+              <h1 className="mt-2 text-2xl font-light leading-snug sm:text-4xl lg:text-[2.6rem]">
                 {product.name}
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -393,7 +426,7 @@ export function ProductDetailPage() {
             )}
 
             {/* Size selection */}
-            <fieldset>
+            <fieldset ref={sizeSectionRef}>
               <div className="mb-2 flex items-center justify-between">
                 <legend className="text-[11px] uppercase tracking-[0.2em] font-medium">
                   Size: {size && <span className="text-muted-foreground font-normal">{size}</span>}
@@ -590,16 +623,42 @@ export function ProductDetailPage() {
       )}
 
       {/* Sticky Mobile Add to Bag Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between border-t border-border bg-background/95 p-4 backdrop-blur-md lg:hidden">
-        <div>
-          <p className="text-xs font-medium text-foreground truncate max-w-[160px]">
-            {product.name}
-          </p>
-          <p className="text-sm font-display text-gold-deep">{formatINR(product.price)}</p>
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-xl backdrop-blur-md lg:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-foreground">
+              {product.name}
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-base text-gold-deep">
+                {formatINR(product.price)}
+              </span>
+              {size && (
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  · Size {size}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleWishlist}
+              aria-label={wished ? "Saved to Wishlist" : "Save to Wishlist"}
+              className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-background transition-colors hover:border-gold active:scale-95"
+            >
+              <Heart className={cn("h-4 w-4", wished && "fill-gold text-gold")} />
+            </button>
+            <Button
+              variant="luxe"
+              size="sm"
+              onClick={handleStickyCta}
+              className="h-10 px-4 text-xs font-medium tracking-wider"
+            >
+              {size ? `Add to Bag (${size})` : "Select Size"}
+            </Button>
+          </div>
         </div>
-        <Button variant="luxe" size="sm" onClick={handleAddToCart}>
-          {size ? `Add to Bag (${size})` : "Select Size"}
-        </Button>
       </div>
 
       {/* Size Chart Modal */}

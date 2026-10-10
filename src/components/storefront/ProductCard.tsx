@@ -171,9 +171,9 @@ export function ProductCard({
       <article
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="group relative flex flex-col rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-2 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:-translate-y-1.5 hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4] shimmer-hover"
+        className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-1.5 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] sm:hover:-translate-y-1.5 sm:hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4] shimmer-hover"
       >
-        <div className="relative aspect-4/5 w-full overflow-hidden rounded-xl bg-[#f5ede2]/40">
+        <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg sm:rounded-xl bg-[#f5ede2]/40">
           <Link
             to={`/products/${product.slug}${activeColour ? `?colour=${encodeURIComponent(activeColour)}` : ""}`}
             className="relative block h-full w-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#c6903c]"
@@ -201,7 +201,7 @@ export function ProductCard({
               />
             ))}
             {soldOut && (
-              <span className="absolute bottom-0 left-0 right-0 z-10 bg-neutral-950/85 py-1.5 text-center text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-xs">
+              <span className="absolute bottom-0 left-0 right-0 z-10 bg-neutral-950/85 py-1 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-xs">
                 Currently unavailable
               </span>
             )}
@@ -209,14 +209,14 @@ export function ProductCard({
 
           {/* Subtle Carousel Indicators (visible when cycling multi-image dresses) */}
           {images.length > 1 && (
-            <div className="absolute top-2.5 inset-x-0 flex justify-center items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none z-10">
+            <div className="absolute top-2 inset-x-0 flex justify-center items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none z-10">
               {images.map((_, dotIdx) => (
                 <span
                   key={dotIdx}
                   className={cn(
                     "h-1 rounded-full transition-all duration-400",
                     dotIdx === activeImageIndex
-                      ? "w-3.5 bg-white shadow-xs"
+                      ? "w-3 bg-white shadow-xs"
                       : "w-1 bg-white/45 backdrop-blur-xs",
                   )}
                 />
@@ -224,7 +224,7 @@ export function ProductCard({
             </div>
           )}
 
-          {/* Floating Wishlist Heart Button */}
+          {/* Floating Wishlist Heart Button - High z-index & touch target */}
           <button
             type="button"
             onClick={onWishlist}
@@ -232,7 +232,7 @@ export function ProductCard({
               saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`
             }
             aria-pressed={saved}
-            className="absolute right-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-full border border-white/60 bg-white/75 text-neutral-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-110 active:scale-95 cursor-pointer"
+            className="absolute right-1.5 top-1.5 sm:right-2.5 sm:top-2.5 z-20 grid h-7 w-7 sm:h-8 sm:w-8 place-items-center rounded-full border border-white/60 bg-white/80 text-neutral-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-white hover:scale-110 active:scale-90 cursor-pointer"
           >
             <Heart
               className={cn(
@@ -244,7 +244,7 @@ export function ProductCard({
 
           {/* Badge Tag Pill at bottom of image */}
           {product.badge && !soldOut && (
-            <span className="absolute bottom-2 left-2 z-10 inline-flex items-center rounded-full border border-white/60 bg-white/90 px-2 py-0.5 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.12em] text-[#8a6335] shadow-xs backdrop-blur-md transition-opacity duration-300 pointer-events-none sm:group-hover:opacity-0">
+            <span className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 z-10 inline-flex items-center rounded-full border border-white/60 bg-white/90 px-1.5 py-0.5 sm:px-2 text-[7.5px] sm:text-[9px] font-semibold uppercase tracking-[0.12em] text-[#8a6335] shadow-xs backdrop-blur-md transition-opacity duration-300 pointer-events-none sm:group-hover:opacity-0">
               {badgeLabel[product.badge] ?? product.badge}
             </span>
           )}
@@ -265,19 +265,19 @@ export function ProductCard({
         </div>
 
         {/* Anchored Bottom Information */}
-        <div className="flex flex-1 flex-col justify-between px-3 pt-3 pb-2.5">
+        <div className="flex flex-1 flex-col justify-between px-1.5 pt-2 pb-1.5 sm:px-3 sm:pt-3 sm:pb-2.5">
           <div>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[#9a7342] truncate">
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-[#9a7342] truncate">
                 {product.category}
               </p>
               {/* Interactive Colour Swatches */}
               {product.colours && product.colours.length > 1 && (
                 <div
-                  className="flex items-center gap-1.5"
+                  className="flex items-center gap-1 shrink-0"
                   title={`${product.colours.length} available colours`}
                 >
-                  {product.colours.slice(0, 4).map((col) => (
+                  {product.colours.slice(0, 3).map((col) => (
                     <button
                       key={col}
                       type="button"
@@ -295,17 +295,17 @@ export function ProductCard({
                       title={col}
                       aria-label={`Select colour ${col}`}
                       className={cn(
-                        "h-2.5 w-2.5 rounded-full border border-black/20 shadow-2xs transition-all cursor-pointer hover:scale-130",
+                        "h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full border border-black/20 shadow-2xs transition-all cursor-pointer",
                         activeColour.toLowerCase() === col.toLowerCase()
-                          ? "ring-1.5 ring-[#c6903c] ring-offset-1 scale-115 opacity-100"
+                          ? "ring-1.5 ring-[#c6903c] ring-offset-0.5 scale-110 opacity-100"
                           : "opacity-70 hover:opacity-100",
                       )}
                       style={{ backgroundColor: colourMap[col.toLowerCase()] || "#c8bca9" }}
                     />
                   ))}
-                  {product.colours.length > 4 && (
-                    <span className="text-[9px] font-medium text-neutral-400">
-                      +{product.colours.length - 4}
+                  {product.colours.length > 3 && (
+                    <span className="text-[8px] sm:text-[9px] font-medium text-neutral-400">
+                      +{product.colours.length - 3}
                     </span>
                   )}
                 </div>
@@ -313,24 +313,24 @@ export function ProductCard({
             </div>
             <Link
               to={`/products/${product.slug}${activeColour ? `?colour=${encodeURIComponent(activeColour)}` : ""}`}
-              className="mt-1 block font-serif text-[14.5px] font-normal leading-snug tracking-tight text-[#24211e] transition-colors line-clamp-1 hover:text-[#9a7342]"
+              className="mt-0.5 sm:mt-1 block font-serif text-[13px] sm:text-[14.5px] font-normal leading-tight sm:leading-snug tracking-tight text-[#24211e] transition-colors line-clamp-1 hover:text-[#9a7342]"
             >
               {product.name}
             </Link>
           </div>
-          <div className="mt-2.5 flex items-baseline justify-between gap-1.5 sm:gap-2 border-t border-[#f0e6d6]/60 pt-2">
-            <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
-              <span className="text-[13.5px] sm:text-[14px] font-semibold text-[#24211e] whitespace-nowrap">
+          <div className="mt-1.5 sm:mt-2.5 flex flex-wrap items-baseline justify-between gap-x-1 gap-y-0.5 border-t border-[#f0e6d6]/60 pt-1.5 sm:pt-2">
+            <div className="flex flex-wrap items-baseline gap-1 sm:gap-1.5 min-w-0">
+              <span className="text-[12.5px] sm:text-[14px] font-semibold text-[#24211e]">
                 {formatINR(product.price)}
               </span>
               {off > 0 && (
-                <span className="text-[10.5px] sm:text-[11px] text-neutral-400 line-through whitespace-nowrap">
+                <span className="text-[9.5px] sm:text-[11px] text-neutral-400 line-through">
                   {formatINR(product.mrp)}
                 </span>
               )}
             </div>
             {off > 0 && (
-              <span className="shrink-0 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] sm:text-[9.5px] font-semibold tracking-wider text-emerald-800 border border-emerald-200/60 whitespace-nowrap">
+              <span className="shrink-0 rounded-full bg-emerald-50 px-1 py-0.2 sm:px-1.5 sm:py-0.5 text-[8px] sm:text-[9.5px] font-semibold tracking-wide text-emerald-800 border border-emerald-200/60">
                 {off}%<span className="hidden sm:inline"> off</span>
               </span>
             )}
@@ -452,7 +452,7 @@ export function ProductGrid({ products, columns = 4 }: { products: Product[]; co
   return (
     <div
       className={cn(
-        "grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 sm:gap-y-14",
+        "grid grid-cols-2 gap-x-2.5 gap-y-5 sm:gap-x-6 sm:gap-y-12",
         columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3",
       )}
     >

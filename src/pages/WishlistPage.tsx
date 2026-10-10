@@ -74,38 +74,38 @@ function WishlistCard({ product }: { product: Product }) {
           </span>
         )}
       </Link>
-      <div className="flex flex-1 flex-col gap-3 p-5">
+      <div className="flex flex-1 flex-col gap-2 p-3 sm:gap-3 sm:p-5">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground sm:text-[10px]">
             {product.category}
           </p>
           <Link
             to={`/products/${product.slug}`}
-            className="link-underline mt-1 inline-block font-display text-lg leading-snug"
+            className="link-underline mt-0.5 inline-block font-display text-sm leading-snug sm:text-lg line-clamp-1"
           >
             {product.name}
           </Link>
         </div>
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-sm tracking-wide">{formatINR(product.price)}</span>
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="text-xs sm:text-sm font-medium tracking-wide">{formatINR(product.price)}</span>
           {off > 0 && (
             <>
-              <span className="text-xs text-muted-foreground line-through">
+              <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
                 {formatINR(product.mrp)}
               </span>
-              <span className="text-xs text-gold-deep">{off}% off</span>
+              <span className="text-[10px] sm:text-xs text-gold-deep">{off}% off</span>
             </>
           )}
         </div>
         <p
-          className={`text-xs ${anyAvailable ? "text-muted-foreground" : "text-destructive"}`}
+          className={`text-[10px] sm:text-xs line-clamp-1 ${anyAvailable ? "text-muted-foreground" : "text-destructive"}`}
           role={anyAvailable ? undefined : "status"}
         >
           {summary}
         </p>
 
         {anyAvailable && (
-          <div className="mt-1 grid grid-cols-2 gap-2">
+          <div className="mt-1 grid grid-cols-2 gap-1.5 sm:gap-2">
             <Select
               value={colour}
               onValueChange={(v) => {
@@ -113,24 +113,24 @@ function WishlistCard({ product }: { product: Product }) {
                 setSize("");
               }}
             >
-              <SelectTrigger aria-label={`Colour for ${product.name}`} className="rounded-none">
+              <SelectTrigger aria-label={`Colour for ${product.name}`} className="h-8 text-[10px] sm:h-9 sm:text-xs rounded-none">
                 <SelectValue placeholder="Colour" />
               </SelectTrigger>
               <SelectContent>
                 {product.colours.map((c) => (
-                  <SelectItem key={c} value={c}>
+                  <SelectItem key={c} value={c} className="text-xs">
                     {c}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={size} onValueChange={setSize}>
-              <SelectTrigger aria-label={`Size for ${product.name}`} className="rounded-none">
+              <SelectTrigger aria-label={`Size for ${product.name}`} className="h-8 text-[10px] sm:h-9 sm:text-xs rounded-none">
                 <SelectValue placeholder="Size" />
               </SelectTrigger>
               <SelectContent>
                 {availableSizesForColour.map((s) => (
-                  <SelectItem key={s.size} value={s.size} disabled={!s.available}>
+                  <SelectItem key={s.size} value={s.size} disabled={!s.available} className="text-xs">
                     {s.size}
                     {!s.available ? " (Unavailable)" : ""}
                   </SelectItem>
@@ -140,12 +140,12 @@ function WishlistCard({ product }: { product: Product }) {
           </div>
         )}
 
-        <div className="mt-auto flex items-center gap-2 pt-2">
+        <div className="mt-auto flex items-center gap-1.5 pt-2 sm:gap-2">
           <Button
             type="button"
             variant="luxe"
-            size="luxeSm"
-            className="flex-1"
+            size="sm"
+            className="flex-1 h-8 text-[10px] sm:h-9 sm:text-xs font-medium"
             disabled={!anyAvailable}
             onClick={handleAddToBag}
           >
@@ -155,10 +155,11 @@ function WishlistCard({ product }: { product: Product }) {
             type="button"
             variant="luxeOutline"
             size="icon"
+            className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
             aria-label={`Remove ${product.name} from wishlist`}
             onClick={handleRemove}
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -187,7 +188,7 @@ export function WishlistPage() {
         title="Wishlist"
         description="Pieces you've saved for later."
       />
-      <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-3.5 py-6 sm:px-8 sm:py-14 lg:px-12">
         {savedProducts.length === 0 ? (
           <EmptyState
             icon={<Heart className="h-8 w-8" />}
@@ -200,7 +201,7 @@ export function WishlistPage() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
             {savedProducts.map((product) => (
               <WishlistCard key={product.id} product={product} />
             ))}

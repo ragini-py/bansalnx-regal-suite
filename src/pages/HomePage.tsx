@@ -194,38 +194,38 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[76vh] max-w-[1400px] flex-col justify-end px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
+      <div className="relative mx-auto flex min-h-[72vh] sm:min-h-[76vh] max-w-[1400px] flex-col justify-end px-4 pb-8 pt-24 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
         <div key={current} className="max-w-2xl animate-fade-in">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#d4a76a] mb-3 animate-fade-up">
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.22em] text-[#d4a76a] mb-2 sm:mb-3 animate-fade-up">
             {slide.eyebrow}
           </p>
           <h1
             style={{ animationDelay: "120ms" }}
-            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight animate-fade-up"
+            className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight animate-fade-up"
           >
             {slide.heading}
           </h1>
           <p
             style={{ animationDelay: "220ms" }}
-            className="mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-slate-200 animate-fade-up"
+            className="mt-3 sm:mt-4 max-w-lg text-xs sm:text-base leading-relaxed text-slate-200 animate-fade-up line-clamp-3 sm:line-clamp-none"
           >
             {slide.subheading}
           </p>
           <div
             style={{ animationDelay: "320ms" }}
-            className="mt-6 sm:mt-8 flex flex-row items-center gap-2.5 sm:gap-3.5 animate-fade-up"
+            className="mt-5 sm:mt-8 flex flex-wrap items-center gap-2 sm:gap-3.5 animate-fade-up"
           >
             <Button
               asChild
               variant="luxe"
-              className="h-8 px-3.5 text-xs sm:h-11 sm:px-6 sm:text-sm bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md whitespace-nowrap tracking-wide uppercase"
+              className="h-9 px-4 text-xs sm:h-11 sm:px-6 sm:text-sm bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-md whitespace-nowrap tracking-wide uppercase"
             >
               <Link to={slide.primaryTo}>{slide.primaryCta}</Link>
             </Button>
             <Button
               asChild
               variant="onImage"
-              className="h-8 px-3.5 text-xs sm:h-11 sm:px-6 sm:text-sm border-white/35 text-white hover:bg-white/10 font-medium whitespace-nowrap tracking-wide uppercase"
+              className="h-9 px-4 text-xs sm:h-11 sm:px-6 sm:text-sm border-white/35 text-white hover:bg-white/10 font-medium whitespace-nowrap tracking-wide uppercase"
             >
               <Link to={slide.secondaryTo}>{slide.secondaryCta}</Link>
             </Button>
@@ -359,25 +359,25 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
 
 function Promo({ promo }: { promo: HomepageContent["promo"] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-5 sm:px-8 lg:px-12">
-      <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-8 sm:p-12 rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
+    <section className="mx-auto max-w-[1400px] px-4 py-4 sm:px-8 lg:px-12">
+      <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-5 sm:p-12 rounded-[20px] sm:rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
         <div className="relative z-10 max-w-xl">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800">
             Exclusive Client Privilege
           </p>
-          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900">
+          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
             {promo.heading}
           </h2>
-          <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-700">{promo.caption}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild variant="luxe" size="lg">
+          <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-relaxed text-slate-700">{promo.caption}</p>
+          <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm">
               <Link to="/collections/the-ceremony-edit">{promo.cta}</Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium transition-all hover:scale-105 active:scale-95"
+              className="h-10 text-xs sm:text-sm border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium transition-all active:scale-95"
             >
               <Link to="/contact">Book Private Consultation</Link>
             </Button>

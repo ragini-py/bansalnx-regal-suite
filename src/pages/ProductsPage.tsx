@@ -309,81 +309,143 @@ export function ProductsPage() {
         }
       />
 
-      <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-12">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-14">
+      <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-8 sm:py-12 lg:px-12">
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-14">
           <aside className="hidden w-64 shrink-0 lg:block">
             <h2 className="eyebrow mb-8">Refine</h2>
             {filterPanel}
           </aside>
 
           <div className="min-w-0 flex-1">
-            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="luxeOutline" size="luxeSm" className="lg:hidden">
-                      <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
-                      Filters{activeCount ? ` (${activeCount})` : ""}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-[88vw] max-w-sm overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle className="font-display text-2xl font-light">Refine</SheetTitle>
-                    </SheetHeader>
-                    <div className="px-4 pb-10">{filterPanel}</div>
-                  </SheetContent>
-                </Sheet>
+            {/* Mobile & Desktop Action Toolbar */}
+            <div className="mb-6 space-y-3 border-b border-border pb-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {/* Mobile 2-column controls (Filters + Sort) */}
+                <div className="grid grid-cols-2 gap-2 lg:hidden">
+                  <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="luxeOutline"
+                        size="sm"
+                        className="h-10 w-full justify-center text-xs tracking-wider font-medium"
+                      >
+                        <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
+                        Filters{activeCount ? ` (${activeCount})` : ""}
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="flex w-[88vw] max-w-sm flex-col p-0">
+                      <SheetHeader className="border-b border-border px-6 py-4">
+                        <SheetTitle className="text-left font-display text-2xl font-light">
+                          Refine
+                        </SheetTitle>
+                      </SheetHeader>
+                      <div className="flex-1 overflow-y-auto px-6 py-6">{filterPanel}</div>
+                      <div className="sticky bottom-0 border-t border-border bg-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2">
+                        {activeCount > 0 && (
+                          <Button
+                            variant="luxeOutline"
+                            size="sm"
+                            onClick={clearAll}
+                            className="flex-1 text-xs"
+                          >
+                            Reset
+                          </Button>
+                        )}
+                        <Button
+                          variant="luxe"
+                          size="sm"
+                          onClick={() => setFiltersOpen(false)}
+                          className="flex-1 text-xs font-medium"
+                        >
+                          Show {results.length} Pieces
+                        </Button>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
 
-                {search.category && (
-                  <Chip
-                    label={
-                      liveCategories.find((c) => c.slug === search.category)?.name ?? "Category"
-                    }
-                    onRemove={() => setSearch({ category: undefined })}
-                  />
-                )}
-                {search.collection && (
-                  <Chip
-                    label={
-                      collections.find((c) => c.slug === search.collection)?.name ?? "Collection"
-                    }
-                    onRemove={() => setSearch({ collection: undefined })}
-                  />
-                )}
-                {selectedSizes.map((s) => (
-                  <Chip key={s} label={`Size ${s}`} onRemove={() => toggleList("size", s)} />
-                ))}
-                {selectedColours.map((c) => (
-                  <Chip key={c} label={c} onRemove={() => toggleList("colour", c)} />
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Label
-                  htmlFor="sort"
-                  className="hidden text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:block"
-                >
-                  Sort
-                </Label>
-                <Select
-                  value={search.sort ?? "featured"}
-                  onValueChange={(value) => setSearch({ sort: value })}
-                >
-                  <SelectTrigger
-                    id="sort"
-                    className="w-[190px] rounded-none border-border text-xs uppercase tracking-[0.14em]"
+                  <Select
+                    value={search.sort ?? "featured"}
+                    onValueChange={(value) => setSearch({ sort: value })}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none">
-                    {sortOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value} className="text-xs">
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger
+                      id="sort-mobile"
+                      className="h-10 w-full rounded-none border-border text-xs uppercase tracking-[0.14em]"
+                    >
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none">
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="text-xs">
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Desktop Sort on the right */}
+                <div className="hidden lg:flex lg:items-center lg:gap-3 lg:ml-auto">
+                  <Label
+                    htmlFor="sort-desktop"
+                    className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
+                  >
+                    Sort
+                  </Label>
+                  <Select
+                    value={search.sort ?? "featured"}
+                    onValueChange={(value) => setSearch({ sort: value })}
+                  >
+                    <SelectTrigger
+                      id="sort-desktop"
+                      className="w-[190px] rounded-none border-border text-xs uppercase tracking-[0.14em]"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none">
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="text-xs">
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+              {/* Active Filter Chips (Scrollable row) */}
+              {activeCount > 0 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-1">
+                  {search.category && (
+                    <Chip
+                      label={
+                        liveCategories.find((c) => c.slug === search.category)?.name ?? "Category"
+                      }
+                      onRemove={() => setSearch({ category: undefined })}
+                    />
+                  )}
+                  {search.collection && (
+                    <Chip
+                      label={
+                        collections.find((c) => c.slug === search.collection)?.name ?? "Collection"
+                      }
+                      onRemove={() => setSearch({ collection: undefined })}
+                    />
+                  )}
+                  {selectedSizes.map((s) => (
+                    <Chip key={s} label={`Size ${s}`} onRemove={() => toggleList("size", s)} />
+                  ))}
+                  {selectedColours.map((c) => (
+                    <Chip key={c} label={c} onRemove={() => toggleList("colour", c)} />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground underline underline-offset-2 px-2"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
             </div>
 
             {results.length ? (

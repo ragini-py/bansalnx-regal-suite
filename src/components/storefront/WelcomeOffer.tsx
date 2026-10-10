@@ -39,30 +39,30 @@ export function WelcomeOffer() {
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-w-lg gap-0 rounded-2xl border border-gold/40 bg-card p-0 shadow-2xl overflow-hidden">
-        <div className="px-8 py-10 text-center sm:px-12 sm:py-12">
+      <DialogContent className="w-[92vw] max-w-lg gap-0 rounded-2xl border border-gold/40 bg-card p-0 shadow-2xl overflow-hidden">
+        <div className="px-5 py-7 text-center sm:px-12 sm:py-12">
           <span className="mx-auto block h-10 w-10 text-gold animate-float">
             <PeacockGlyph />
           </span>
           {code ? (
             <>
-              <DialogTitle className="mt-6 font-display text-3xl font-light">
+              <DialogTitle className="mt-4 font-display text-2xl font-light sm:mt-6 sm:text-3xl">
                 Your offer is ready
               </DialogTitle>
-              <DialogDescription className="mt-3 text-sm text-muted-foreground">
+              <DialogDescription className="mt-2 text-xs sm:text-sm text-muted-foreground">
                 Use this code at checkout to enjoy 10% off your first order.
               </DialogDescription>
-              <p className="mt-6 border border-dashed border-gold px-6 py-4 text-lg tracking-[0.3em] text-gold-deep animate-pulse-glow bg-gold/5 font-mono">
+              <p className="mt-5 border border-dashed border-gold px-4 py-3 text-base tracking-[0.25em] text-gold-deep animate-pulse-glow bg-gold/5 font-mono sm:mt-6 sm:px-6 sm:py-4 sm:text-lg sm:tracking-[0.3em]">
                 {code}
               </p>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground sm:mt-4 sm:text-xs">
                 Valid on orders above ₹10,000 · one use per customer · applies at the coupon field
                 in your bag or at checkout.
               </p>
               <Button
                 variant="luxe"
                 size="luxe"
-                className="mt-8 w-full"
+                className="mt-6 w-full sm:mt-8"
                 onClick={() => close(false)}
               >
                 Start shopping
@@ -70,7 +70,7 @@ export function WelcomeOffer() {
             </>
           ) : (
             <>
-              <DialogTitle className="mt-6 font-display text-3xl font-light">
+              <DialogTitle className="mt-4 font-display text-2xl font-light sm:mt-6 sm:text-3xl">
                 Welcome to Bansal-nx
               </DialogTitle>
               <DialogDescription className="mt-3 text-sm leading-relaxed text-muted-foreground">

@@ -131,9 +131,14 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
+    width: 100%;
   }
 
   body {
+    overflow-x: clip;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
     background:
       radial-gradient(circle at top, rgba(216, 179, 120, 0.18), transparent 24%),
       linear-gradient(180deg, #fffaf4 0%, #f8f1e8 36%, #f9f6f2 100%);

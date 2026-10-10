@@ -57,7 +57,7 @@ export function CollectionDetailPage() {
           className="absolute inset-0 h-full w-full object-cover opacity-80"
         />
         <div className="absolute inset-0 bg-ink/55" aria-hidden="true" />
-        <div className="relative mx-auto max-w-[1400px] px-5 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-36 lg:px-12">
+        <div className="relative mx-auto max-w-[1400px] px-4 pb-12 pt-24 sm:px-8 sm:pb-24 sm:pt-36 lg:px-12">
           <div className="text-pearl/70">
             <Breadcrumbs
               items={[
@@ -81,19 +81,19 @@ export function CollectionDetailPage() {
               ]}
             />
           </div>
-          <h1 className="mt-6 max-w-3xl font-display text-[2.4rem] leading-[1.08] text-ivory sm:text-5xl lg:text-[4rem]">
+          <h1 className="mt-4 max-w-3xl font-display text-3xl leading-tight text-ivory sm:mt-6 sm:text-5xl lg:text-[4rem]">
             {collection.name}
           </h1>
-          <p className="mt-5 max-w-xl text-sm leading-relaxed text-pearl/80 sm:text-base">
+          <p className="mt-3 max-w-xl text-xs leading-relaxed text-pearl/80 sm:mt-5 sm:text-base">
             {collection.description}
           </p>
-          <p className="mt-8 text-[11px] uppercase tracking-[0.24em] text-gold">
+          <p className="mt-6 text-[10px] uppercase tracking-[0.24em] text-gold sm:mt-8 sm:text-[11px]">
             {items.length} {items.length === 1 ? "piece" : "pieces"} in this edit
           </p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-[1400px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-8 sm:py-20 lg:px-12">
         {items.length ? (
           <ProductGrid products={items} />
         ) : (

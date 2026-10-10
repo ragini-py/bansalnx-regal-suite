@@ -88,14 +88,14 @@ export function CollectionsPage() {
                     </div>
 
                     {/* Floating Info Overlay on Image */}
-                    <div className="absolute inset-x-0 bottom-0 z-10 p-6 text-white">
-                      <h2 className="font-display text-2xl font-bold tracking-tight text-white group-hover:text-amber-200 transition-colors sm:text-3xl">
+                    <div className="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-6 text-white">
+                      <h2 className="font-display text-xl font-bold tracking-tight text-white group-hover:text-amber-200 transition-colors sm:text-2xl lg:text-3xl">
                         {collection.name}
                       </h2>
-                      <p className="mt-2 text-xs text-slate-200 line-clamp-2 leading-relaxed opacity-90">
+                      <p className="mt-1.5 text-xs text-slate-200 line-clamp-2 leading-relaxed opacity-90 sm:mt-2">
                         {collection.description}
                       </p>
-                      <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-amber-300">
+                      <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-amber-300 sm:mt-4">
                         <span>Explore Collection</span>
                         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
                       </div>

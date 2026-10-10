@@ -68,7 +68,7 @@ export function CartPage() {
         }
       />
 
-      <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-8 sm:py-12 lg:px-12">
         {cartLines.length === 0 ? (
           <EmptyState
             icon={<ShoppingBag className="h-8 w-8" strokeWidth={1} />}
@@ -81,10 +81,10 @@ export function CartPage() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_380px]">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px] lg:gap-12">
             <ul className="divide-y divide-border border-y border-border">
               {cartLines.map((line) => (
-                <li key={line.variantId} className="flex gap-5 py-7">
+                <li key={line.variantId} className="flex gap-3.5 py-5 sm:gap-5 sm:py-7">
                   <Link to={`/products/${line.product.slug}`} className="shrink-0">
                     <img
                       src={line.product.images[0]}
@@ -92,50 +92,50 @@ export function CartPage() {
                       width={1000}
                       height={1300}
                       loading="lazy"
-                      className="h-36 w-28 object-cover sm:h-44 sm:w-32"
+                      className="h-28 w-22 object-cover rounded-xs sm:h-44 sm:w-32"
                     />
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <Link
                           to={`/products/${line.product.slug}`}
-                          className="font-display text-lg link-underline"
+                          className="font-display text-base sm:text-lg link-underline"
                         >
                           {line.product.name}
                         </Link>
-                        <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                        <p className="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
                           {line.size} · {line.colour}
                         </p>
-                        <p className="mt-2 text-sm">{formatINR(line.product.price)}</p>
+                        <p className="mt-1.5 text-xs sm:text-sm font-medium">{formatINR(line.product.price)}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeFromCart(line.variantId)}
                         aria-label={`Remove ${line.product.name} from bag`}
-                        className="text-muted-foreground transition-colors hover:text-foreground"
+                        className="p-1 text-muted-foreground transition-colors hover:text-foreground active:scale-90"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
 
                     {!line.available && (
-                      <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-destructive">
+                      <p className="mt-2 text-[10px] uppercase tracking-[0.16em] text-destructive sm:text-[11px]">
                         This variant is no longer available — please remove it to continue.
                       </p>
                     )}
 
-                    <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-5">
+                    <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
                       <div className="flex items-center border border-border">
                         <button
                           type="button"
                           onClick={() => updateQuantity(line.variantId, line.quantity - 1)}
                           aria-label="Decrease quantity"
-                          className="grid h-9 w-9 place-items-center transition-colors hover:bg-muted"
+                          className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center transition-colors hover:bg-muted active:scale-90"
                         >
-                          <Minus className="h-3 w-3" />
+                          <Minus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         </button>
-                        <span className="w-9 text-center text-sm">{line.quantity}</span>
+                        <span className="w-8 sm:w-9 text-center text-xs sm:text-sm font-medium">{line.quantity}</span>
                         <button
                           type="button"
                           onClick={() =>
@@ -143,21 +143,21 @@ export function CartPage() {
                           }
                           disabled={line.quantity >= 10}
                           aria-label="Increase quantity"
-                          className="grid h-9 w-9 place-items-center transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
+                          className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center transition-colors hover:bg-muted active:scale-90 disabled:opacity-40 disabled:hover:bg-transparent"
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         </button>
                       </div>
+                      <span className="text-sm font-medium ml-auto sm:ml-0">{formatINR(line.lineTotal)}</span>
                       <button
                         type="button"
                         onClick={() =>
                           handleMoveToWishlist(line.productId, line.variantId, line.product.name)
                         }
-                        className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-gold-deep"
+                        className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-gold-deep w-full sm:w-auto mt-1 sm:mt-0"
                       >
                         <Heart className="h-3.5 w-3.5" /> Move to wishlist
                       </button>
-                      <span className="ml-auto text-sm">{formatINR(line.lineTotal)}</span>
                     </div>
                   </div>
                 </li>
@@ -165,7 +165,7 @@ export function CartPage() {
             </ul>
 
             <aside className="lg:sticky lg:top-24 lg:h-fit">
-              <div className="border border-border bg-card p-6 sm:p-8">
+              <div className="border border-border bg-card p-5 sm:p-8">
                 <h2 className="font-display text-xl">Order Summary</h2>
 
                 <div className="mt-6">
