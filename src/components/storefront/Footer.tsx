@@ -124,7 +124,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-800">
+    <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-800 pb-16 lg:pb-0">
       <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
           <div>

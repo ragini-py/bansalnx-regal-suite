@@ -663,7 +663,7 @@ export function ProductDetailPage() {
 
       {/* Size Chart Modal */}
       <Dialog open={sizeChartOpen} onOpenChange={setSizeChartOpen}>
-        <DialogContent className="max-w-lg rounded-none border border-border bg-background p-6">
+        <DialogContent className="w-[92vw] max-w-lg rounded-none border border-border bg-background p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">Bespoke Size Guide</DialogTitle>
             <DialogDescription>

@@ -105,7 +105,7 @@ export function AccountLayout({
             aria-label="Account navigation"
             className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-fit"
           >
-            <ul className="flex gap-1 overflow-x-auto whitespace-nowrap lg:flex-col lg:overflow-visible">
+            <ul className="flex gap-1 overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5 lg:flex-col lg:overflow-visible">
               {NAV_ITEMS.map((item) => {
                 const active = currentPath === item.to;
                 return (
@@ -124,6 +124,16 @@ export function AccountLayout({
                   </li>
                 );
               })}
+              <li className="shrink-0 lg:hidden">
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                  Sign Out
+                </button>
+              </li>
             </ul>
             <div className="hidden pt-3 mt-3 border-t border-slate-100 lg:block">
               <Button
@@ -139,18 +149,6 @@ export function AccountLayout({
             </div>
           </nav>
           <div className="min-w-0">
-            <div className="mb-6 flex justify-end lg:hidden">
-              <Button
-                type="button"
-                variant="luxeOutline"
-                size="luxeSm"
-                className="gap-2"
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                Sign Out
-              </Button>
-            </div>
             {children}
           </div>
         </div>

@@ -173,10 +173,10 @@ export function TrackPage() {
                   const completed = i <= currentIndex && !!event;
                   const isCurrent = i === currentIndex;
                   return (
-                    <li key={stage.status} className="mb-8 last:mb-0">
+                    <li key={stage.status} className="relative mb-8 last:mb-0">
                       <span
                         className={cn(
-                          "absolute -left-[9px] flex h-4 w-4 items-center justify-center rounded-full border",
+                          "absolute -left-[33px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full border",
                           completed ? "border-gold bg-gold" : "border-border bg-background",
                           isCurrent && "ring-2 ring-gold/40",
                         )}

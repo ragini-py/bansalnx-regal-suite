@@ -35,8 +35,8 @@ export function AuthPromptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md gap-0 rounded-none border-border bg-card p-0">
-        <div className="flex flex-col items-center px-8 py-10 text-center">
+      <DialogContent className="w-[92vw] max-w-md gap-0 rounded-none border-border bg-card p-0">
+        <div className="flex flex-col items-center px-6 py-8 sm:px-8 sm:py-10 text-center">
           <span className="h-10 w-10 text-gold">
             <PeacockGlyph />
           </span>

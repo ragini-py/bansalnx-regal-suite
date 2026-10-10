@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ShoppingBag, XCircle, AlertCircle } from "lucide-react";
+import { Loader2, ShoppingBag, XCircle, AlertCircle, ChevronDown } from "lucide-react";
 import { z } from "zod";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
@@ -13,6 +13,7 @@ import { extractApiErrorMessage } from "@/lib/api/auth";
 import { env } from "@/lib/env";
 import { formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import type { Address, PaymentMethod } from "@/data/types";
 
 const IDEMPOTENCY_STORAGE_KEY = "kbc_checkout_idempotency_key";
@@ -147,6 +148,7 @@ export function CheckoutPage() {
 
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
   const [paymentState, setPaymentState] = useState<PaymentState>("idle");
@@ -444,7 +446,78 @@ export function CheckoutPage() {
             </Button>
           </div>
         )}
-        <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
+        {/* Mobile Expandable Order Summary Header (Shopify/Luxury checkout standard) */}
+        <div className="mt-6 border border-border/80 bg-card/80 backdrop-blur-xs lg:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+            className="flex w-full items-center justify-between p-4 text-left text-xs sm:text-sm transition-colors hover:bg-muted/30"
+          >
+            <div className="flex items-center gap-2 font-medium">
+              <ShoppingBag className="h-4 w-4 text-gold-deep" />
+              <span>{mobileSummaryOpen ? "Hide order summary" : "Show order summary"} ({cartLines.length})</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                  mobileSummaryOpen && "rotate-180",
+                )}
+              />
+            </div>
+            <span className="font-display font-semibold text-base text-gold-deep">
+              {formatINR(t.total)}
+            </span>
+          </button>
+          {mobileSummaryOpen && (
+            <div className="border-t border-border px-4 py-4 bg-muted/20 animate-fade-in">
+              <ul className="space-y-3">
+                {cartLines.map((line) => (
+                  <li key={line.variantId} className="flex gap-3 text-xs">
+                    <img
+                      src={line.product.images[0]}
+                      alt={line.product.name}
+                      className="h-14 w-11 shrink-0 object-cover rounded-xs"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{line.product.name}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
+                        {line.size} · {line.colour} · Qty {line.quantity}
+                      </p>
+                    </div>
+                    <span className="font-medium shrink-0">{formatINR(line.lineTotal)}</span>
+                  </li>
+                ))}
+              </ul>
+              <dl className="mt-4 space-y-2 border-t border-border pt-3 text-xs">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Subtotal</dt>
+                  <dd>{formatINR(t.subtotal)}</dd>
+                </div>
+                {t.discount > 0 && (
+                  <div className="flex justify-between text-gold-deep">
+                    <dt>Discount {appliedCoupon ? `(${appliedCoupon.code})` : ""}</dt>
+                    <dd>-{formatINR(t.discount)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Shipping</dt>
+                  <dd>{t.shippingFee === 0 ? "Complimentary" : formatINR(t.shippingFee)}</dd>
+                </div>
+                {paymentMethod === "cod" && (
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">COD fee</dt>
+                    <dd>{formatINR(t.codFee)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-border pt-2 text-sm font-semibold">
+                  <dt>Total</dt>
+                  <dd>{formatINR(t.total)}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 lg:mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-12">
           <div className="space-y-10">
             {/* Contact */}
             <section aria-labelledby="contact-heading">

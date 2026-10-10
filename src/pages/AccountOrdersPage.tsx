@@ -237,22 +237,22 @@ export function AccountOrdersPage() {
           open={Boolean(selectedOrder)}
           onOpenChange={(open) => !open && setSelectedOrder(null)}
         >
-          <DialogContent className="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="w-[94vw] max-w-2xl rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <div className="flex items-center justify-between gap-2 pr-6">
+              <div className="flex flex-col gap-2 pr-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <DialogTitle className="font-display text-xl font-bold text-slate-900">
+                  <DialogTitle className="font-display text-lg sm:text-xl font-bold text-slate-900">
                     Order {selectedOrder.id}
                   </DialogTitle>
                   <DialogDescription className="text-xs text-slate-500 mt-1">
                     Placed on {formatDateTime(selectedOrder.createdAt)}
                   </DialogDescription>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant="outline" className="rounded-full text-xs capitalize">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  <Badge variant="outline" className="rounded-full text-[10px] sm:text-xs capitalize">
                     {orderStatusLabels[selectedOrder.status]}
                   </Badge>
-                  <Badge variant="outline" className="rounded-full text-xs capitalize">
+                  <Badge variant="outline" className="rounded-full text-[10px] sm:text-xs capitalize">
                     {selectedOrder.payment.status}
                   </Badge>
                 </div>
@@ -261,27 +261,27 @@ export function AccountOrdersPage() {
 
             <div className="mt-5 space-y-6">
               {/* Order Items */}
-              <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+              <div className="border border-slate-200 rounded-xl p-3.5 sm:p-4 bg-slate-50/50">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Ordered Items ({selectedOrder.lines.length})
                 </p>
                 <ul className="mt-3 divide-y divide-slate-200/80">
                   {selectedOrder.lines.map((line, idx) => (
-                    <li key={idx} className="flex items-center justify-between py-2.5 text-sm">
-                      <div className="flex items-center gap-3">
+                    <li key={idx} className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 py-2.5 text-sm">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <img
                           src={line.image}
                           alt={line.name}
-                          className="h-12 w-10 object-cover rounded-md border border-slate-200"
+                          className="h-12 w-10 shrink-0 object-cover rounded-md border border-slate-200"
                         />
-                        <div>
-                          <p className="font-semibold text-slate-900">{line.name}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-slate-900 truncate">{line.name}</p>
                           <p className="text-xs text-slate-500">
                             Size: {line.size} · Colour: {line.colour} · Qty: {line.quantity}
                           </p>
                         </div>
                       </div>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-slate-900 shrink-0">
                         {formatINR(line.price * line.quantity)}
                       </span>
                     </li>

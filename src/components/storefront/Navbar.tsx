@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Heart, Menu, Search, ShoppingBag, ShieldCheck, User, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -44,9 +44,10 @@ function SearchDialog({
   onOpenChange,
 }: {
   open: boolean;
-  onOpenChange: (o: boolean) => void;
+  onOpenChange: (open: boolean) => void;
 }) {
   const { products } = useStore();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {
@@ -63,14 +64,22 @@ function SearchDialog({
       .slice(0, 6);
   }, [products, query]);
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      onOpenChange(false);
+      navigate(`/products?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[94vw] sm:w-full max-w-2xl border border-white/50 bg-white/85 p-0 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
         <DialogTitle className="sr-only">Search products</DialogTitle>
         <DialogDescription className="sr-only">Search our luxury couture catalog</DialogDescription>
-        <div className="border-b border-slate-200 p-4 bg-slate-50/50">
+        <form onSubmit={handleSearchSubmit} className="border-b border-slate-200 p-4 bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <Search className="h-4 w-4 text-slate-500" />
+            <Search className="h-4 w-4 text-slate-500 shrink-0" />
             <input
               type="search"
               value={query}
@@ -84,13 +93,21 @@ function SearchDialog({
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
-                className="text-slate-400 hover:text-slate-700"
+                className="text-slate-400 hover:text-slate-700 shrink-0"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
+            <Button
+              type="submit"
+              variant="luxe"
+              size="sm"
+              className="h-8 px-3 text-xs uppercase tracking-wider shrink-0"
+            >
+              Search
+            </Button>
           </div>
-        </div>
+        </form>
 
         <div className="max-h-[60vh] overflow-y-auto p-4">
           {query.trim().length < 2 ? (
@@ -116,34 +133,49 @@ function SearchDialog({
               <p>No results found for "{query}".</p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100">
-              {results.map((product) => (
-                <li key={product.id}>
-                  <Link
-                    to={`/products/${product.slug}`}
-                    onClick={() => onOpenChange(false)}
-                    className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors"
-                  >
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="h-12 w-12 object-cover rounded-md border border-slate-200"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
-                        {product.category}
-                      </p>
-                      <p className="font-sans font-medium text-sm text-slate-900 truncate">
-                        {product.name}
-                      </p>
-                      <p className="text-xs text-slate-500 font-medium">
-                        {formatINR(product.price)}
-                      </p>
-                    </div>
+            <div>
+              <ul className="divide-y divide-slate-100">
+                {results.map((product) => (
+                  <li key={product.id}>
+                    <Link
+                      to={`/products/${product.slug}`}
+                      onClick={() => onOpenChange(false)}
+                      className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="h-12 w-12 object-cover rounded-md border border-slate-200"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                          {product.category}
+                        </p>
+                        <p className="font-sans font-medium text-sm text-slate-900 truncate">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-slate-500 font-medium">
+                          {formatINR(product.price)}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="pt-3 border-t border-slate-100 text-center">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                  className="text-xs font-medium text-amber-800 hover:text-amber-900"
+                >
+                  <Link to={`/products?q=${encodeURIComponent(query.trim())}`}>
+                    View all results for &ldquo;{query}&rdquo; →
                   </Link>
-                </li>
-              ))}
-            </ul>
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </DialogContent>
