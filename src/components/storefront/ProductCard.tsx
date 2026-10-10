@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getProductImagesForColour, isVariantAvailable } from "@/data/catalog";
+import { getProductImagesForColour, isProductOutOfStock, isVariantAvailable } from "@/data/catalog";
 import type { Product } from "@/data/types";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -126,7 +126,7 @@ export function ProductCard({
 
   const saved = isWishlisted(product.id);
   const off = discountPercent(product.mrp, product.price);
-  const soldOut = product.variants.every((v) => v.availability === "unavailable");
+  const soldOut = isProductOutOfStock(product);
   const selectedAvailable = selectedSize
     ? isVariantAvailable(product, selectedSize, selectedColour)
     : false;
@@ -171,7 +171,10 @@ export function ProductCard({
       <article
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="group relative flex flex-col rounded-xl sm:rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-1.5 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] sm:hover:-translate-y-1.5 sm:hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4] shimmer-hover"
+        className={cn(
+          "group relative flex flex-col rounded-xl sm:rounded-2xl border border-[#ebe0cf]/80 bg-[#fdfbf7]/90 p-1.5 sm:p-2.5 shadow-[0_4px_20px_-10px_rgba(45,35,28,0.06)] backdrop-blur-xs transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] sm:hover:-translate-y-1.5 sm:hover:scale-[1.025] hover:shadow-[0_22px_45px_-15px_rgba(42,32,22,0.16)] hover:border-[#d9c4a4] shimmer-hover",
+          soldOut && "opacity-80 border-[#ebe0cf]/60 bg-[#f7f4ee]/70",
+        )}
       >
         <div className="relative aspect-4/5 w-full overflow-hidden rounded-lg sm:rounded-xl bg-[#f5ede2]/40">
           <Link
@@ -194,6 +197,7 @@ export function ProductCard({
                 }}
                 className={cn(
                   "absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out",
+                  soldOut && "grayscale-[20%]",
                   idx === activeImageIndex
                     ? "opacity-100 scale-[1.02]"
                     : "opacity-0 scale-100 pointer-events-none",
@@ -201,8 +205,8 @@ export function ProductCard({
               />
             ))}
             {soldOut && (
-              <span className="absolute bottom-0 left-0 right-0 z-10 bg-neutral-950/85 py-1 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-xs">
-                Currently unavailable
+              <span className="absolute bottom-0 left-0 right-0 z-10 bg-neutral-950/85 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-xs">
+                Out of Stock
               </span>
             )}
           </Link>

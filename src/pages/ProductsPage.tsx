@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { allSizes } from "@/data/catalog";
+import { allSizes, sortProductsWithStockPriority } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Product } from "@/data/types";
 
@@ -136,27 +136,27 @@ export function ProductsPage() {
     if (selectedColours.length)
       list = list.filter((p) => p.colours.some((c) => selectedColours.includes(c)));
 
-    const sorted = [...list];
+    let comparator: (a: Product, b: Product) => number;
     switch (search.sort) {
       case "best-selling":
-        sorted.sort((a, b) => Number(b.bestseller) - Number(a.bestseller));
+        comparator = (a, b) => Number(b.bestseller) - Number(a.bestseller);
         break;
       case "newest":
-        sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        comparator = (a, b) => b.createdAt.localeCompare(a.createdAt);
         break;
       case "price-asc":
-        sorted.sort((a, b) => a.price - b.price);
+        comparator = (a, b) => a.price - b.price;
         break;
       case "price-desc":
-        sorted.sort((a, b) => b.price - a.price);
+        comparator = (a, b) => b.price - a.price;
         break;
       case "discount":
-        sorted.sort((a, b) => saving(b) - saving(a));
+        comparator = (a, b) => saving(b) - saving(a);
         break;
       default:
-        sorted.sort((a, b) => Number(b.featured) - Number(a.featured));
+        comparator = (a, b) => Number(b.featured) - Number(a.featured);
     }
-    return sorted;
+    return sortProductsWithStockPriority(list, comparator);
   }, [
     products,
     categories,

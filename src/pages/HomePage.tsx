@@ -9,7 +9,7 @@ import { SectionHeading } from "@/components/common/SectionHeading";
 import { ProductGrid } from "@/components/storefront/ProductCard";
 import { SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
-import { imagery } from "@/data/catalog";
+import { imagery, sortProductsWithStockPriority } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Collection, HomepageContent, Product } from "@/data/types";
 import { cn } from "@/lib/utils";
@@ -67,14 +67,18 @@ export function HomePage() {
   // Matched by slug, not id — ids come from the backend now and vary per
   // deployment/seed run, while slugs are the stable, human-authored keys
   // shared between this mocked homepage config and the real catalog.
-  const featuredProducts = content.featuredProductIds
-    .map((slug) => live.find((p) => p.slug === slug))
-    .filter((p): p is Product => !!p);
-  const newArrivals = live
-    .filter((p) => p.newArrival)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 4);
-  const bestsellers = live.filter((p) => p.bestseller).slice(0, 4);
+  const featuredProducts = sortProductsWithStockPriority(
+    content.featuredProductIds
+      .map((slug) => live.find((p) => p.slug === slug))
+      .filter((p): p is Product => !!p),
+  );
+  const newArrivals = sortProductsWithStockPriority(
+    live.filter((p) => p.newArrival),
+    (a, b) => b.createdAt.localeCompare(a.createdAt),
+  ).slice(0, 4);
+  const bestsellers = sortProductsWithStockPriority(
+    live.filter((p) => p.bestseller),
+  ).slice(0, 4);
   const featuredCollections = content.featuredCollectionIds
     .map((slug) => collections.find((c) => c.slug === slug))
     .filter((c): c is Collection => !!c && c.published);

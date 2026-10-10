@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/common/SectionHeading";
 import { ProductGrid } from "@/components/storefront/ProductCard";
 import { Breadcrumbs, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
+import { sortProductsWithStockPriority } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 
 export function CollectionDetailPage() {
@@ -19,15 +20,16 @@ export function CollectionDetailPage() {
       .map((id) => products.find((p) => p.id === id || p._id === id || p.slug === id))
       .filter((p): p is (typeof products)[0] => !!p && p.published);
 
-    if (byId.length > 0) return byId;
+    if (byId.length > 0) return sortProductsWithStockPriority(byId);
 
     // 2. Category name fallback match
     const normSlug = collection.slug.toLowerCase().replace(/[^a-z0-9]/g, "");
-    return products.filter((p) => {
+    const filtered = products.filter((p) => {
       if (!p.published) return false;
       const catNorm = (p.category || "").toLowerCase().replace(/[^a-z0-9]/g, "");
       return catNorm.includes(normSlug) || normSlug.includes(catNorm);
     });
+    return sortProductsWithStockPriority(filtered);
   }, [collection, products]);
 
   if (!collection) {

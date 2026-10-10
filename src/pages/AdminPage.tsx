@@ -1488,8 +1488,25 @@ function ProductsManagerTab() {
                 <TableCell className="text-xs text-slate-400 line-through">
                   {formatINR(p.mrp)}
                 </TableCell>
-                <TableCell className="text-xs text-slate-600 font-medium">
-                  {p.variants.length} SKU(s)
+                <TableCell className="text-xs font-medium">
+                  {(() => {
+                    const availableCount = p.variants.filter((v) => v.availability === "available").length;
+                    const isOut = p.variants.length > 0 && availableCount === 0;
+                    return (
+                      <div className="space-y-0.5">
+                        <span className="text-slate-600">{p.variants.length} SKU(s)</span>
+                        {isOut ? (
+                          <span className="block text-[10px] font-semibold uppercase tracking-wider text-rose-600">
+                            Out of Stock
+                          </span>
+                        ) : availableCount < p.variants.length && availableCount > 0 ? (
+                          <span className="block text-[10px] text-amber-700">
+                            {availableCount}/{p.variants.length} in stock
+                          </span>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell>
                   <button

@@ -33,7 +33,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { findVariant, getProductImagesForColour, isVariantAvailable } from "@/data/catalog";
+import {
+  findVariant,
+  getProductImagesForColour,
+  isColourOutOfStock,
+  isProductOutOfStock,
+  isVariantAvailable,
+} from "@/data/catalog";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -139,9 +145,11 @@ export function ProductDetailPage() {
 
   const saving = discountPercent(product.mrp, product.price);
   const wished = isWishlisted(product.id);
+  const isOutOfStock = isProductOutOfStock(product);
+  const isCurrentColourOutOfStock = isColourOutOfStock(product, colour);
+  const isEntirelySoldOut = isOutOfStock || isCurrentColourOutOfStock;
   const selectedAvailable = size ? isVariantAvailable(product, size, colour) : false;
-  const colourSoldOut = (c: string) =>
-    !product.sizes.some((s) => isVariantAvailable(product, s, c));
+  const colourSoldOut = (c: string) => isColourOutOfStock(product, c);
 
   const handleWishlist = () => {
     if (!isAuthenticated) {
@@ -363,6 +371,11 @@ export function ProductDetailPage() {
                     </span>
                   </>
                 )}
+                {isEntirelySoldOut && (
+                  <span className="inline-flex items-center rounded-full border border-neutral-900/15 bg-neutral-900/5 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-800">
+                    Out of Stock
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                 Inclusive of all taxes · Handcrafted in Jaipur
@@ -496,24 +509,37 @@ export function ProductDetailPage() {
             {/* Action buttons */}
             <div className="space-y-3 pt-2">
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  variant="luxe"
-                  size="luxeLg"
-                  className="flex-1 text-xs"
-                  onClick={handleAddToCart}
-                  disabled={!!size && !selectedAvailable}
-                >
-                  Add to Bag — {formatINR(product.price * quantity)}
-                </Button>
-                <Button
-                  variant="luxeOutline"
-                  size="luxeLg"
-                  className="flex-1 text-xs"
-                  onClick={handleBuyNow}
-                  disabled={!!size && !selectedAvailable}
-                >
-                  Buy Now
-                </Button>
+                {isEntirelySoldOut ? (
+                  <Button
+                    variant="outline"
+                    size="luxeLg"
+                    className="flex-1 text-xs uppercase tracking-widest text-muted-foreground border-border/80 bg-muted/40 cursor-not-allowed"
+                    disabled
+                  >
+                    Out of Stock
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="luxe"
+                      size="luxeLg"
+                      className="flex-1 text-xs"
+                      onClick={handleAddToCart}
+                      disabled={!!size && !selectedAvailable}
+                    >
+                      Add to Bag — {formatINR(product.price * quantity)}
+                    </Button>
+                    <Button
+                      variant="luxeOutline"
+                      size="luxeLg"
+                      className="flex-1 text-xs"
+                      onClick={handleBuyNow}
+                      disabled={!!size && !selectedAvailable}
+                    >
+                      Buy Now
+                    </Button>
+                  </>
+                )}
               </div>
               <button
                 type="button"
@@ -649,14 +675,25 @@ export function ProductDetailPage() {
             >
               <Heart className={cn("h-4 w-4", wished && "fill-gold text-gold")} />
             </button>
-            <Button
-              variant="luxe"
-              size="sm"
-              onClick={handleStickyCta}
-              className="h-10 px-4 text-xs font-medium tracking-wider"
-            >
-              {size ? `Add to Bag (${size})` : "Select Size"}
-            </Button>
+            {isEntirelySoldOut ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="h-10 px-4 text-xs font-medium tracking-wider text-muted-foreground border-border/80 bg-muted/40 cursor-not-allowed"
+              >
+                Out of Stock
+              </Button>
+            ) : (
+              <Button
+                variant="luxe"
+                size="sm"
+                onClick={handleStickyCta}
+                className="h-10 px-4 text-xs font-medium tracking-wider"
+              >
+                {size ? `Add to Bag (${size})` : "Select Size"}
+              </Button>
+            )}
           </div>
         </div>
       </div>

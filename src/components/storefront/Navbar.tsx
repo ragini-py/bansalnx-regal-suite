@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { formatINR } from "@/lib/format";
+import { sortProductsWithStockPriority } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -52,16 +53,14 @@ function SearchDialog({
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (q.length < 2) return [];
-    return products
-      .filter(
-        (p) =>
-          p.published &&
-          (p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            p.tags.some((t) => t.includes(q))),
-      )
-      .slice(0, 6);
+    const matches = products.filter(
+      (p) =>
+        p.published &&
+        (p.name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.tags.some((t) => t.includes(q))),
+    );
+    return sortProductsWithStockPriority(matches).slice(0, 6);
   }, [products, query]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
