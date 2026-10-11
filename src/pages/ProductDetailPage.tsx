@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Check,
+  ChevronLeft,
   ChevronRight,
   Heart,
   Minus,
@@ -86,6 +87,7 @@ export function ProductDetailPage() {
   const touchStartX = useRef<number | null>(null);
   const wasSwipe = useRef(false);
   const sizeSectionRef = useRef<HTMLFieldSetElement>(null);
+  const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleStickyCta = () => {
     if (!size) {
@@ -96,6 +98,26 @@ export function ProductDetailPage() {
     }
     handleAddToCart();
   };
+
+  const handlePrevImage = () => {
+    const count = currentImages.length;
+    if (count <= 1) return;
+    setActiveImage((i) => (i - 1 + count) % count);
+  };
+
+  const handleNextImage = () => {
+    const count = currentImages.length;
+    if (count <= 1) return;
+    setActiveImage((i) => (i + 1) % count);
+  };
+
+  useEffect(() => {
+    thumbnailRefs.current[activeImage]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeImage]);
 
   useEffect(() => {
     setActiveImage(0);
@@ -216,7 +238,7 @@ export function ProductDetailPage() {
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-[1400px] px-5 pb-32 pt-10 sm:px-8 sm:pb-24 sm:pt-14 lg:pb-20 lg:pt-16 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-4 pb-32 pt-4 sm:px-8 sm:pb-24 sm:pt-12 lg:pb-20 lg:pt-16 lg:px-12">
         <Breadcrumbs
           items={[
             {
@@ -239,7 +261,7 @@ export function ProductDetailPage() {
           ]}
         />
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+        <div className="mt-4 sm:mt-8 grid gap-8 sm:gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           {/* Gallery */}
           <div>
             <div
@@ -265,9 +287,37 @@ export function ProductDetailPage() {
 
               {/* Photo Counter Badge for Mobile & Desktop */}
               {currentImages.length > 1 && (
-                <div className="absolute top-3.5 right-3.5 z-10 rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-medium tracking-widest text-pearl backdrop-blur-xs">
+                <div className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-medium tracking-widest text-pearl backdrop-blur-xs">
                   {activeImage + 1} / {currentImages.length}
                 </div>
+              )}
+
+              {/* Previous / Next Image Navigation Buttons */}
+              {currentImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevImage();
+                    }}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-ink/75 text-pearl shadow-md backdrop-blur-xs transition-all duration-200 hover:bg-ink hover:scale-110 active:scale-90"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextImage();
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-ink/75 text-pearl shadow-md backdrop-blur-xs transition-all duration-200 hover:bg-ink hover:scale-110 active:scale-90"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </>
               )}
 
               {/* Explicit Zoom Button (Always easily tappable on mobile, hover on desktop) */}
@@ -277,14 +327,14 @@ export function ProductDetailPage() {
                   e.stopPropagation();
                   setZoomOpen(true);
                 }}
-                className="absolute right-3.5 bottom-3.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-ink/85 text-pearl shadow-md backdrop-blur-xs transition-transform duration-200 hover:scale-110 active:scale-95"
+                className="absolute right-3 bottom-3 sm:right-3.5 sm:bottom-3.5 z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-ink/85 text-pearl shadow-md backdrop-blur-xs transition-transform duration-200 hover:scale-110 active:scale-95"
                 aria-label="Zoom image"
               >
                 <ZoomIn className="h-4 w-4" />
               </button>
 
               {product.badge && (
-                <span className="absolute left-3.5 top-3.5 z-10 bg-ink px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-ivory sm:px-3 sm:py-1.5 sm:text-[10px]">
+                <span className="absolute left-3 top-3 sm:left-3.5 sm:top-3.5 z-10 bg-ink px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-ivory sm:px-3 sm:py-1.5 sm:text-[10px]">
                   {product.badge === "new"
                     ? "New"
                     : product.badge === "bestseller"
@@ -295,7 +345,7 @@ export function ProductDetailPage() {
 
               {/* Mobile Carousel Progress Dots */}
               {currentImages.length > 1 && (
-                <div className="absolute inset-x-0 bottom-3.5 flex justify-center gap-1.5 sm:hidden pointer-events-none">
+                <div className="absolute inset-x-0 bottom-3 sm:bottom-3.5 flex justify-center items-center gap-1.5 sm:hidden pointer-events-none">
                   {currentImages.map((_, i) => (
                     <span
                       key={i}
@@ -312,18 +362,26 @@ export function ProductDetailPage() {
 
             {/* Thumbnails Strip */}
             {currentImages.length > 1 && (
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x sm:mt-4 sm:gap-3">
+              <div
+                className={cn(
+                  "mt-3 flex gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x sm:mt-4 sm:gap-3",
+                  currentImages.length <= 5 ? "justify-center sm:justify-start" : "justify-start",
+                )}
+              >
                 {currentImages.map((image, i) => (
                   <button
                     key={image + i}
+                    ref={(el) => {
+                      thumbnailRefs.current[i] = el;
+                    }}
                     type="button"
                     onClick={() => setActiveImage(i)}
                     aria-label={`View image ${i + 1} of ${product.name}`}
                     aria-current={i === activeImage}
                     className={cn(
-                      "relative aspect-3/4 w-16 shrink-0 snap-start overflow-hidden border transition-all duration-200 active:scale-95 sm:w-22",
+                      "relative aspect-3/4 w-14 sm:w-20 shrink-0 snap-start overflow-hidden border transition-all duration-200 active:scale-95",
                       i === activeImage
-                        ? "border-gold ring-1 ring-gold shadow-xs"
+                        ? "border-gold ring-1 ring-gold shadow-xs opacity-100"
                         : "border-border hover:border-foreground/40 opacity-70 hover:opacity-100",
                     )}
                   >
@@ -649,14 +707,14 @@ export function ProductDetailPage() {
       )}
 
       {/* Sticky Mobile Add to Bag Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-xl backdrop-blur-md lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] shadow-xl backdrop-blur-md lg:hidden">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-foreground">
+            <p className="truncate text-xs font-medium text-foreground leading-tight">
               {product.name}
             </p>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-display text-base text-gold-deep">
+            <div className="mt-0.5 flex items-baseline gap-1.5 leading-none">
+              <span className="font-display text-base font-medium text-gold-deep">
                 {formatINR(product.price)}
               </span>
               {size && (
@@ -671,7 +729,7 @@ export function ProductDetailPage() {
               type="button"
               onClick={handleWishlist}
               aria-label={wished ? "Saved to Wishlist" : "Save to Wishlist"}
-              className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-background transition-colors hover:border-gold active:scale-95"
+              className="flex h-10 w-10 items-center justify-center border border-border bg-background transition-colors hover:border-gold active:scale-95"
             >
               <Heart className={cn("h-4 w-4", wished && "fill-gold text-gold")} />
             </button>
