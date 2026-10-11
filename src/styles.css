@@ -450,3 +450,27 @@
   }
 }
 
+/* Custom refined scrollbar for sticky side panels and drawers */
+.luxury-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(169, 123, 65, 0.3) transparent;
+}
+
+.luxury-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.luxury-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.luxury-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(169, 123, 65, 0.28);
+  border-radius: 9999px;
+}
+
+.luxury-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(169, 123, 65, 0.55);
+}
+
+

@@ -310,8 +310,8 @@ export function ProductsPage() {
       />
 
       <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-8 sm:py-12 lg:px-12">
-        <div className="flex flex-col gap-8 lg:flex-row lg:gap-14">
-          <aside className="hidden w-64 shrink-0 lg:block">
+        <div className="flex flex-col gap-8 lg:flex-row lg:gap-14 lg:items-start">
+          <aside className="hidden w-64 shrink-0 lg:block lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-3 lg:pb-12 overscroll-contain luxury-scrollbar">
             <h2 className="eyebrow mb-8">Refine</h2>
             {filterPanel}
           </aside>
