@@ -12,7 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getProductImagesForColour, isProductOutOfStock, isVariantAvailable } from "@/data/catalog";
+import {
+  getColourHex,
+  getProductImagesForColour,
+  isProductOutOfStock,
+  isVariantAvailable,
+} from "@/data/catalog";
 import type { Product } from "@/data/types";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -22,41 +27,6 @@ const badgeLabel: Record<string, string> = {
   new: "New",
   bestseller: "Bestseller",
   exclusive: "Exclusive",
-};
-
-const colourMap: Record<string, string> = {
-  ivory: "#fdfbf7",
-  cream: "#fffdd0",
-  gold: "#d4af37",
-  rose: "#e8a598",
-  peach: "#f8cbb6",
-  pink: "#f4a6b8",
-  emerald: "#2d5a43",
-  sapphire: "#2b4c7e",
-  ruby: "#9b111e",
-  black: "#1c1917",
-  white: "#ffffff",
-  beige: "#f5f0e6",
-  maroon: "#6b1724",
-  yellow: "#eedc82",
-  green: "#3b5323",
-  red: "#a52a2a",
-  blue: "#4682b4",
-  silver: "#c0c0c0",
-  rust: "#b7410e",
-  plum: "#5e2a40",
-  teal: "#005f73",
-  sage: "#9caf88",
-  wine: "#722f37",
-  navy: "#1b2a47",
-  mustard: "#e1ad01",
-  blush: "#f7cfcf",
-  "pearl grey": "#c5c6c7",
-  "royal purple": "#602b7a",
-  "peacock teal": "#0d6970",
-  "antique gold": "#cda14d",
-  "leaf green": "#5b7e47",
-  "antique rose": "#c48888",
 };
 
 export function ProductCard({
@@ -275,11 +245,15 @@ export function ProductCard({
               <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em] sm:tracking-[0.16em] text-[#9a7342] truncate">
                 {product.category}
               </p>
-              {/* Interactive Colour Swatches */}
-              {product.colours && product.colours.length > 1 && (
+              {/* Interactive Colour Swatches or Base Colour Pip */}
+              {product.colours && product.colours.length > 0 && (
                 <div
                   className="flex items-center gap-1 shrink-0"
-                  title={`${product.colours.length} available colours`}
+                  title={
+                    product.colours.length > 1
+                      ? `${product.colours.length} available colours`
+                      : `Colour: ${product.colours[0]}`
+                  }
                 >
                   {product.colours.slice(0, 3).map((col) => (
                     <button
@@ -302,9 +276,9 @@ export function ProductCard({
                         "h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full border border-black/20 shadow-2xs transition-all cursor-pointer",
                         activeColour.toLowerCase() === col.toLowerCase()
                           ? "ring-1.5 ring-[#c6903c] ring-offset-0.5 scale-110 opacity-100"
-                          : "opacity-70 hover:opacity-100",
+                          : "opacity-75 hover:opacity-100",
                       )}
-                      style={{ backgroundColor: colourMap[col.toLowerCase()] || "#c8bca9" }}
+                      style={{ backgroundColor: getColourHex(col) }}
                     />
                   ))}
                   {product.colours.length > 3 && (
@@ -379,12 +353,16 @@ export function ProductCard({
                             setSelectedSize("");
                           }}
                           className={cn(
-                            "rounded-md border px-2.5 py-1 text-xs transition-colors cursor-pointer",
+                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition-colors cursor-pointer",
                             selectedColour === c
                               ? "border-[#c6903c] bg-[#c6903c] text-white font-medium shadow-xs"
                               : "border-[#e3d7c3] text-neutral-700 hover:border-neutral-400 bg-white",
                           )}
                         >
+                          <span
+                            className="h-2 w-2 rounded-full border border-black/15 shrink-0"
+                            style={{ backgroundColor: getColourHex(c) }}
+                          />
                           {c}
                         </button>
                       ))}

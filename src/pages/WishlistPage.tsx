@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Product } from "@/data/types";
+import { getColourHex } from "@/data/catalog";
 import { discountPercent, formatINR } from "@/lib/format";
 import { useStore } from "@/lib/store";
 
@@ -120,7 +121,13 @@ function WishlistCard({ product }: { product: Product }) {
               <SelectContent>
                 {product.colours.map((c) => (
                   <SelectItem key={c} value={c} className="text-xs">
-                    {c}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full border border-black/15 shrink-0"
+                        style={{ backgroundColor: getColourHex(c) }}
+                      />
+                      <span>{c}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

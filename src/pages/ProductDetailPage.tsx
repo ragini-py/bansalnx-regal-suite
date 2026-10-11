@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   findVariant,
+  getColourHex,
   getProductImagesForColour,
   isColourOutOfStock,
   isProductOutOfStock,
@@ -477,38 +478,55 @@ export function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Colour selection */}
-            {product.colours.length > 1 && (
+            {/* Colour selection or display */}
+            {product.colours.length > 0 && (
               <fieldset>
                 <legend className="mb-2 text-[11px] uppercase tracking-[0.2em] font-medium">
-                  Colour: <span className="text-muted-foreground font-normal">{colour}</span>
+                  Colour:{" "}
+                  <span className="text-foreground font-normal">
+                    {colour || product.colours[0]}
+                  </span>
                 </legend>
-                <div className="flex flex-wrap gap-2">
-                  {product.colours.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => {
-                        setColour(c);
-                        setActiveImage(0);
-                        setSize("");
-                        setSearchParams(
-                          (prev) => {
-                            const next = new URLSearchParams(prev);
-                            next.set("colour", c);
-                            return next;
-                          },
-                          { replace: true },
-                        );
-                      }}
-                      aria-pressed={colour === c}
-                      disabled={colourSoldOut(c)}
-                      className="border border-border px-4 py-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-all duration-200 hover:border-gold hover:text-foreground active:scale-95 disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
+                {product.colours.length > 1 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {product.colours.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          setColour(c);
+                          setActiveImage(0);
+                          setSize("");
+                          setSearchParams(
+                            (prev) => {
+                              const next = new URLSearchParams(prev);
+                              next.set("colour", c);
+                              return next;
+                            },
+                            { replace: true },
+                          );
+                        }}
+                        aria-pressed={colour === c}
+                        disabled={colourSoldOut(c)}
+                        className="inline-flex items-center gap-2 border border-border px-4 py-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-all duration-200 hover:border-gold hover:text-foreground active:scale-95 disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 aria-pressed:border-gold aria-pressed:bg-gold/10 aria-pressed:text-gold-deep font-medium"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                          style={{ backgroundColor: getColourHex(c) }}
+                        />
+                        <span>{c}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-2 border border-gold/30 bg-gold/5 px-3.5 py-1.5 text-[11px] uppercase tracking-[0.16em] text-gold-deep font-medium">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                      style={{ backgroundColor: getColourHex(product.colours[0]) }}
+                    />
+                    <span>{product.colours[0]}</span>
+                  </div>
+                )}
               </fieldset>
             )}
 

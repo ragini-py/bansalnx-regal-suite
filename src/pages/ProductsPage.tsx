@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { allSizes, sortProductsWithStockPriority } from "@/data/catalog";
+import { allSizes, getColourHex, sortProductsWithStockPriority } from "@/data/catalog";
 import { useStore } from "@/lib/store";
 import type { Product } from "@/data/types";
 
@@ -296,7 +296,7 @@ export function ProductsPage() {
       </FilterGroup>
 
       <FilterGroup title="Colour">
-        <ul className="space-y-2.5">
+        <ul className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
           {allColours.map((colour) => (
             <li key={colour} className="flex items-center gap-3">
               <Checkbox
@@ -306,9 +306,13 @@ export function ProductsPage() {
               />
               <Label
                 htmlFor={`colour-${slug(colour)}`}
-                className="text-sm font-normal text-muted-foreground"
+                className="flex items-center gap-2 text-sm font-normal text-muted-foreground cursor-pointer hover:text-foreground"
               >
-                {colour}
+                <span
+                  className="h-3 w-3 rounded-full border border-black/20 shadow-2xs shrink-0"
+                  style={{ backgroundColor: getColourHex(colour) }}
+                />
+                <span>{colour}</span>
               </Label>
             </li>
           ))}
@@ -500,7 +504,12 @@ export function ProductsPage() {
                     <Chip key={s} label={`Size ${s}`} onRemove={() => toggleList("size", s)} />
                   ))}
                   {selectedColours.map((c) => (
-                    <Chip key={c} label={c} onRemove={() => toggleList("colour", c)} />
+                    <Chip
+                      key={c}
+                      label={c}
+                      colorPip={getColourHex(c)}
+                      onRemove={() => toggleList("colour", c)}
+                    />
                   ))}
                   <button
                     type="button"
@@ -574,9 +583,23 @@ function FilterRadio({
   );
 }
 
-function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
+function Chip({
+  label,
+  colorPip,
+  onRemove,
+}: {
+  label: string;
+  colorPip?: string;
+  onRemove: () => void;
+}) {
   return (
     <span className="inline-flex items-center gap-2 border border-border bg-secondary/60 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-foreground">
+      {colorPip && (
+        <span
+          className="h-2 w-2 rounded-full border border-black/20 shadow-2xs shrink-0"
+          style={{ backgroundColor: colorPip }}
+        />
+      )}
       {label}
       <button type="button" onClick={onRemove} aria-label={`Remove ${label} filter`}>
         <X className="h-3 w-3" />
