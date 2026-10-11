@@ -325,9 +325,9 @@ export function ProductCard({
           <div className="mt-1.5 sm:mt-2.5 flex flex-wrap items-baseline justify-between gap-x-1 gap-y-0.5 border-t border-[#f0e6d6]/60 pt-1.5 sm:pt-2">
             <div className="flex flex-wrap items-baseline gap-1 sm:gap-1.5 min-w-0">
               <span className="text-[12.5px] sm:text-[14px] font-semibold text-[#24211e]">
-                {formatINR(product.price)}
+                {product.price > 0 ? formatINR(product.price) : "Price on Request"}
               </span>
-              {off > 0 && (
+              {off > 0 && product.price > 0 && (
                 <span className="text-[9.5px] sm:text-[11px] text-neutral-400 line-through">
                   {formatINR(product.mrp)}
                 </span>

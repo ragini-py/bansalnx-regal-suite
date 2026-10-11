@@ -431,9 +431,9 @@ export function ProductDetailPage() {
             <div className="border-y border-border/80 py-4">
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="font-display text-3xl font-normal">
-                  {formatINR(product.price)}
+                  {product.price > 0 ? formatINR(product.price) : "Price on Request"}
                 </span>
-                {product.mrp > product.price && (
+                {product.mrp > product.price && product.price > 0 && (
                   <>
                     <span className="text-sm text-muted-foreground line-through">
                       {formatINR(product.mrp)}
@@ -445,7 +445,7 @@ export function ProductDetailPage() {
                 )}
                 {isEntirelySoldOut && (
                   <span className="inline-flex items-center rounded-full border border-neutral-900/15 bg-neutral-900/5 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-800">
-                    Out of Stock
+                    Out of Stock / Bespoke Order
                   </span>
                 )}
               </div>
