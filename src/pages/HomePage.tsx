@@ -1,6 +1,6 @@
-import { useState, useEffect, type ReactElement } from "react";
+import { useState, useEffect, useMemo, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Mail, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Mail, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -16,24 +16,12 @@ import { cn } from "@/lib/utils";
 
 const newsletterEmailSchema = z.string().trim().email().max(255);
 
-// The first slide's copy comes from the admin-editable content.hero; its
-// image and link targets stay fixed since HomepageContent only models one
-// hero object, not per-slide routing. The other two slides are fixed
-// editorial spotlights, not part of the content model.
+// Hero slides featuring Bansal-nx royal couture collections.
+// The old green lehenga placeholder has been replaced by the 3 custom widescreen edits.
 function buildHeroSlides(hero: HomepageContent["hero"]) {
   return [
     {
-      image: hero.image || imagery.hero,
-      eyebrow: hero.eyebrow,
-      heading: hero.heading,
-      subheading: hero.subheading,
-      primaryCta: hero.primaryCta,
-      primaryTo: "/products?sort=newest",
-      secondaryCta: hero.secondaryCta,
-      secondaryTo: "/collections",
-    },
-    {
-      image: imagery.heroSlide2,
+      image: hero.image && !hero.image.includes("hero.jpg") ? hero.image : imagery.heroSlide2,
       eyebrow: "The Heritage Courtyard Edit",
       heading: "Artisanal Grace & Royal Silks",
       subheading:
@@ -162,33 +150,40 @@ export function HomePage() {
 }
 
 function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
+  const heroSlides = useMemo(() => buildHeroSlides(hero), [hero]);
   const [current, setCurrent] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const heroSlides = buildHeroSlides(hero);
 
+  // Safe cyclic index
+  const activeIndex = ((current % heroSlides.length) + heroSlides.length) % heroSlides.length;
+
+  // Auto-advance every 6s without stopping; loops infinitely from last back to first
   useEffect(() => {
-    if (isPaused) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroSlides.length);
-    }, 7000);
+    }, 6000);
     return () => clearInterval(timer);
-  }, [heroSlides.length, isPaused, current]);
+  }, [heroSlides.length]);
 
-  const slide = heroSlides[current] ?? heroSlides[0]!;
+  const slide = heroSlides[activeIndex] ?? heroSlides[0]!;
 
+  const handlePrev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrent((prev) => (prev + 1) % heroSlides.length);
+  };
 
   return (
-    <section
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]"
-    >
+    <section className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]">
       {heroSlides.map((s, idx) => (
         <div
           key={idx}
           className={cn(
             "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-            current === idx ? "opacity-90" : "opacity-0 pointer-events-none",
+            activeIndex === idx ? "opacity-90" : "opacity-0 pointer-events-none",
           )}
         >
           <img
@@ -196,7 +191,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             alt={s.heading}
             className={cn(
               "h-full w-full object-cover object-[center_20%] origin-top transition-transform duration-[7500ms] ease-out",
-              current === idx ? "scale-105" : "scale-100",
+              activeIndex === idx ? "scale-105" : "scale-100",
             )}
           />
           <div
@@ -210,8 +205,27 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[72vh] sm:min-h-[76vh] max-w-[1400px] flex-col justify-end px-4 pb-8 pt-24 sm:px-8 sm:pb-14 sm:pt-36 lg:pt-40 lg:px-12">
-        <div key={current} className="max-w-2xl animate-fade-in">
+      {/* Prev / Next Controls with Infinite Loop */}
+      <button
+        type="button"
+        onClick={handlePrev}
+        aria-label="Previous slide"
+        className="group absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-md text-white/85 transition-all duration-300 hover:scale-105 hover:bg-black/65 hover:text-white hover:border-amber-400/70 shadow-xl cursor-pointer"
+      >
+        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200 group-hover:-translate-x-0.5" />
+      </button>
+
+      <button
+        type="button"
+        onClick={handleNext}
+        aria-label="Next slide"
+        className="group absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-md text-white/85 transition-all duration-300 hover:scale-105 hover:bg-black/65 hover:text-white hover:border-amber-400/70 shadow-xl cursor-pointer"
+      >
+        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200 group-hover:translate-x-0.5" />
+      </button>
+
+      <div className="relative mx-auto flex min-h-[72vh] sm:min-h-[76vh] max-w-[1400px] flex-col justify-end px-4 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-36 lg:pt-40 lg:px-12">
+        <div key={activeIndex} className="max-w-2xl animate-fade-in">
           <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.22em] text-[#d4a76a] mb-2 sm:mb-3 animate-fade-up">
             {slide.eyebrow}
           </p>
@@ -247,6 +261,27 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Slide Indicators / Dots */}
+      <div className="absolute left-4 bottom-5 sm:left-8 sm:bottom-6 lg:left-12 lg:bottom-7 z-20 flex items-center gap-2">
+        {heroSlides.map((_, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => setCurrent(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+            className={cn(
+              "h-1.5 rounded-full transition-all duration-500 cursor-pointer",
+              activeIndex === idx
+                ? "w-8 sm:w-10 bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.7)]"
+                : "w-3 sm:w-4 bg-white/40 hover:bg-white/75",
+            )}
+          />
+        ))}
+        <span className="ml-2 text-[10px] sm:text-xs font-mono font-medium tracking-wider text-white/80">
+          0{activeIndex + 1} / 0{heroSlides.length}
+        </span>
       </div>
 
       {/* Brand Insignia Watermark in Bottom Right */}
