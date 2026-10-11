@@ -31,6 +31,7 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       primaryTo: "/products?sort=newest",
       secondaryCta: hero.secondaryCta,
       secondaryTo: "/collections",
+      isPortrait: false,
     },
     {
       image: imagery.collection1,
@@ -42,6 +43,7 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       primaryTo: "/collections/the-ceremony-edit",
       secondaryCta: "Browse All Collections",
       secondaryTo: "/collections",
+      isPortrait: true,
     },
     {
       image: imagery.collection2,
@@ -52,6 +54,7 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       primaryTo: "/collections/quiet-hours",
       secondaryCta: "Our Story",
       secondaryTo: "/about",
+      isPortrait: true,
     },
   ];
 }
