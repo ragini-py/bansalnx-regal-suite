@@ -101,7 +101,8 @@ export function CartDrawer() {
                       width={1000}
                       height={1300}
                       loading="lazy"
-                      className="h-24 w-18 sm:h-28 sm:w-22 object-cover transition-transform duration-500 hover:scale-105"
+                      decoding="async"
+                      className="h-24 w-18 sm:h-28 sm:w-22 object-cover object-top transition-transform duration-500 hover:scale-105"
                     />
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">

@@ -196,7 +196,7 @@ export function ProductCard({
                   e.currentTarget.src = idx % 2 === 0 ? "/products/p1.jpg" : "/products/p2.jpg";
                 }}
                 className={cn(
-                  "absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out",
+                  "absolute inset-0 h-full w-full object-cover object-top transition-all duration-700 ease-out",
                   soldOut && "grayscale-[20%]",
                   idx === activeImageIndex
                     ? "opacity-100 scale-[1.02]"
@@ -364,7 +364,7 @@ export function ProductCard({
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = "/products/p1.jpg";
                   }}
-                  className="h-24 w-20 object-cover rounded-xl border border-[#ebdcc9]/70 shrink-0 shadow-sm animate-fade-in"
+                  className="h-24 w-20 object-cover object-top rounded-xl border border-[#ebdcc9]/70 shrink-0 shadow-sm animate-fade-in"
                 />
                 <div className="space-y-3">
                   <div>

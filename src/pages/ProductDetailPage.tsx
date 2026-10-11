@@ -10,8 +10,9 @@ import {
   Ruler,
   ShieldCheck,
   Truck,
-  ZoomIn,
+  X,
 } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 
@@ -88,6 +89,7 @@ export function ProductDetailPage() {
   const wasSwipe = useRef(false);
   const sizeSectionRef = useRef<HTMLFieldSetElement>(null);
   const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const modalTouchStartX = useRef<number | null>(null);
 
   const handleStickyCta = () => {
     if (!size) {
@@ -111,6 +113,44 @@ export function ProductDetailPage() {
     setActiveImage((i) => (i + 1) % count);
   };
 
+  const handleModalTouchStart = (e: React.TouchEvent) => {
+    modalTouchStartX.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const handleModalTouchEnd = (e: React.TouchEvent) => {
+    if (modalTouchStartX.current === null) return;
+    const endX = e.changedTouches[0]?.clientX ?? modalTouchStartX.current;
+    const delta = endX - modalTouchStartX.current;
+    if (Math.abs(delta) > 40) {
+      if (delta < 0) {
+        handleNextImage();
+      } else {
+        handlePrevImage();
+      }
+    }
+    modalTouchStartX.current = null;
+  };
+
+  const currentImages = useMemo(() => {
+    if (!product) return ["/products/p1.jpg"];
+    return getProductImagesForColour(product, colour);
+  }, [product, colour]);
+
+  useEffect(() => {
+    if (!zoomOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevImage();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextImage();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [zoomOpen, currentImages.length]);
+
   useEffect(() => {
     thumbnailRefs.current[activeImage]?.scrollIntoView({
       behavior: "smooth",
@@ -126,11 +166,6 @@ export function ProductDetailPage() {
     setSizeError(false);
     setColour(initialColour);
   }, [slug, product?.id, initialColour]);
-
-  const currentImages = useMemo(() => {
-    if (!product) return ["/products/p1.jpg"];
-    return getProductImagesForColour(product, colour);
-  }, [product, colour]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -265,7 +300,8 @@ export function ProductDetailPage() {
           {/* Gallery */}
           <div>
             <div
-              className="group relative aspect-3/4 overflow-hidden bg-secondary select-none touch-pan-y"
+              className="group relative aspect-3/4 overflow-hidden bg-secondary select-none touch-pan-y cursor-zoom-in"
+              onClick={handleGalleryClick}
               onTouchStart={handleGalleryTouchStart}
               onTouchEnd={handleGalleryTouchEnd}
             >
@@ -273,24 +309,14 @@ export function ProductDetailPage() {
                 key={`${colour}-${activeImage}`}
                 src={currentImages[activeImage] ?? currentImages[0]}
                 alt={`${product.name} — view ${activeImage + 1}`}
-                onClick={() => {
-                  if (typeof window !== "undefined" && window.innerWidth >= 768) {
-                    setZoomOpen(true);
-                  }
-                }}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = "/products/p1.jpg";
                 }}
-                className="h-full w-full object-cover transition-transform duration-700 md:cursor-zoom-in md:group-hover:scale-105 animate-fade-in"
+                className="h-full w-full object-cover object-top transition-transform duration-700 md:group-hover:scale-105 animate-fade-in"
               />
-
-              {/* Photo Counter Badge for Mobile & Desktop */}
-              {currentImages.length > 1 && (
-                <div className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 z-10 rounded-full bg-ink/75 px-2.5 py-1 text-[10px] font-medium tracking-widest text-pearl backdrop-blur-xs">
-                  {activeImage + 1} / {currentImages.length}
-                </div>
-              )}
 
               {/* Previous / Next Image Navigation Buttons */}
               {currentImages.length > 1 && (
@@ -319,19 +345,6 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-
-              {/* Explicit Zoom Button (Always easily tappable on mobile, hover on desktop) */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoomOpen(true);
-                }}
-                className="absolute right-3 bottom-3 sm:right-3.5 sm:bottom-3.5 z-10 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-ink/85 text-pearl shadow-md backdrop-blur-xs transition-transform duration-200 hover:scale-110 active:scale-95"
-                aria-label="Zoom image"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
 
               {product.badge && (
                 <span className="absolute left-3 top-3 sm:left-3.5 sm:top-3.5 z-10 bg-ink px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-ivory sm:px-3 sm:py-1.5 sm:text-[10px]">
@@ -390,6 +403,7 @@ export function ProductDetailPage() {
                       alt=""
                       className="h-full w-full object-cover"
                       loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = "/products/p1.jpg";
@@ -566,12 +580,12 @@ export function ProductDetailPage() {
 
             {/* Action buttons */}
             <div className="space-y-3 pt-2">
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-row gap-2 sm:gap-3">
                 {isEntirelySoldOut ? (
                   <Button
                     variant="outline"
                     size="luxeLg"
-                    className="flex-1 text-xs uppercase tracking-widest text-muted-foreground border-border/80 bg-muted/40 cursor-not-allowed"
+                    className="flex-1 h-auto px-1 py-1.5 rounded-xl text-[11px] sm:text-xs sm:h-12 sm:px-8 sm:py-3 sm:rounded-md uppercase tracking-widest text-muted-foreground border-border/80 bg-muted/40 cursor-not-allowed"
                     disabled
                   >
                     Out of Stock
@@ -581,7 +595,7 @@ export function ProductDetailPage() {
                     <Button
                       variant="luxe"
                       size="luxeLg"
-                      className="flex-1 text-xs"
+                      className="flex-1 h-auto px-1 py-1.5 rounded-xl text-[11px] sm:text-xs sm:h-12 sm:px-8 sm:py-3 sm:rounded-md"
                       onClick={handleAddToCart}
                       disabled={!!size && !selectedAvailable}
                     >
@@ -590,7 +604,7 @@ export function ProductDetailPage() {
                     <Button
                       variant="luxeOutline"
                       size="luxeLg"
-                      className="flex-1 text-xs"
+                      className="flex-1 h-auto px-1 py-1.5 rounded-xl text-[11px] sm:text-xs sm:h-12 sm:px-8 sm:py-3 sm:rounded-md"
                       onClick={handleBuyNow}
                       disabled={!!size && !selectedAvailable}
                     >
@@ -803,19 +817,117 @@ export function ProductDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Zoom Modal */}
+      {/* Luxury Full-Screen Lightbox Modal */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] rounded-none border border-border bg-ink p-2 overflow-hidden flex items-center justify-center">
-          <img
-            src={currentImages[activeImage] ?? currentImages[0]}
-            alt={product.name}
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = "/products/p1.jpg";
-            }}
-            className="max-h-[85vh] w-auto object-contain"
-          />
-        </DialogContent>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md animate-fade-in" />
+          <DialogPrimitive.Content
+            className="fixed inset-0 z-50 flex flex-col justify-between p-3 sm:p-6 outline-none select-none"
+            aria-describedby={undefined}
+          >
+            <DialogTitle className="sr-only">{product.name} Gallery View</DialogTitle>
+
+            {/* Top Bar: Title, Counter & Close Button */}
+            <div className="flex items-center justify-between gap-4 z-20">
+              <div className="min-w-0">
+                <p className="font-serif text-sm sm:text-base text-white tracking-wide truncate max-w-[220px] sm:max-w-md">
+                  {product.name}
+                </p>
+                {currentImages.length > 1 && (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 mt-0.5 font-mono">
+                    {activeImage + 1} / {currentImages.length}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setZoomOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-white/20 active:scale-95 cursor-pointer backdrop-blur-xs"
+                aria-label="Close image modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Main Image Stage */}
+            <div
+              className="relative flex-1 flex items-center justify-center w-full my-auto px-2 sm:px-16 overflow-hidden"
+              onTouchStart={handleModalTouchStart}
+              onTouchEnd={handleModalTouchEnd}
+              onClick={() => setZoomOpen(false)}
+            >
+              <img
+                key={`${colour}-${activeImage}`}
+                src={currentImages[activeImage] ?? currentImages[0]}
+                alt={`${product.name} — view ${activeImage + 1}`}
+                loading="lazy"
+                decoding="async"
+                onClick={(e) => e.stopPropagation()}
+                className="max-h-[68vh] sm:max-h-[76vh] w-auto max-w-full object-contain rounded-xs shadow-2xl transition-all duration-300 animate-fade-in cursor-default"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/products/p1.jpg";
+                }}
+              />
+
+              {/* Prev / Next Chevrons inside Lightbox */}
+              {currentImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevImage();
+                    }}
+                    className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 backdrop-blur-md transition-all active:scale-90 shadow-xl cursor-pointer"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextImage();
+                    }}
+                    className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/25 backdrop-blur-md transition-all active:scale-90 shadow-xl cursor-pointer"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Thumbnail Strip */}
+            {currentImages.length > 1 && (
+              <div className="flex items-center justify-center gap-2 py-2 sm:py-3 px-4 overflow-x-auto scrollbar-none max-w-full z-20">
+                {currentImages.map((image, i) => (
+                  <button
+                    key={image + i}
+                    type="button"
+                    onClick={() => setActiveImage(i)}
+                    aria-label={`View image ${i + 1}`}
+                    className={cn(
+                      "relative aspect-3/4 h-12 sm:h-16 shrink-0 overflow-hidden border transition-all duration-200 cursor-pointer active:scale-95",
+                      i === activeImage
+                        ? "border-gold ring-1 ring-gold opacity-100 scale-105 shadow-md"
+                        : "border-white/20 opacity-40 hover:opacity-80 hover:border-white/50",
+                    )}
+                  >
+                    <img
+                      src={image}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
       </Dialog>
 
       <AuthPromptDialog open={promptOpen} onOpenChange={setPromptOpen} intent={promptIntent} />

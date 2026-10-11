@@ -92,7 +92,8 @@ export function CartPage() {
                       width={1000}
                       height={1300}
                       loading="lazy"
-                      className="h-28 w-22 object-cover rounded-xs sm:h-44 sm:w-32"
+                      decoding="async"
+                      className="h-28 w-22 object-cover object-top rounded-xs sm:h-44 sm:w-32"
                     />
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">

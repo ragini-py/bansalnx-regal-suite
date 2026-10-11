@@ -65,8 +65,9 @@ function WishlistCard({ product }: { product: Product }) {
         <img
           src={product.images[0]}
           alt={product.name}
-          className="aspect-4/5 w-full object-cover"
+          className="aspect-4/5 w-full object-cover object-top"
           loading="lazy"
+          decoding="async"
         />
         {!anyAvailable && (
           <span className="absolute bottom-0 left-0 right-0 bg-ink/70 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-ivory">
