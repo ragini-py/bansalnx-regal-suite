@@ -130,7 +130,47 @@ export function ProductsPage() {
         );
       });
     }
-    if (search.collection) list = list.filter((p) => p.collections.includes(search.collection!));
+    if (search.collection) {
+      const targetCol = collections.find(
+        (c) => c.slug === search.collection || c.id === search.collection,
+      );
+      const colNorm = search.collection.toLowerCase().replace(/[^a-z0-9]/g, "");
+      list = list.filter((p) => {
+        // 1. Direct ID / slug matches from Collection.productIds
+        if (targetCol && targetCol.productIds && targetCol.productIds.length > 0) {
+          if (
+            targetCol.productIds.includes(p.id) ||
+            Boolean(p._id && targetCol.productIds.includes(p._id)) ||
+            targetCol.productIds.includes(p.slug)
+          ) {
+            return true;
+          }
+        }
+        // 2. Direct matches in Product.collections array (slug or id)
+        if (p.collections && Array.isArray(p.collections)) {
+          if (
+            p.collections.includes(search.collection!) ||
+            (targetCol && p.collections.includes(targetCol.slug)) ||
+            (targetCol && p.collections.includes(targetCol.id))
+          ) {
+            return true;
+          }
+        }
+        // 3. Fallback: match by product category name/slug with collection slug/name
+        const pCatNorm = (p.category || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const targetNameNorm = (targetCol?.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (
+          colNorm &&
+          (pCatNorm === colNorm ||
+            pCatNorm.includes(colNorm) ||
+            colNorm.includes(pCatNorm) ||
+            (targetNameNorm && (pCatNorm.includes(targetNameNorm) || targetNameNorm.includes(pCatNorm))))
+        ) {
+          return true;
+        }
+        return false;
+      });
+    }
     if (selectedSizes.length)
       list = list.filter((p) => p.sizes.some((s) => selectedSizes.includes(s)));
     if (selectedColours.length)
@@ -159,6 +199,7 @@ export function ProductsPage() {
     return sortProductsWithStockPriority(list, comparator);
   }, [
     products,
+    collections,
     categories,
     search.q,
     search.category,
@@ -282,6 +323,15 @@ export function ProductsPage() {
     </div>
   );
 
+  const activeCollection = useMemo(
+    () => collections.find((c) => c.slug === search.collection || c.id === search.collection),
+    [collections, search.collection],
+  );
+  const activeCategory = useMemo(
+    () => liveCategories.find((c) => c.slug === search.category || c.id === search.category),
+    [liveCategories, search.category],
+  );
+
   return (
     <SiteLayout>
       <PageHeader
@@ -296,12 +346,27 @@ export function ProductsPage() {
                   </Link>
                 ),
               },
-              { label: "Shop All" },
+              activeCollection
+                ? { label: activeCollection.name }
+                : activeCategory
+                  ? { label: activeCategory.name }
+                  : { label: "Shop All" },
             ]}
           />
         }
-        title={search.q ? `Results for “${search.q}”` : "Shop All"}
-        description="Every piece is handcrafted to perfection in Jaipur. Allow four to six weeks for custom ceremonial styles."
+        title={
+          search.q
+            ? `Results for “${search.q}”`
+            : activeCollection
+              ? activeCollection.name
+              : activeCategory
+                ? activeCategory.name
+                : "Shop All"
+        }
+        description={
+          activeCollection?.description ||
+          "Every piece is handcrafted to perfection in Jaipur. Allow four to six weeks for custom ceremonial styles."
+        }
         meta={
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             {results.length} {results.length === 1 ? "piece" : "pieces"}

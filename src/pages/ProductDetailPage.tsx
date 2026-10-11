@@ -177,7 +177,9 @@ export function ProductDetailPage() {
           (p.category === product.category ||
             (product.categoryIds &&
               p.categoryIds?.some((id) => product.categoryIds?.includes(id))) ||
-            p.collections.some((c) => product.collections.includes(c))),
+            (Array.isArray(p.collections) &&
+              Array.isArray(product.collections) &&
+              p.collections.some((c) => product.collections.includes(c)))),
       )
       .slice(0, 4);
   }, [products, product]);
