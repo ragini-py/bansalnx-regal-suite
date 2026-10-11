@@ -64,9 +64,9 @@ export function AboutPage() {
           </div>
           <div className="order-1 lg:order-2">
             <img
-              src={imagery.craft}
-              alt="Artisan hands at work on embroidery"
-              className="h-full w-full object-cover"
+              src={imagery.craftOrange}
+              alt="Handcrafted embroidered orange textile with pearl tassels by Bansal-nx karigars"
+              className="h-full w-full object-cover rounded-lg shadow-sm"
             />
           </div>
         </div>
@@ -76,9 +76,9 @@ export function AboutPage() {
         <div className="mx-auto grid max-w-[1400px] gap-10 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:px-12">
           <div>
             <img
-              src={imagery.editorial}
-              alt="Editorial view of a Bansal-nx garment"
-              className="h-full w-full object-cover"
+              src={imagery.aboutEditorial}
+              alt="Editorial portrait of draped blue couture by Bansal-nx"
+              className="h-full w-full object-cover rounded-lg shadow-sm"
             />
           </div>
           <div className="flex flex-col justify-center">

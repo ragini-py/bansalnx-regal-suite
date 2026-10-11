@@ -4,15 +4,27 @@ import collection3 from "@/assets/collection-3.jpg";
 import editorial from "@/assets/editorial-1.jpg";
 import promo from "@/assets/promo.jpg";
 import craft from "@/assets/craft.jpg";
+import craftOrange from "@/assets/craft-orange.jpg";
 import hero from "@/assets/hero.jpg";
+import heroSlide2 from "@/assets/hero-slide-2.jpg";
+import heroSlide3 from "@/assets/hero-slide-3.jpg";
+import heroSlide4 from "@/assets/hero-slide-4.jpg";
+import authHero from "@/assets/auth-hero.jpg";
+import aboutEditorial from "@/assets/about-editorial.jpg";
 
 import type { Product, ProductVariant } from "./types";
 
 export const imagery = {
   hero,
+  heroSlide2,
+  heroSlide3,
+  heroSlide4,
+  authHero,
   editorial,
+  aboutEditorial,
   promo,
   craft,
+  craftOrange,
   collection1,
   collection2,
   collection3,

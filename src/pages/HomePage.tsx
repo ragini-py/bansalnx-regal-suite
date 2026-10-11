@@ -31,30 +31,39 @@ function buildHeroSlides(hero: HomepageContent["hero"]) {
       primaryTo: "/products?sort=newest",
       secondaryCta: hero.secondaryCta,
       secondaryTo: "/collections",
-      isPortrait: false,
     },
     {
-      image: imagery.collection1,
-      eyebrow: "The Wedding Pavilion Edit",
-      heading: "Timeless Bridal Opulence",
+      image: imagery.heroSlide2,
+      eyebrow: "The Heritage Courtyard Edit",
+      heading: "Artisanal Grace & Royal Silks",
       subheading:
-        "Zardozi needlework and antique gota patti on hand-spun silks for life's greatest celebrations.",
-      primaryCta: "Discover Bridal",
+        "Handcrafted luxury ethnicwear designed for festive grandeur and timeless modern celebrations.",
+      primaryCta: "Discover Collection",
       primaryTo: "/collections/the-ceremony-edit",
       secondaryCta: "Browse All Collections",
       secondaryTo: "/collections",
-      isPortrait: true,
     },
     {
-      image: imagery.collection2,
-      eyebrow: "Summer Muslins & Florals",
-      heading: "Breeze & Light Heritage",
-      subheading: "Fine chanderi and tissue kurtas woven with pure silver zari threads.",
+      image: imagery.heroSlide3,
+      eyebrow: "Festive Grandeur 2026",
+      heading: "Sunlit Arches & Heirloom Weaves",
+      subheading:
+        "Luminous bandhani, fine zari, and layered jacket ensembles woven with pure regal heritage.",
       primaryCta: "Shop Festive Edit",
       primaryTo: "/collections/quiet-hours",
       secondaryCta: "Our Story",
       secondaryTo: "/about",
-      isPortrait: true,
+    },
+    {
+      image: imagery.heroSlide4,
+      eyebrow: "Royal Pavilion Edit 2026",
+      heading: "Regal Blues & Handcrafted Grace",
+      subheading:
+        "Opulent peacock motifs, weighted silks, and intricate silver zari needlework tailored for celebrations that demand majesty.",
+      primaryCta: "Explore Royal Edit",
+      primaryTo: "/products?sort=featured",
+      secondaryCta: "All Collections",
+      secondaryTo: "/collections",
     },
   ];
 }
@@ -186,7 +195,7 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             src={s.image}
             alt={s.heading}
             className={cn(
-              "h-full w-full object-cover object-center transition-transform duration-[7500ms] ease-out",
+              "h-full w-full object-cover object-[center_20%] origin-top transition-transform duration-[7500ms] ease-out",
               current === idx ? "scale-105" : "scale-100",
             )}
           />
@@ -238,6 +247,15 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Brand Insignia Watermark in Bottom Right */}
+      <div className="absolute right-4 bottom-4 sm:right-8 sm:bottom-6 lg:right-12 lg:bottom-8 z-20 pointer-events-none select-none">
+        <img
+          src="/ui/logo.png"
+          alt="Bansal-nx"
+          className="h-8 sm:h-11 lg:h-14 w-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] opacity-90"
+        />
       </div>
     </section>
   );

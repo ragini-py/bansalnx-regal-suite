@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { useStore } from "@/lib/store";
 
-import hero from "@/assets/collection-1.jpg";
+import authHero from "@/assets/auth-hero.jpg";
 
 const schema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email address"),
@@ -98,8 +98,12 @@ export function LoginPage() {
     <SiteLayout>
       <div className="grid min-h-[85vh] lg:grid-cols-2">
         <div className="relative hidden lg:block">
-          <img src={hero} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-ink/40" />
+          <img
+            src={authHero}
+            alt="Bansal-nx Royal Couture"
+            className="h-full w-full object-cover object-[center_15%]"
+          />
+          <div className="absolute inset-0 bg-ink/35" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-10 text-center">
             <BrandMark size="lg" tone="onDark" withTagline />
           </div>
