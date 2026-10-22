@@ -4,8 +4,18 @@ import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
+    <div className="relative w-full min-w-0 max-w-full overflow-x-auto luxury-scrollbar touch-pan-x">
+      <div className="flex items-center justify-between px-3 py-1.5 text-[11px] font-medium text-amber-800/90 bg-amber-50/60 border-b border-amber-200/50 md:hidden select-none">
+        <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+          Table View
+        </span>
+        <span className="font-semibold text-amber-700">← Swipe to view all columns →</span>
+      </div>
+      <table
+        ref={ref}
+        className={cn("w-full caption-bottom text-sm min-w-[680px]", className)}
+        {...props}
+      />
     </div>
   ),
 );
@@ -60,7 +70,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "h-10 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className,
     )}
     {...props}

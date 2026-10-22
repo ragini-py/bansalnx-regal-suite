@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PeacockGlyph } from "@/components/brand/BrandMark";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 const copy = {
   wishlist: {
@@ -45,6 +46,18 @@ export function AuthPromptDialog({
             {description}
           </DialogDescription>
           <div className="mt-8 flex w-full flex-col gap-3">
+            <GoogleAuthButton
+              mode="continue"
+              onSuccess={() => onOpenChange(false)}
+            />
+
+            <div className="relative my-1 flex items-center justify-center">
+              <div className="w-full border-t border-border" />
+              <span className="absolute bg-card px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                or
+              </span>
+            </div>
+
             <Button asChild variant="luxe" size="luxe">
               <Link
                 to={`/login?redirect=${encodeURIComponent(redirect)}`}

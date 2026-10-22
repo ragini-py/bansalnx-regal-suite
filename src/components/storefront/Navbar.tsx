@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Heart, Menu, Search, ShoppingBag, ShieldCheck, User, X } from "lucide-react";
+import { Heart, LogOut, Menu, Search, ShoppingBag, ShieldCheck, User, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { BrandMark } from "@/components/brand/BrandMark";
@@ -201,8 +201,10 @@ export function Navbar() {
     isAdmin,
     setCartDrawerOpen,
     categories,
+    logout,
   } = useStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
 
   const accountHref = isAdmin ? "/admin" : isAuthenticated ? "/account" : "/login";
@@ -245,10 +247,10 @@ export function Navbar() {
           scrolled ? "shadow-[0_10px_28px_-24px_rgba(17,43,47,0.35)]" : "",
         )}
       >
-        <div className="mx-auto flex h-14 sm:h-20 max-w-[1400px] items-center justify-between gap-1.5 sm:gap-4 px-3 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-16 sm:h-20 lg:h-22 max-w-[1400px] items-center justify-between gap-2 sm:gap-4 px-3 sm:px-8 lg:px-12">
           {/* Logo - Left Most */}
           <Link to="/" className="flex items-center py-1 shrink-0" aria-label="Bansal-nx home">
-            <BrandMark size="md" imgClassName="h-9 sm:h-14 lg:h-16 w-auto" />
+            <BrandMark size="md" imgClassName="h-12 sm:h-16 lg:h-18 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -348,39 +350,55 @@ export function Navbar() {
           <div className="flex h-full flex-col">
             {/* Header: Prominent logo, single close button */}
             <div className="flex items-center justify-between border-b border-border/80 px-5 py-3.5 pr-12">
-              <BrandMark size="md" imgClassName="h-10 sm:h-12 w-auto" />
+              <BrandMark size="md" imgClassName="h-12 sm:h-14 w-auto" />
             </div>
 
             {/* Account / Login Section inside Mobile Menu */}
             <div className="border-b border-border/70 bg-[#faf6ee]/60 p-4">
               {isAuthenticated ? (
-                <Link
-                  to={accountHref}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-between rounded-lg border border-[#e4d4bd] bg-white p-3 shadow-xs transition-colors hover:border-[#c6903c]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-full bg-[#f4ecd8] text-[#9b7038]">
-                      {isAdmin ? <ShieldCheck className="h-5 w-5" /> : <User className="h-5 w-5" />}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-semibold text-slate-900">
-                        {isAdmin
-                          ? "Admin Console"
-                          : `${user?.firstName ?? "Valued Client"} ${user?.lastName ?? ""}`.trim()}
-                      </p>
-                      <p className="text-[11px] text-slate-500 truncate max-w-[140px]">
-                        {user?.email ?? "Account"}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none"
+                <div className="space-y-2">
+                  <Link
+                    to={accountHref}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between rounded-lg border border-[#e4d4bd] bg-white p-3 shadow-xs transition-colors hover:border-[#c6903c]"
                   >
-                    {isAdmin ? "Admin" : "Client"}
-                  </Badge>
-                </Link>
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-9 w-9 place-items-center rounded-full bg-[#f4ecd8] text-[#9b7038]">
+                        {isAdmin ? <ShieldCheck className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-semibold text-slate-900">
+                          {isAdmin
+                            ? "Admin Console"
+                            : `${user?.firstName ?? "Valued Client"} ${user?.lastName ?? ""}`.trim()}
+                        </p>
+                        <p className="text-[11px] text-slate-500 truncate max-w-[140px]">
+                          {user?.email ?? "Account"}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="border-gold/50 text-gold-deep text-[10px] uppercase tracking-wider rounded-none"
+                    >
+                      {isAdmin ? "Admin" : "Client"}
+                    </Badge>
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                      navigate("/");
+                    }}
+                    className="w-full justify-center gap-1.5 h-8 text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Sign Out / Logout
+                  </Button>
+                </div>
               ) : (
                 <Button
                   asChild

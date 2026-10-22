@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Plus } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ChevronRight, LogOut, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { extractApiErrorMessage } from "@/lib/api/auth";
 
@@ -37,6 +37,7 @@ function tabFromPathname(pathname: string): AccountTab {
 
 export function AccountPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const activeTab = tabFromPathname(location.pathname);
   const {
     isAuthenticated,
@@ -47,6 +48,7 @@ export function AccountPage() {
     coupons,
     addAddress,
     removeAddress,
+    logout,
   } = useStore();
 
   const [addAddressOpen, setAddAddressOpen] = useState(false);
@@ -229,6 +231,29 @@ export function AccountPage() {
                   ))}
                 </ul>
               )}
+            </div>
+
+            {/* Quick Session & Logout Card */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+              <div className="text-center sm:text-left">
+                <p className="text-xs font-semibold text-slate-800">Active Account Session</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Signed in as <span className="font-medium text-slate-700">{user.email}</span>
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+                className="w-full sm:w-auto border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold"
+              >
+                <LogOut className="h-3.5 w-3.5 mr-1.5" />
+                Sign Out / Logout
+              </Button>
             </div>
           </div>
         )}
@@ -459,6 +484,24 @@ export function AccountPage() {
                   disabled
                   className="mt-1 rounded-none bg-muted/40"
                 />
+              </div>
+              <div className="pt-3 border-t border-border/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Need to switch accounts or end your session on this device?
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                  className="border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold shrink-0"
+                >
+                  <LogOut className="h-3.5 w-3.5 mr-1.5" />
+                  Sign Out / Logout
+                </Button>
               </div>
             </div>
           </div>

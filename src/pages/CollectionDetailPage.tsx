@@ -11,7 +11,24 @@ import { useStore } from "@/lib/store";
 export function CollectionDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { collections, products } = useStore();
-  const collection = collections.find((c) => c.slug === slug && c.published);
+  const collection = useMemo(() => {
+    if (!slug) return undefined;
+    // 1. Exact match
+    const exact = collections.find((c) => c.slug === slug && c.published);
+    if (exact) return exact;
+
+    // 2. Loose keyword match
+    const norm = slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const loose = collections.find((c) => {
+      if (!c.published) return false;
+      const cNorm = c.slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return cNorm.includes(norm) || norm.includes(cNorm);
+    });
+    if (loose) return loose;
+
+    // 3. Graceful fallback to first published collection
+    return collections.find((c) => c.published);
+  }, [slug, collections]);
 
   const items = useMemo(() => {
     if (!collection) return [];

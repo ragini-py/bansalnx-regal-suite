@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, Mail, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { useStore } from "@/lib/store";
 
 import authHero from "@/assets/auth-hero.jpg";
@@ -37,7 +38,15 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 export function RegisterPage() {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get("redirect") || undefined;
-  const { register, resendVerification } = useStore();
+  const navigate = useNavigate();
+  const {
+    register,
+    resendVerification,
+    pendingIntent,
+    setPendingIntent,
+    toggleWishlist,
+    addToCart,
+  } = useStore();
 
   const [values, setValues] = useState({
     firstName: "",
@@ -57,6 +66,35 @@ export function RegisterPage() {
   const [verificationPendingEmail, setVerificationPendingEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+
+  function resolveIntentAndNavigate(role: string) {
+    if (pendingIntent) {
+      if (pendingIntent.type === "wishlist" && pendingIntent.productId) {
+        toggleWishlist(pendingIntent.productId);
+        toast.success("Added to your wishlist");
+      } else if (
+        pendingIntent.type === "cart" &&
+        pendingIntent.productId &&
+        pendingIntent.variant
+      ) {
+        addToCart({
+          productId: pendingIntent.productId,
+          size: pendingIntent.variant.size,
+          colour: pendingIntent.variant.colour,
+        });
+        toast.success("Added to your bag");
+      }
+      const returnTo = pendingIntent.returnTo;
+      setPendingIntent(null);
+      navigate(returnTo);
+      return;
+    }
+    if (role !== "customer") {
+      navigate(redirect && redirect.startsWith("/admin") ? redirect : "/admin");
+      return;
+    }
+    navigate(redirect || "/account");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -199,7 +237,21 @@ export function RegisterPage() {
                   </div>
                 )}
 
-                <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+                <div className="mt-8 space-y-6">
+                  <GoogleAuthButton
+                    mode="signup"
+                    onSuccess={(u) => resolveIntentAndNavigate(u.role)}
+                  />
+
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-full border-t border-border" />
+                    <span className="absolute bg-background px-3 text-[11px] uppercase tracking-wider text-muted-foreground font-mono">
+                      or register with email
+                    </span>
+                  </div>
+                </div>
+
+                <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                       <Label htmlFor="firstName">First name</Label>

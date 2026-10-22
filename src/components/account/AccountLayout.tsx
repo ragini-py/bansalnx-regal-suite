@@ -5,6 +5,7 @@ import { LogOut, Loader2 } from "lucide-react";
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { PeacockGlyph } from "@/components/brand/BrandMark";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export function AccountLoading() {
 
 export function AccountGate() {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname + location.search;
   const redirectTarget = encodeURIComponent(currentPath || "/account");
 
@@ -56,6 +58,18 @@ export function AccountGate() {
             Sign in to manage your orders, wishlist, addresses and preferences.
           </p>
           <div className="mt-8 flex w-full flex-col gap-3">
+            <GoogleAuthButton
+              mode="continue"
+              onSuccess={() => navigate(currentPath || "/account")}
+            />
+
+            <div className="relative my-1 flex items-center justify-center">
+              <div className="w-full border-t border-border" />
+              <span className="absolute bg-card px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                or
+              </span>
+            </div>
+
             <Button asChild variant="luxe" size="luxe">
               <Link to={`/login?redirect=${redirectTarget}`}>Login</Link>
             </Button>
@@ -78,7 +92,7 @@ export function AccountLayout({
   description?: string;
   children: ReactNode;
 }) {
-  const { logout } = useStore();
+  const { logout, user } = useStore();
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -99,8 +113,29 @@ export function AccountLayout({
         title={title}
         description={description}
       />
-      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
-        <div className="grid gap-8 lg:grid-cols-[220px_1fr] lg:gap-10">
+      <div className="mx-auto max-w-[1400px] px-3.5 py-6 sm:px-8 sm:py-10 lg:px-12">
+        {/* Prominent Mobile Account & Quick Logout Bar */}
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-xs lg:hidden">
+          <div className="min-w-0 pr-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Signed In As</p>
+            <p className="text-xs font-bold text-slate-900 truncate">
+              {user ? `${user.firstName} ${user.lastName}` : "Valued Client"}
+            </p>
+            {user?.email && <p className="text-[11px] text-slate-500 truncate">{user.email}</p>}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSignOut}
+            className="h-8 gap-1.5 shrink-0 border-rose-200 bg-rose-50/60 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Logout</span>
+          </Button>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[220px_1fr] lg:gap-10 min-w-0">
           <nav
             aria-label="Account navigation"
             className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm h-fit"
@@ -148,7 +183,7 @@ export function AccountLayout({
               </Button>
             </div>
           </nav>
-          <div className="min-w-0">
+          <div className="min-w-0 w-full max-w-full">
             {children}
           </div>
         </div>

@@ -1,8 +1,19 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, ExternalLink, Loader2, Package, Search, Truck } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  LayoutGrid,
+  Loader2,
+  Package,
+  RotateCcw,
+  Search,
+  Table as TableIcon,
+  Truck,
+} from "lucide-react";
 
 import { AccountGate, AccountLayout, AccountLoading } from "@/components/account/AccountLayout";
+import { OrderCancelDialog } from "@/components/account/OrderCancelDialog";
 import { EmptyState } from "@/components/common/SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +47,13 @@ const FILTERS: { label: string; statuses: OrderStatus[] | null }[] = [
   { label: "Cancelled", statuses: ["cancelled", "delivery_failed", "ndr", "rto", "lost"] },
 ];
 
+const CANCELLABLE_STATUSES: OrderStatus[] = [
+  "confirmed",
+  "processing",
+  "packed",
+  "ready_for_pickup",
+];
+
 function shipmentStatusLabel(status: OrderStatus) {
   if (["shipped", "in_transit", "out_for_delivery"].includes(status)) return "In transit";
   if (status === "delivered") return "Delivered";
@@ -49,6 +67,8 @@ export function AccountOrdersPage() {
   const [filter, setFilter] = useState(FILTERS[0]?.label ?? "All");
   const [query, setQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   const filtered = useMemo(() => {
     const active = FILTERS.find((f) => f.label === filter);
@@ -85,15 +105,39 @@ export function AccountOrdersPage() {
             </button>
           ))}
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search order ID"
-            aria-label="Search by order ID"
-            className="rounded-lg pl-9"
-          />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Responsive View Switcher */}
+          <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-1 bg-white shadow-2xs self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setViewMode("table")}
+              data-active={viewMode === "table" || undefined}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-slate-600 hover:text-slate-900 data-[active]:bg-slate-900 data-[active]:text-white cursor-pointer"
+            >
+              <TableIcon className="h-3.5 w-3.5" />
+              <span>Table View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("cards")}
+              data-active={viewMode === "cards" || undefined}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-slate-600 hover:text-slate-900 data-[active]:bg-slate-900 data-[active]:text-white cursor-pointer"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span>Card View</span>
+            </button>
+          </div>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search order ID"
+              aria-label="Search by order ID"
+              className="rounded-lg pl-9"
+            />
+          </div>
         </div>
       </div>
 
@@ -110,124 +154,156 @@ export function AccountOrdersPage() {
         </div>
       ) : (
         <>
-          {/* Mobile cards */}
-          <div className="mt-8 flex flex-col gap-4 lg:hidden">
-            {filtered.map((order) => (
-              <div
-                key={order.id}
-                onClick={() => setSelectedOrder(order)}
-                className="flex flex-col gap-3 border border-border/70 bg-card p-5 rounded-xl shadow-xs transition-colors hover:border-slate-400 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-900">{order.id}</p>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {order.lines.map((l) => l.name).join(", ")}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="rounded-full text-[11px]">
-                    {orderStatusLabels[order.status]}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full text-[11px]">
-                    {paymentStatusLabels[order.payment.status]}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between pt-1">
-                  <p className="text-sm font-bold text-slate-900">{formatINR(order.total)}</p>
-                  <span className="text-xs text-amber-700 font-medium">Click to inspect →</span>
-                </div>
+          {/* Responsive Horizontally Scrollable Table View */}
+          {viewMode === "table" ? (
+            <div className="mt-6 border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden">
+              <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-slate-100 bg-slate-50/60">
+                      <TableHead className="text-xs font-semibold text-slate-600">Order ID</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">Date</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">Products</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">Total</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">Payment</TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">
+                        Order Status
+                      </TableHead>
+                      <TableHead className="text-xs font-semibold text-slate-600">Shipping</TableHead>
+                      <TableHead className="text-right text-xs font-semibold text-slate-600">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((order) => (
+                      <TableRow
+                        key={order.id}
+                        onClick={() => setSelectedOrder(order)}
+                        className="cursor-pointer border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
+                      >
+                        <TableCell className="font-semibold text-slate-900 text-xs">
+                          {order.id}
+                        </TableCell>
+                        <TableCell className="text-xs text-slate-500 whitespace-nowrap">
+                          {formatDate(order.createdAt)}
+                        </TableCell>
+                        <TableCell
+                          className="text-xs text-slate-700 max-w-[200px] truncate"
+                          title={order.lines.map((l) => l.name).join(", ")}
+                        >
+                          {order.lines.map((l) => l.name).join(", ")}
+                        </TableCell>
+                        <TableCell className="text-xs font-bold text-slate-900 whitespace-nowrap">
+                          {formatINR(order.total)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <Badge
+                            variant="outline"
+                            className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700"
+                          >
+                            {paymentStatusLabels[order.payment.status]}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "rounded-full text-[11px] font-semibold capitalize",
+                              order.status === "delivered" &&
+                                "border-emerald-200 bg-emerald-50 text-emerald-700",
+                              ["ndr", "rto", "cancelled"].includes(order.status) &&
+                                "border-rose-200 bg-rose-50 text-rose-700",
+                              !["delivered", "ndr", "rto", "cancelled"].includes(order.status) &&
+                                "border-slate-200 bg-slate-50 text-slate-700",
+                            )}
+                          >
+                            {orderStatusLabels[order.status]}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-slate-600 whitespace-nowrap">
+                          {shipmentStatusLabel(order.status)}
+                        </TableCell>
+                        <TableCell className="text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedOrder(order);
+                              }}
+                              className="text-xs font-medium border-slate-200 hover:bg-slate-100"
+                            >
+                              Inspect
+                            </Button>
+                            {CANCELLABLE_STATUSES.includes(order.status) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOrderToCancel(order);
+                                }}
+                                className="text-xs font-medium border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            ))}
-          </div>
-
-          {/* Desktop table */}
-          <div className="mt-8 hidden border border-slate-200 bg-white rounded-xl shadow-xs overflow-x-auto lg:block">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-slate-100 bg-slate-50/60">
-                  <TableHead className="text-xs font-semibold text-slate-600">Order ID</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Date</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Products</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Total</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Payment</TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">
-                    Order Status
-                  </TableHead>
-                  <TableHead className="text-xs font-semibold text-slate-600">Shipping</TableHead>
-                  <TableHead className="text-right text-xs font-semibold text-slate-600">
-                    Action
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((order) => (
-                  <TableRow
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    className="cursor-pointer border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
-                  >
-                    <TableCell className="font-semibold text-slate-900 text-xs">
-                      {order.id}
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-500">
-                      {formatDate(order.createdAt)}
-                    </TableCell>
-                    <TableCell
-                      className="text-xs text-slate-700 max-w-[200px] truncate"
-                      title={order.lines.map((l) => l.name).join(", ")}
-                    >
-                      {order.lines.map((l) => l.name).join(", ")}
-                    </TableCell>
-                    <TableCell className="text-xs font-bold text-slate-900">
-                      {formatINR(order.total)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="rounded-full text-[11px] font-medium border-slate-200 bg-slate-50 text-slate-700"
-                      >
-                        {paymentStatusLabels[order.payment.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "rounded-full text-[11px] font-semibold capitalize",
-                          order.status === "delivered" &&
-                            "border-emerald-200 bg-emerald-50 text-emerald-700",
-                          ["ndr", "rto", "cancelled"].includes(order.status) &&
-                            "border-rose-200 bg-rose-50 text-rose-700",
-                          !["delivered", "ndr", "rto", "cancelled"].includes(order.status) &&
-                            "border-slate-200 bg-slate-50 text-slate-700",
-                        )}
-                      >
-                        {orderStatusLabels[order.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-slate-600">
-                      {shipmentStatusLabel(order.status)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(order);
-                        }}
-                        className="text-xs font-medium border-slate-200 hover:bg-slate-100"
-                      >
-                        Inspect
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          ) : (
+            /* Cards View */
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {filtered.map((order) => (
+                <div
+                  key={order.id}
+                  onClick={() => setSelectedOrder(order)}
+                  className="flex flex-col gap-3 border border-border/70 bg-card p-5 rounded-xl shadow-xs transition-colors hover:border-slate-400 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-900">{order.id}</p>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-1">
+                    {order.lines.map((l) => l.name).join(", ")}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="rounded-full text-[11px]">
+                      {orderStatusLabels[order.status]}
+                    </Badge>
+                    <Badge variant="outline" className="rounded-full text-[11px]">
+                      {paymentStatusLabels[order.payment.status]}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <p className="text-sm font-bold text-slate-900">{formatINR(order.total)}</p>
+                    <div className="flex items-center gap-2">
+                      {CANCELLABLE_STATUSES.includes(order.status) && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOrderToCancel(order);
+                          }}
+                          className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <span className="text-xs text-amber-700 font-medium">Inspect →</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </>
       )}
 
@@ -365,11 +441,35 @@ export function AccountOrdersPage() {
                     </Link>
                   </Button>
                 )}
+                {CANCELLABLE_STATUSES.includes(selectedOrder.status) && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOrderToCancel(selectedOrder)}
+                    className="flex-1 border-rose-200 text-rose-700 hover:bg-rose-50 font-semibold"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                    Cancel Order
+                  </Button>
+                )}
               </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Real E-Commerce Order Cancellation Flow */}
+      <OrderCancelDialog
+        order={orderToCancel}
+        open={Boolean(orderToCancel)}
+        onOpenChange={(open) => !open && setOrderToCancel(null)}
+        onCancelled={() => {
+          if (selectedOrder && selectedOrder.id === orderToCancel?.id) {
+            setSelectedOrder((prev) => (prev ? { ...prev, status: "cancelled" } : null));
+          }
+        }}
+      />
     </AccountLayout>
   );
 }

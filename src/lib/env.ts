@@ -16,6 +16,7 @@ const schema = z.object({
       "VITE_API_URL must be a valid absolute URL (e.g. http://localhost:4000/api) or a root-relative path (e.g. /api)",
     ),
   VITE_RAZORPAY_KEY_ID: z.string().trim().min(1).default("rzp_test_dummy_key_id"),
+  VITE_GOOGLE_CLIENT_ID: z.string().trim().optional().default(""),
 });
 
 const parsed = schema.safeParse(import.meta.env);
@@ -28,4 +29,5 @@ if (!parsed.success) {
 export const env = {
   apiUrl: parsed.data.VITE_API_URL,
   razorpayKeyId: parsed.data.VITE_RAZORPAY_KEY_ID,
+  googleClientId: parsed.data.VITE_GOOGLE_CLIENT_ID,
 };

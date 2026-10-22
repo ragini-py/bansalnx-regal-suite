@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { useStore } from "@/lib/store";
 
 import authHero from "@/assets/auth-hero.jpg";
@@ -136,7 +137,21 @@ export function LoginPage() {
               </div>
             )}
 
-            <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+            <div className="mt-8 space-y-6">
+              <GoogleAuthButton
+                mode="signin"
+                onSuccess={(u) => resolveIntentAndNavigate(u.role)}
+              />
+
+              <div className="relative flex items-center justify-center">
+                <div className="w-full border-t border-border" />
+                <span className="absolute bg-background px-3 text-[11px] uppercase tracking-wider text-muted-foreground font-mono">
+                  or continue with email
+                </span>
+              </div>
+            </div>
+
+            <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input

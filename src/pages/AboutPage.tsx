@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Gem, Hand, Scissors } from "lucide-react";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
+import { Button } from "@/components/ui/button";
 import { imagery } from "@/data/catalog";
 
 const values = [
@@ -104,6 +105,11 @@ export function AboutPage() {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
             </div>
           ))}
+        </div>
+        <div className="mt-14 text-center">
+          <Button asChild variant="luxe" size="luxe">
+            <Link to="/products">Explore Our Creations</Link>
+          </Button>
         </div>
       </section>
     </SiteLayout>

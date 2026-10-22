@@ -450,27 +450,211 @@
   }
 }
 
-/* Custom refined scrollbar for sticky side panels and drawers */
+/* Custom refined scrollbar for sticky side panels, horizontal tables, and drawers */
 .luxury-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(169, 123, 65, 0.3) transparent;
+  scrollbar-color: rgba(169, 123, 65, 0.45) rgba(0, 0, 0, 0.04);
+  -webkit-overflow-scrolling: touch;
 }
 
 .luxury-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 .luxury-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 9999px;
 }
 
 .luxury-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(169, 123, 65, 0.28);
+  background: rgba(169, 123, 65, 0.4);
   border-radius: 9999px;
 }
 
 .luxury-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(169, 123, 65, 0.55);
+  background: rgba(169, 123, 65, 0.7);
+}
+
+/* =========================================================================
+ * Luxury Regal Toast Notification System for Bansal NX
+ * Matches the royal Jaipur palette: Royal Teal-Emerald (#143538 / #183d40),
+ * Antique Jaipur Gold (#d8b378 / #c5a059), and Warm Ivory (#fcf9f2).
+ * ========================================================================= */
+:root {
+  /* Default light/dark variables */
+  --toastify-color-light: #fffdfa;
+  --toastify-color-dark: #143538;
+  --toastify-color-info: #192530;
+  --toastify-color-success: #143538;
+  --toastify-color-warning: #382613;
+  --toastify-color-error: #3a151b;
+
+  /* Colored theme variables (CRITICAL: used by react-toastify when theme="colored") */
+  --toastify-color-colored-info: #192530;
+  --toastify-color-colored-success: #143538;
+  --toastify-color-colored-warning: #382613;
+  --toastify-color-colored-error: #3a151b;
+
+  --toastify-text-color-light: #2d2a28;
+  --toastify-text-color-dark: #fcf9f2;
+  --toastify-text-color-info: #f8fafc;
+  --toastify-text-color-success: #fcf9f2;
+  --toastify-text-color-warning: #fdfaf4;
+  --toastify-text-color-error: #fff5f5;
+
+  --toastify-text-color-colored-info: #f8fafc;
+  --toastify-text-color-colored-success: #fcf9f2;
+  --toastify-text-color-colored-warning: #fdfaf4;
+  --toastify-text-color-colored-error: #fff5f5;
+
+  --toastify-icon-color-info: #d8b378;
+  --toastify-icon-color-success: #d8b378;
+  --toastify-icon-color-warning: #d8b378;
+  --toastify-icon-color-error: #f87171;
+}
+
+.Toastify__toast-container {
+  padding: 1rem !important;
+  z-index: 99999 !important;
+}
+
+/* Floating luxury card on mobile viewports — prevent edge-to-edge square bar */
+@media only screen and (max-width: 640px) {
+  .Toastify__toast-container {
+    width: auto !important;
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 24px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    max-width: 440px !important;
+    pointer-events: none !important;
+  }
+  .Toastify__toast {
+    margin-bottom: 12px !important;
+    border-radius: 16px !important;
+    pointer-events: auto !important;
+  }
+}
+
+.Toastify__toast {
+  border-radius: 14px !important;
+  font-family: inherit !important;
+  padding: 14px 18px !important;
+  box-shadow: 0 16px 40px -6px rgba(10, 26, 23, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(216, 179, 120, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* SUCCESS TOAST: Deep Royal Emerald & Jaipur Gold */
+.Toastify__toast-theme--colored.Toastify__toast--success,
+.Toastify__toast--colored.Toastify__toast--success,
+.Toastify__toast--success {
+  background: #143538 !important;
+  background-color: #143538 !important;
+  color: #fcf9f2 !important;
+  border: 1px solid rgba(216, 179, 120, 0.45) !important;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--success .Toastify__toast-icon,
+.Toastify__toast--colored.Toastify__toast--success .Toastify__toast-icon,
+.Toastify__toast--success .Toastify__toast-icon {
+  color: #d8b378 !important;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--success .Toastify__toast-icon svg,
+.Toastify__toast--colored.Toastify__toast--success .Toastify__toast-icon svg,
+.Toastify__toast--success .Toastify__toast-icon svg {
+  fill: #d8b378 !important;
+  color: #d8b378 !important;
+}
+
+/* ERROR TOAST: Velvet Royal Crimson */
+.Toastify__toast-theme--colored.Toastify__toast--error,
+.Toastify__toast--colored.Toastify__toast--error,
+.Toastify__toast--error {
+  background: #3a151b !important;
+  background-color: #3a151b !important;
+  color: #fff5f5 !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--error .Toastify__toast-icon svg,
+.Toastify__toast--colored.Toastify__toast--error .Toastify__toast-icon svg,
+.Toastify__toast--error .Toastify__toast-icon svg {
+  fill: #f43f5e !important;
+  color: #f43f5e !important;
+}
+
+/* INFO TOAST: Midnight Obsidian Sapphire */
+.Toastify__toast-theme--colored.Toastify__toast--info,
+.Toastify__toast--colored.Toastify__toast--info,
+.Toastify__toast--info {
+  background: #192530 !important;
+  background-color: #192530 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(216, 179, 120, 0.35) !important;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--info .Toastify__toast-icon svg,
+.Toastify__toast--colored.Toastify__toast--info .Toastify__toast-icon svg,
+.Toastify__toast--info .Toastify__toast-icon svg {
+  fill: #d8b378 !important;
+  color: #d8b378 !important;
+}
+
+/* WARNING TOAST: Royal Amber Umber */
+.Toastify__toast-theme--colored.Toastify__toast--warning,
+.Toastify__toast--colored.Toastify__toast--warning,
+.Toastify__toast--warning {
+  background: #382613 !important;
+  background-color: #382613 !important;
+  color: #fdfaf4 !important;
+  border: 1px solid rgba(216, 179, 120, 0.45) !important;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--warning .Toastify__toast-icon svg,
+.Toastify__toast--colored.Toastify__toast--warning .Toastify__toast-icon svg,
+.Toastify__toast--warning .Toastify__toast-icon svg {
+  fill: #d8b378 !important;
+  color: #d8b378 !important;
+}
+
+/* Progress Bars */
+.Toastify__progress-bar {
+  height: 3px !important;
+}
+
+.Toastify__progress-bar--colored.Toastify__progress-bar--success,
+.Toastify__progress-bar--success {
+  background: linear-gradient(90deg, #b98a54 0%, #f3e5c8 50%, #b98a54 100%) !important;
+}
+
+.Toastify__progress-bar--colored.Toastify__progress-bar--error,
+.Toastify__progress-bar--error {
+  background: linear-gradient(90deg, #f43f5e 0%, #fda4af 100%) !important;
+}
+
+.Toastify__progress-bar--colored.Toastify__progress-bar--info,
+.Toastify__progress-bar--info {
+  background: linear-gradient(90deg, #94a3b8 0%, #d8b378 100%) !important;
+}
+
+.Toastify__progress-bar--colored.Toastify__progress-bar--warning,
+.Toastify__progress-bar--warning {
+  background: linear-gradient(90deg, #d8b378 0%, #fae8c8 100%) !important;
+}
+
+.Toastify__close-button {
+  color: rgba(255, 255, 255, 0.75) !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__close-button:hover {
+  color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 

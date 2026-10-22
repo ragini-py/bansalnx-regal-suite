@@ -109,15 +109,15 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
         <SidebarContent pathname={pathname} />
       </div>
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 backdrop-blur-md px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
+      <div className="lg:pl-64 min-w-0 w-full overflow-x-hidden">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 backdrop-blur-md px-3 py-2.5 sm:px-6">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="lg:hidden"
+                  className="lg:hidden shrink-0 h-8 w-8"
                   aria-label="Open navigation"
                 >
                   <Menu className="h-4 w-4" />
@@ -130,12 +130,12 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
                 <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
               </SheetContent>
             </Sheet>
-            <h1 className="font-display font-semibold text-base sm:text-lg text-slate-900">
+            <h1 className="font-display font-semibold text-sm sm:text-lg text-slate-900 truncate">
               {title ?? "Admin"}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {isAdmin && user && (
               <div className="hidden text-right sm:block">
                 <p className="text-xs font-semibold leading-tight text-slate-800">
@@ -149,30 +149,30 @@ export function AdminLayout({ title, children }: { title?: string; children: Rea
             <Button
               variant="outline"
               size="sm"
-              className="h-8 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50"
+              className="h-8 px-2 sm:px-3 text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-50"
               asChild
             >
               <Link to="/">
-                <ExternalLink className="h-3.5 w-3.5" /> View store
+                <ExternalLink className="h-3.5 w-3.5" /> <span className="hidden sm:inline ml-1">View store</span>
               </Link>
             </Button>
             {isAdmin && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                className="h-8 px-2 sm:px-3 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 onClick={() => {
                   logout();
                   navigate("/");
                 }}
               >
-                <LogOut className="h-3.5 w-3.5" /> Sign out
+                <LogOut className="h-3.5 w-3.5" /> <span className="hidden sm:inline ml-1">Sign out</span>
               </Button>
             )}
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6 lg:py-8">{children}</main>
+        <main className="w-full min-w-0 px-3 py-4 sm:px-6 lg:py-8">{children}</main>
       </div>
     </div>
   );

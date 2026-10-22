@@ -105,7 +105,7 @@ export function AdminPage() {
   return (
     <AdminGuard>
       <AdminLayout title={TAB_TITLES[activeTab]}>
-        <div className="space-y-8">
+        <div className="w-full min-w-0 max-w-full space-y-8">
           {activeTab === "overview" && <OverviewTab onNavigateTab={goToTab} />}
           {activeTab === "orders" && <OrdersManagerTab />}
           {activeTab === "products" && <ProductsManagerTab />}

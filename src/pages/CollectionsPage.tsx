@@ -31,31 +31,7 @@ export function CollectionsPage() {
         description="Explore our signature edits and categories handcrafted by master artisans in Jaipur."
       />
 
-      <div className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 sm:py-16 lg:px-12">
-        {/* Category Quick Filter Pills */}
-        <div className="mb-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          <Link
-            to="/products"
-            className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground hover:scale-105 active:scale-95"
-          >
-            All Pieces ({products.filter((p) => p.published).length})
-          </Link>
-          {live.map((c) => {
-            const count = c.productIds.filter((id) =>
-              products.some((p) => (p.id === id || p._id === id) && p.published),
-            ).length;
-            return (
-              <Link
-                key={c.id}
-                to={`/collections/${c.slug}`}
-                className="rounded-full border border-border/80 bg-background/80 px-4 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-gold hover:text-foreground hover:scale-105 active:scale-95"
-              >
-                {c.name} {count > 0 ? `(${count})` : ""}
-              </Link>
-            );
-          })}
-        </div>
-
+      <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-14 lg:px-12">
         {/* 6-Card Category & Collection Showcase Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {live.map((collection, index) => {

@@ -28,6 +28,7 @@ import {
 } from "@/data/mock";
 import {
   extractApiErrorMessage,
+  googleLoginRequest,
   loginRequest,
   logoutRequest,
   meRequest,
@@ -178,6 +179,7 @@ interface StoreValue {
   permissions: PermissionKey[];
   hasPermission: (p: PermissionKey) => boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; user?: User }>;
+  loginWithGoogle: (idToken: string) => Promise<{ ok: boolean; error?: string; user?: User }>;
   register: (input: {
     firstName: string;
     lastName: string;
@@ -228,7 +230,7 @@ interface StoreValue {
   }) => Promise<Order>;
   updateOrder: (id: string, patch: Partial<Order>) => Promise<void>;
   requestReturn: (id: string, reason: string) => Promise<void>;
-  cancelOrder: (id: string) => Promise<void>;
+  cancelOrder: (id: string, reason?: string) => Promise<void>;
   /* addresses */
   addAddress: (address: Omit<Address, "id">) => Promise<Address>;
   removeAddress: (id: string) => Promise<void>;
@@ -608,6 +610,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const loginWithGoogle = useCallback<StoreValue["loginWithGoogle"]>(async (idToken: string) => {
+    try {
+      const loggedInUser = await googleLoginRequest(idToken);
+      isExplicitLoginForCartRef.current = true;
+      isExplicitLoginForWishlistRef.current = true;
+      setAuthUser(loggedInUser);
+      return { ok: true, user: loggedInUser };
+    } catch (err) {
+      return { ok: false, error: extractApiErrorMessage(err, "Unable to sign in with Google.") };
+    }
+  }, []);
+
   const register = useCallback<StoreValue["register"]>(async (input) => {
     try {
       const res = await registerRequest({ ...input, email: input.email.trim() });
@@ -913,8 +927,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
   }, []);
 
-  const cancelOrder = useCallback<StoreValue["cancelOrder"]>(async (id) => {
-    const updated = await cancelOrderRequest(id);
+  const cancelOrder = useCallback<StoreValue["cancelOrder"]>(async (id, reason) => {
+    const updated = await cancelOrderRequest(id, reason);
     setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
     setMyOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
   }, []);
@@ -941,6 +955,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     permissions,
     hasPermission: (p) => permissions.includes(p),
     login,
+    loginWithGoogle,
     register,
     verifyEmail,
     resendVerification,

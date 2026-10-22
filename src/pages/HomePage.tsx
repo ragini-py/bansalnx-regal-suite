@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight, Mail, Star } from "lucide-react";
+import { ArrowRight, Mail, Star } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -18,38 +18,68 @@ const newsletterEmailSchema = z.string().trim().email().max(255);
 
 // Hero slides featuring Bansal-nx royal couture collections.
 // The old green lehenga placeholder has been replaced by the 3 custom widescreen edits.
-function buildHeroSlides(hero: HomepageContent["hero"]) {
+function buildHeroSlides(hero: HomepageContent["hero"], collections: Collection[] = []) {
+  const liveCols = collections.filter((c) => c.published);
+
+  // 1. Signature collection: e.g. Indo-Western / Couture / top collection by piece count
+  const sortedByCount = [...liveCols].sort(
+    (a, b) => (b.productIds?.length ?? 0) - (a.productIds?.length ?? 0),
+  );
+  const col1 =
+    sortedByCount.find((c) =>
+      /indo|couture|heritage|ceremony/i.test(c.slug + " " + c.name),
+    ) ?? sortedByCount[0];
+
+  // 2. Festive Ensembles / Royal Suits / Weaves
+  const col2 =
+    liveCols.find((c) =>
+      /royal|ensemble|suit|festive|jamdani|weave/i.test(c.slug + " " + c.name),
+    ) ?? liveCols[1] ?? liveCols[0];
+
+  // 3. Co-ords / Tunics / Contemporary Edits
+  const col3 =
+    liveCols.find((c) =>
+      /coord|contemporary|tunic|kurta|pavilion/i.test(c.slug + " " + c.name),
+    ) ?? liveCols[2] ?? liveCols[0];
+
+  const slide1To = col1 ? `/collections/${col1.slug}` : "/products?sort=featured";
+  const slide2To = col2 ? `/collections/${col2.slug}` : "/products?sort=newest";
+  const slide3To = col3 ? `/collections/${col3.slug}` : "/products?sort=featured";
+
   return [
     {
       image: hero.image && !hero.image.includes("hero.jpg") ? hero.image : imagery.heroSlide2,
-      eyebrow: "The Heritage Courtyard Edit",
+      eyebrow: col1 ? col1.name : "The Heritage Courtyard Edit",
       heading: "Artisanal Grace & Royal Silks",
       subheading:
+        col1?.description ||
         "Handcrafted luxury ethnicwear designed for festive grandeur and timeless modern celebrations.",
       primaryCta: "Discover Collection",
-      primaryTo: "/collections/the-ceremony-edit",
+      primaryTo: slide1To,
       secondaryCta: "Browse All Collections",
       secondaryTo: "/collections",
     },
     {
       image: imagery.heroSlide3,
-      eyebrow: "Festive Grandeur 2026",
+      eyebrow: col2 ? col2.name : "Festive Grandeur 2026",
       heading: "Sunlit Arches & Heirloom Weaves",
       subheading:
+        col2?.description ||
         "Luminous bandhani, fine zari, and layered jacket ensembles woven with pure regal heritage.",
       primaryCta: "Shop Festive Edit",
-      primaryTo: "/collections/quiet-hours",
+      primaryTo: slide2To,
       secondaryCta: "Our Story",
       secondaryTo: "/about",
     },
     {
       image: imagery.heroSlide4,
-      eyebrow: "Royal Pavilion Edit 2026",
+      eyebrow: col3 ? col3.name : "Royal Pavilion Edit 2026",
       heading: "Regal Blues & Handcrafted Grace",
       subheading:
+        col3?.description ||
         "Opulent peacock motifs, weighted silks, and intricate silver zari needlework tailored for celebrations that demand majesty.",
       primaryCta: "Explore Royal Edit",
-      primaryTo: "/products?sort=featured",
+      primaryTo: slide3To,
       secondaryCta: "All Collections",
       secondaryTo: "/collections",
     },
@@ -79,13 +109,17 @@ export function HomePage() {
   const bestsellers = sortProductsWithStockPriority(
     live.filter((p) => p.bestseller),
   ).slice(0, 4);
-  const featuredCollections = content.featuredCollectionIds
+  const matchedCollections = content.featuredCollectionIds
     .map((slug) => collections.find((c) => c.slug === slug))
     .filter((c): c is Collection => !!c && c.published);
+  const featuredCollections =
+    matchedCollections.length > 0
+      ? matchedCollections
+      : collections.filter((c) => c.published).slice(0, 3);
 
   return (
     <SiteLayout>
-      <HeroSlider hero={content.hero} />
+      <HeroSlider hero={content.hero} collections={collections} />
 
       {/* Featured Products */}
       {isSectionVisible(content, "featured") && featuredProducts.length > 0 && (
@@ -126,13 +160,15 @@ export function HomePage() {
           title="The Bestsellers"
           description="Iconic silhouettes our patrons return to season after season."
           items={bestsellers}
-          href="/products?sort=featured"
+          href="/products?sort=best-selling"
           cta="Shop bestsellers"
         />
       )}
 
       {/* Promotional Banner */}
-      {isSectionVisible(content, "promo") && <Promo promo={content.promo} />}
+      {isSectionVisible(content, "promo") && (
+        <Promo promo={content.promo} collectionSlug={featuredCollections[0]?.slug} />
+      )}
 
       {/* Craftsmanship & Heritage */}
       <Craft />
@@ -149,8 +185,14 @@ export function HomePage() {
   );
 }
 
-function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
-  const heroSlides = useMemo(() => buildHeroSlides(hero), [hero]);
+function HeroSlider({
+  hero,
+  collections,
+}: {
+  hero: HomepageContent["hero"];
+  collections: Collection[];
+}) {
+  const heroSlides = useMemo(() => buildHeroSlides(hero, collections), [hero, collections]);
   const [current, setCurrent] = useState(0);
 
   // Safe cyclic index
@@ -166,18 +208,39 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
 
   const slide = heroSlides[activeIndex] ?? heroSlides[0]!;
 
-  const handlePrev = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0]?.clientX ?? null);
   };
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrent((prev) => (prev + 1) % heroSlides.length);
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0]?.clientX ?? null);
+  };
+
+  const onTouchEnd = () => {
+    if (touchStart === null || touchEnd === null) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) {
+      // Swiped left -> next slide
+      setCurrent((prev) => (prev + 1) % heroSlides.length);
+    } else if (distance < -minSwipeDistance) {
+      // Swiped right -> prev slide
+      setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+    }
   };
 
   return (
-    <section className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]">
+    <section
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="relative isolate min-h-[76vh] w-full overflow-hidden bg-[#173a3d]"
+    >
       {heroSlides.map((s, idx) => (
         <div
           key={idx}
@@ -204,25 +267,6 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
           />
         </div>
       ))}
-
-      {/* Prev / Next Controls with Infinite Loop */}
-      <button
-        type="button"
-        onClick={handlePrev}
-        aria-label="Previous slide"
-        className="group absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-md text-white/85 transition-all duration-300 hover:scale-105 hover:bg-black/65 hover:text-white hover:border-amber-400/70 shadow-xl cursor-pointer"
-      >
-        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200 group-hover:-translate-x-0.5" />
-      </button>
-
-      <button
-        type="button"
-        onClick={handleNext}
-        aria-label="Next slide"
-        className="group absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-black/35 backdrop-blur-md text-white/85 transition-all duration-300 hover:scale-105 hover:bg-black/65 hover:text-white hover:border-amber-400/70 shadow-xl cursor-pointer"
-      >
-        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200 group-hover:translate-x-0.5" />
-      </button>
 
       <div className="relative mx-auto flex min-h-[72vh] sm:min-h-[76vh] max-w-[1400px] flex-col justify-end px-4 pb-16 pt-24 sm:px-8 sm:pb-20 sm:pt-36 lg:pt-40 lg:px-12">
         <div key={activeIndex} className="max-w-2xl animate-fade-in">
@@ -263,33 +307,12 @@ function HeroSlider({ hero }: { hero: HomepageContent["hero"] }) {
         </div>
       </div>
 
-      {/* Slide Indicators / Dots */}
-      <div className="absolute left-4 bottom-5 sm:left-8 sm:bottom-6 lg:left-12 lg:bottom-7 z-20 flex items-center gap-2">
-        {heroSlides.map((_, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => setCurrent(idx)}
-            aria-label={`Go to slide ${idx + 1}`}
-            className={cn(
-              "h-1.5 rounded-full transition-all duration-500 cursor-pointer",
-              activeIndex === idx
-                ? "w-8 sm:w-10 bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.7)]"
-                : "w-3 sm:w-4 bg-white/40 hover:bg-white/75",
-            )}
-          />
-        ))}
-        <span className="ml-2 text-[10px] sm:text-xs font-mono font-medium tracking-wider text-white/80">
-          0{activeIndex + 1} / 0{heroSlides.length}
-        </span>
-      </div>
-
       {/* Brand Insignia Watermark in Bottom Right */}
       <div className="absolute right-4 bottom-4 sm:right-8 sm:bottom-6 lg:right-12 lg:bottom-8 z-20 pointer-events-none select-none">
         <img
           src="/ui/logo.png"
           alt="Bansal-nx"
-          className="h-8 sm:h-11 lg:h-14 w-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] opacity-90"
+          className="h-16 sm:h-[88px] lg:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] opacity-95"
         />
       </div>
     </section>
@@ -417,7 +440,14 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
   );
 }
 
-function Promo({ promo }: { promo: HomepageContent["promo"] }) {
+function Promo({
+  promo,
+  collectionSlug,
+}: {
+  promo: HomepageContent["promo"];
+  collectionSlug?: string;
+}) {
+  const promoHref = collectionSlug ? `/collections/${collectionSlug}` : "/products?sort=featured";
   return (
     <section className="mx-auto max-w-[1400px] px-4 py-4 sm:px-8 lg:px-12">
       <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-5 sm:p-12 rounded-[20px] sm:rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
@@ -431,7 +461,7 @@ function Promo({ promo }: { promo: HomepageContent["promo"] }) {
           <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-relaxed text-slate-700">{promo.caption}</p>
           <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
             <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm">
-              <Link to="/collections/the-ceremony-edit">{promo.cta}</Link>
+              <Link to={promoHref}>{promo.cta}</Link>
             </Button>
             <Button
               asChild
@@ -485,6 +515,11 @@ function Craft() {
               </p>
               <p className="mt-1.5 text-xs text-slate-600 font-medium">Mulberry &amp; raw silks</p>
             </div>
+          </div>
+          <div className="pt-2">
+            <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm">
+              <Link to="/about">Discover Jaipur Artistry</Link>
+            </Button>
           </div>
         </Reveal>
       </div>

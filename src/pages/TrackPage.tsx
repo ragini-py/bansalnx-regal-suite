@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2, PackageSearch, Search } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { AlertTriangle, CheckCircle2, PackageSearch, RotateCcw, Search } from "lucide-react";
 
 import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/SiteLayout";
 import { EmptyState } from "@/components/common/SectionHeading";
@@ -150,22 +150,53 @@ export function TrackPage() {
             </div>
 
             {exception ? (
-              <div className="border border-destructive/40 bg-destructive/5 p-6">
-                <div className="flex items-center gap-3 text-destructive">
-                  <AlertTriangle className="h-5 w-5" />
-                  <p className="font-display text-lg">
-                    {trackingStages.find((s) => s.status === result.status)?.label ?? result.status}
+              result.status === "cancelled" ? (
+                <div className="border border-rose-200 bg-rose-50/50 p-6 rounded-xl space-y-3">
+                  <div className="flex items-center gap-3 text-rose-700">
+                    <RotateCcw className="h-5 w-5 shrink-0" />
+                    <p className="font-display text-lg font-bold">Order Cancelled</p>
+                  </div>
+                  {result.shipment.events?.find((e) => e.status === "cancelled")?.label && (
+                    <p className="text-xs text-slate-700 font-medium">
+                      Reason:{" "}
+                      <span className="text-slate-600">
+                        {result.shipment.events
+                          .find((e) => e.status === "cancelled")
+                          ?.label.replace(/^Cancelled:\s*/, "")}
+                      </span>
+                    </p>
+                  )}
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {result.payment.status === "refunded" ||
+                    result.payment.status === "paid" ||
+                    result.payment.method !== "cod"
+                      ? "100% refund has been processed. Settlement to original source takes 5–7 banking days."
+                      : "This Cash on Delivery order was cancelled. No charges were incurred."}
+                  </p>
+                  <div className="pt-2">
+                    <Button asChild variant="outline" size="sm" className="text-xs">
+                      <Link to={`/order/${result.id}`}>View Full Cancellation Receipt &amp; Details</Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="border border-destructive/40 bg-destructive/5 p-6 rounded-xl">
+                  <div className="flex items-center gap-3 text-destructive">
+                    <AlertTriangle className="h-5 w-5" />
+                    <p className="font-display text-lg">
+                      {trackingStages.find((s) => s.status === result.status)?.label ?? result.status}
+                    </p>
+                  </div>
+                  {result.shipment.ndrReason && (
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      Reason: {result.shipment.ndrReason}
+                    </p>
+                  )}
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Our team has been notified and will reach out with next steps.
                   </p>
                 </div>
-                {result.shipment.ndrReason && (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Reason: {result.shipment.ndrReason}
-                  </p>
-                )}
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Our team has been notified and will reach out with next steps.
-                </p>
-              </div>
+              )
             ) : (
               <ol className="relative border-l border-border pl-6">
                 {trackingStages.map((stage, i) => {

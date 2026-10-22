@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { extractApiErrorMessage } from "@/lib/api/auth";
 import { env } from "@/lib/env";
 import { formatINR } from "@/lib/format";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Address, PaymentMethod } from "@/data/types";
@@ -361,25 +362,36 @@ export function CheckoutPage() {
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Sign in to apply saved addresses, track your order, and access exclusive privileges.
           </p>
-          <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
-            <Button
-              asChild
-              variant="luxe"
-              size="luxe"
-              className="flex-1"
-              onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
-            >
-              <Link to="/login?redirect=/checkout">Login</Link>
-            </Button>
-            <Button
-              asChild
-              variant="luxeOutline"
-              size="luxe"
-              className="flex-1"
-              onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
-            >
-              <Link to="/register?redirect=/checkout">Create Account</Link>
-            </Button>
+          <div className="mt-8 flex w-full flex-col gap-3">
+            <GoogleAuthButton mode="continue" />
+
+            <div className="relative my-1 flex items-center justify-center">
+              <div className="w-full border-t border-border" />
+              <span className="absolute bg-background px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                or
+              </span>
+            </div>
+
+            <div className="flex w-full flex-col gap-3 sm:flex-row">
+              <Button
+                asChild
+                variant="luxe"
+                size="luxe"
+                className="flex-1"
+                onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
+              >
+                <Link to="/login?redirect=/checkout">Login</Link>
+              </Button>
+              <Button
+                asChild
+                variant="luxeOutline"
+                size="luxe"
+                className="flex-1"
+                onClick={() => setPendingIntent({ type: "checkout", returnTo: "/checkout" })}
+              >
+                <Link to="/register?redirect=/checkout">Create Account</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </SiteLayout>

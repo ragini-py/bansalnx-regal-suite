@@ -40,8 +40,8 @@ export async function requestReturnRequest(id: string, reason: string): Promise<
   return data.order;
 }
 
-export async function cancelOrderRequest(id: string): Promise<Order> {
-  const { data } = await apiClient.post<{ order: Order }>(`/orders/${id}/cancel`);
+export async function cancelOrderRequest(id: string, reason?: string): Promise<Order> {
+  const { data } = await apiClient.post<{ order: Order }>(`/orders/${id}/cancel`, { reason });
   return data.order;
 }
 

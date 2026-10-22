@@ -66,6 +66,13 @@ export async function loginRequest(input: LoginInput): Promise<AuthUser> {
   return data.user;
 }
 
+export async function googleLoginRequest(idToken: string): Promise<AuthUser> {
+  const { data } = await apiClient.post<AuthResponse>("/auth/google", { idToken });
+  setAccessToken(data.accessToken);
+  setCsrfToken(data.csrfToken);
+  return data.user;
+}
+
 export async function logoutRequest(): Promise<void> {
   try {
     await apiClient.post("/auth/logout");
