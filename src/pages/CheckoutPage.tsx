@@ -438,7 +438,7 @@ export function CheckoutPage() {
           />
         }
         title="Secure Checkout"
-        description="Encrypted 256-bit checkout · Delhivery Insured Shipping"
+        description="Encrypted 256-bit checkout · Express Insured Shipping"
       />
       <div className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 lg:px-12">
         {cartHasUnavailableItems && (
@@ -690,9 +690,9 @@ export function CheckoutPage() {
                 Delivery Method
               </h2>
               <div className="mt-4 border border-gold/50 bg-gold/5 p-4">
-                <p className="text-sm">Standard delivery — 5–8 business days</p>
+                <p className="text-sm">Standard express delivery — 5–8 business days</p>
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Live courier rates and AWB creation will arrive with the Delhivery integration.
+                  Insured direct dispatch from our Kolkata atelier. Real-time updates provided via order tracking.
                 </p>
               </div>
             </section>

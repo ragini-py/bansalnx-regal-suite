@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Loader2,
   Mail,
+  MapPin,
   PackageSearch,
   RotateCcw,
   ShieldCheck,
@@ -209,7 +210,7 @@ export function OrderConfirmationPage() {
                 {cancelledEvent?.at
                   ? `Cancelled on ${formatDateTime(cancelledEvent.at)}.`
                   : `Placed on ${formatDateTime(order.createdAt)}.`}{" "}
-                The shipment has been halted and items released back to Jaipur inventory.
+                The shipment has been halted and items released back to Kolkata inventory.
               </p>
 
               {/* Cancellation Reason Notice */}
@@ -438,7 +439,7 @@ export function OrderConfirmationPage() {
           <div className="mt-8 border border-border p-6">
             <p className="eyebrow">Need to make a change?</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              You can cancel this order before it leaves the Jaipur warehouse dispatch.
+              You can cancel this order before it leaves the Kolkata warehouse dispatch.
             </p>
             <Button
               variant="luxeOutline"
@@ -454,19 +455,44 @@ export function OrderConfirmationPage() {
 
         {/* Delivered Order Returns CTA */}
         {order.status === "delivered" && (
-          <div className="mt-8 border border-border p-6">
-            <p className="eyebrow">Returns &amp; Exchanges</p>
+          <div className="mt-8 border border-border p-6 rounded-2xl bg-amber-50/30">
+            <p className="eyebrow text-amber-900 font-bold">Returns &amp; Exchanges</p>
             {order.returnRequest ? (
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <Badge
-                  variant="outline"
-                  className="rounded-none border-gold/50 text-gold-deep capitalize"
-                >
-                  Return: {order.returnRequest.status}
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  Reason: {order.returnRequest.reason}
-                </p>
+              <div className="mt-3 space-y-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-amber-300 bg-amber-100 text-amber-950 font-semibold capitalize px-3 py-1 text-xs"
+                  >
+                    Return Status: {order.returnRequest.status}
+                  </Badge>
+                  <p className="text-xs text-slate-600">
+                    Reason: <strong>{order.returnRequest.reason}</strong>
+                  </p>
+                </div>
+
+                {/* Return Shipping Instructions & Address */}
+                <div className="rounded-xl border border-amber-300 bg-white p-4 text-xs text-slate-800 space-y-2.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                    <MapPin className="h-4 w-4 text-amber-700 shrink-0" />
+                    <span>Return Shipping Destination Address (Final Step)</span>
+                  </div>
+                  <p className="text-slate-600 leading-relaxed">
+                    Please pack the unworn garments with original tags attached, and ship the parcel via <strong>Speed Post, India Post, Blue Dart, DTDC, or any postal / courier service</strong> of your choice to:
+                  </p>
+                  <div className="rounded-lg bg-amber-50/60 p-3.5 border border-amber-200 text-slate-900 font-medium leading-relaxed space-y-0.5">
+                    <p className="font-bold text-sm">Bansal NX (Returns Department)</p>
+                    <p>2nd Flr, Rm No. 38, 134/1,</p>
+                    <p>Mahatma Gandhi Rd, Central Avenue,</p>
+                    <p>Kolutolla, Kolkata, West Bengal 700073</p>
+                    <p className="text-amber-850 font-mono text-[11px] pt-1">
+                      Website: bansalnx.in · Email: care@bansalnx.in
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2.5 text-[11px] font-semibold text-emerald-900">
+                    ✓ Once your parcel reaches our Kolkata facility and clears quality inspection, your refund will be immediately issued back to your payment method.
+                  </div>
+                </div>
               </div>
             ) : (
               <>
@@ -539,7 +565,7 @@ export function OrderConfirmationPage() {
                 <Label htmlFor="return-reason">Reason for Return or Size Exchange</Label>
                 <textarea
                   id="return-reason"
-                  rows={4}
+                  rows={3}
                   value={returnReason}
                   onChange={(e) => setReturnReason(e.target.value)}
                   placeholder="e.g. Size fitting issue, request size L replacement"
@@ -547,6 +573,25 @@ export function OrderConfirmationPage() {
                   required
                 />
               </div>
+
+              {/* Instructions and Address callout */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 text-xs text-slate-800 space-y-1.5">
+                <p className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-amber-700" />
+                  Return Shipping Destination (Final Step):
+                </p>
+                <p className="text-slate-600 text-[11px] leading-relaxed">
+                  Ship your parcel via <strong>Speed Post, DTDC, Blue Dart, or any postal / courier service</strong> to:
+                </p>
+                <div className="bg-white p-2.5 rounded-lg border border-amber-200 font-medium text-[11px] leading-relaxed">
+                  <strong>Bansal NX</strong><br />
+                  2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in)
+                </div>
+                <p className="text-[11px] text-emerald-800 font-semibold">
+                  Once your parcel reaches our Kolkata facility, refund will be sent to your original payment method.
+                </p>
+              </div>
+
               <Button type="submit" variant="luxe" className="w-full">
                 Submit Return Request
               </Button>

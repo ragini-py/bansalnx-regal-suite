@@ -5,6 +5,7 @@ import {
   Check,
   ChevronRight,
   ClipboardList,
+  Clock,
   CreditCard,
   ExternalLink,
   PackageSearch,
@@ -71,7 +72,7 @@ const TAB_TITLES: Record<AdminTab, string> = {
   collections: "Collections",
   coupons: "Coupons & Offers",
   customers: "Customers",
-  shipping: "Logistics & Delhivery",
+  shipping: "Shipments & Dispatch",
   content: "Homepage Content",
   settings: "Store Settings",
 };
@@ -224,7 +225,7 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
           <p className="mt-3 font-display text-2xl sm:text-3xl font-bold text-slate-900">
             {inTransit.length}
           </p>
-          <p className="mt-1 text-xs text-slate-400">Delhivery network</p>
+          <p className="mt-1 text-xs text-slate-400">Dispatched &amp; in transit</p>
         </div>
         <div className="border border-slate-200 bg-white p-5 rounded-xl shadow-sm">
           <div className="flex items-center justify-between">
@@ -412,12 +413,13 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
           </div>
           <div className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-lg">
             <div>
-              <p className="text-xs font-semibold text-slate-900">Delhivery Logistics</p>
-              <p className="text-[11px] text-slate-500">Surface & Express AWB</p>
+              <p className="text-xs font-semibold text-slate-900">Manual Self-Dispatch</p>
+              <p className="text-[11px] text-slate-500">In-house courier fulfillment &amp; tracking</p>
             </div>
+            {/* Reserved for future automated carrier API integration (Delhivery) */}
             <StatusBadge
-              status={settings.delhiveryConnected ? "success" : "muted"}
-              label={settings.delhiveryConnected ? "Active" : "Ready"}
+              status="success"
+              label="Active"
             />
           </div>
           <div className="flex items-center justify-between border border-slate-200 bg-slate-50/50 p-4 rounded-lg">
@@ -540,16 +542,16 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
 
                 <div className="border border-slate-200 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    Logistics / Delhivery
+                    Shipment &amp; Courier Details
                   </p>
                   <div className="mt-2 text-xs space-y-1">
                     <p>
                       <span className="text-slate-500">Courier:</span>{" "}
-                      <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong>
+                      <strong>{selectedOrder.shipment?.courier ?? "Pending Dispatch"}</strong>
                     </p>
                     <p>
-                      <span className="text-slate-500">AWB:</span>{" "}
-                      <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong>
+                      <span className="text-slate-500">AWB / Docket:</span>{" "}
+                      <strong>{selectedOrder.shipment?.awb ?? "Not assigned"}</strong>
                     </p>
                   </div>
                 </div>
@@ -590,12 +592,23 @@ function OrdersManagerTab() {
   const [search, setSearch] = useState<string>("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Manual dispatch inputs
+  const [dispatchCourier, setDispatchCourier] = useState<string>("Blue Dart");
+  const [dispatchAwb, setDispatchAwb] = useState<string>("");
+  const [showDispatchForm, setShowDispatchForm] = useState<boolean>(false);
+
+  // Overdue check: orders awaiting dispatch placed over 48 hours ago
+  const isOverdue = (o: Order) =>
+    ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status) &&
+    Date.now() - new Date(o.createdAt).getTime() > 48 * 3600 * 1000;
+
   const filteredOrders = orders.filter((o) => {
     if (
       filter === "awaiting" &&
       !["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status)
     )
       return false;
+    if (filter === "overdue" && !isOverdue(o)) return false;
     if (filter === "transit" && !["shipped", "in_transit", "out_for_delivery"].includes(o.status))
       return false;
     if (filter === "delivered" && o.status !== "delivered") return false;
@@ -611,12 +624,65 @@ function OrdersManagerTab() {
     return true;
   });
 
-  async function handleStatusChange(orderId: string, newStatus: OrderStatus) {
+  async function handleStatusChange(
+    orderId: string,
+    newStatus: OrderStatus,
+    courierDetails?: { courier: string; awb: string },
+  ) {
     try {
-      await updateOrder(orderId, { status: newStatus });
+      const nowIso = new Date().toISOString();
+      const existingEvents = selectedOrder?.shipment?.events ?? [];
+      const courierName =
+        courierDetails?.courier || selectedOrder?.shipment?.courier || "Express Courier";
+      const awbCode = courierDetails?.awb || selectedOrder?.shipment?.awb || null;
+
+      let eventLabel = `Status updated to ${orderStatusLabels[newStatus] || newStatus}`;
+      if (newStatus === "confirmed") eventLabel = "Order confirmed & sent to atelier";
+      if (newStatus === "processing")
+        eventLabel = "In tailoring & handcrafted preparation at Kolkata atelier";
+      if (newStatus === "shipped")
+        eventLabel = `Dispatched via ${courierName}${awbCode ? ` · Tracking #: ${awbCode}` : ""}`;
+      if (newStatus === "delivered") eventLabel = "Order delivered to recipient";
+      if (newStatus === "cancelled") eventLabel = "Order cancelled";
+
+      const newEvent = {
+        status: newStatus,
+        at: nowIso,
+        label: eventLabel,
+        location: "Kolkata Atelier",
+        note: awbCode ? `Tracking / AWB: ${awbCode}` : undefined,
+      };
+
+      const updatedShipment = {
+        courier: courierDetails ? courierDetails.courier : (selectedOrder?.shipment?.courier ?? null),
+        awb: courierDetails ? courierDetails.awb : (selectedOrder?.shipment?.awb ?? null),
+        shipmentId: selectedOrder?.shipment?.shipmentId ?? `SHP-${Date.now().toString().slice(-6)}`,
+        trackingUrl: selectedOrder?.shipment?.trackingUrl ?? null,
+        estimatedDelivery: selectedOrder?.shipment?.estimatedDelivery ?? null,
+        attempts: selectedOrder?.shipment?.attempts ?? 0,
+        ndrReason: null,
+        rto: false,
+        events: [...existingEvents, newEvent],
+      };
+
+      await updateOrder(orderId, {
+        status: newStatus,
+        shipment: updatedShipment,
+      });
+
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+        setSelectedOrder((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: newStatus,
+                shipment: updatedShipment,
+              }
+            : null,
+        );
       }
+      setShowDispatchForm(false);
+      setDispatchAwb("");
       toast.success(`Order ${orderId} updated to ${orderStatusLabels[newStatus]}`);
     } catch {
       toast.error("Couldn't update that order. Please try again.");
@@ -666,14 +732,20 @@ function OrdersManagerTab() {
           { id: "all", label: "All Orders", count: orders.length },
           {
             id: "awaiting",
-            label: "Awaiting Fulfilment",
+            label: "Awaiting Dispatch",
             count: orders.filter((o) =>
               ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status),
             ).length,
           },
           {
+            id: "overdue",
+            label: "⚠️ Needs Attention (>48h)",
+            count: orders.filter(isOverdue).length,
+            isWarn: orders.filter(isOverdue).length > 0,
+          },
+          {
             id: "transit",
-            label: "In Transit",
+            label: "Dispatched & In Transit",
             count: orders.filter((o) =>
               ["shipped", "in_transit", "out_for_delivery"].includes(o.status),
             ).length,
@@ -697,7 +769,9 @@ function OrdersManagerTab() {
               "border px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer",
               filter === f.id
                 ? "border-slate-900 bg-slate-900 text-white font-semibold shadow-xs"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900",
+                : f.isWarn
+                  ? "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 font-semibold"
+                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900",
             )}
           >
             {f.label} ({f.count})
@@ -735,7 +809,14 @@ function OrdersManagerTab() {
                   onClick={() => setSelectedOrder(o)}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  <TableCell className="font-semibold text-slate-900 text-xs">{o.id}</TableCell>
+                  <TableCell className="font-semibold text-slate-900 text-xs">
+                    <div>{o.id}</div>
+                    {isOverdue(o) && (
+                      <span className="inline-block mt-1 text-[10px] font-semibold text-amber-850 bg-amber-50 border border-amber-300 rounded px-1.5 py-0.5 whitespace-nowrap">
+                        ⚠️ Needs Dispatch
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="text-xs font-semibold text-slate-900">{o.customerName}</p>
@@ -902,16 +983,22 @@ function OrdersManagerTab() {
 
                 <div className="border border-slate-200 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    Logistics / Delhivery
+                    Shipment &amp; Dispatch
                   </p>
                   <div className="mt-2 text-xs space-y-1">
                     <p>
-                      <span className="text-slate-500">Courier:</span>{" "}
-                      <strong>{selectedOrder.shipment?.courier ?? "Delhivery Surface"}</strong>
+                      <span className="text-slate-500">Method:</span>{" "}
+                      <strong>Self-Dispatch (Kolkata Atelier)</strong>
                     </p>
                     <p>
-                      <span className="text-slate-500">AWB:</span>{" "}
-                      <strong>{selectedOrder.shipment?.awb ?? "Not generated"}</strong>
+                      <span className="text-slate-500">Courier:</span>{" "}
+                      <strong>{selectedOrder.shipment?.courier ?? "Not assigned yet"}</strong>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">Docket / Tracking #:</span>{" "}
+                      <strong className="font-mono text-amber-800">
+                        {selectedOrder.shipment?.awb ?? "Awaiting dispatch"}
+                      </strong>
                     </p>
                     {selectedOrder.shipment?.awb && (
                       <Link
@@ -926,38 +1013,295 @@ function OrdersManagerTab() {
                 </div>
               </div>
 
-              {/* Status Updater */}
-              <div className="border border-slate-200 rounded-xl p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                  Update Fulfillment Status
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {(
-                    [
-                      "confirmed",
-                      "processing",
-                      "packed",
-                      "ready_for_pickup",
-                      "shipped",
-                      "delivered",
-                      "cancelled",
-                    ] as OrderStatus[]
-                  ).map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => handleStatusChange(selectedOrder.id, st)}
-                      className={cn(
-                        "border px-3 py-1.5 text-xs rounded-lg capitalize transition-colors cursor-pointer",
-                        selectedOrder.status === st
-                          ? "border-slate-900 bg-slate-900 text-white font-medium shadow-xs"
-                          : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700",
-                      )}
-                    >
-                      {orderStatusLabels[st] || st}
-                    </button>
-                  ))}
+              {/* Overdue Dispatch Warning */}
+              {isOverdue(selectedOrder) && (
+                <div className="border border-amber-300 bg-amber-50 rounded-xl p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-amber-900">
+                      ⚠️ Needs Attention: Order placed over 48 hours ago
+                    </p>
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      This order is still awaiting dispatch. Please pack the handcrafted garments, hand over to your courier partner, and click &quot;Dispatch Order with Courier&quot; below to record the tracking details.
+                    </p>
+                  </div>
                 </div>
+              )}
+
+              {/* Status Stepper & Manual Fulfillment Controls */}
+              <div className="border border-slate-200 rounded-xl p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                      Order Fulfillment Progression
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Manual dispatch workflow — transitions require explicit admin action.
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="rounded-full text-xs capitalize font-semibold">
+                    {orderStatusLabels[selectedOrder.status] || selectedOrder.status}
+                  </Badge>
+                </div>
+
+                {/* 4-Step Stepper */}
+                <div className="grid grid-cols-4 gap-2 pt-1">
+                  {[
+                    { key: "confirmed", label: "Confirmed", step: 1 },
+                    { key: "processing", label: "In Prep", step: 2 },
+                    { key: "shipped", label: "Dispatched", step: 3 },
+                    { key: "delivered", label: "Delivered", step: 4 },
+                  ].map((s) => {
+                    const stepRanks: Record<string, number> = {
+                      confirmed: 1,
+                      processing: 2,
+                      packed: 2,
+                      ready_for_pickup: 2,
+                      shipped: 3,
+                      in_transit: 3,
+                      out_for_delivery: 3,
+                      delivered: 4,
+                    };
+                    const currentRank = stepRanks[selectedOrder.status] ?? 0;
+                    const isCompleted = currentRank > s.step;
+                    const isCurrent = currentRank === s.step;
+
+                    return (
+                      <div
+                        key={s.key}
+                        className={cn(
+                          "rounded-lg p-2.5 text-center border transition-all",
+                          isCurrent
+                            ? "border-amber-700 bg-amber-50/80 text-amber-950 font-bold shadow-xs"
+                            : isCompleted
+                              ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
+                              : "border-slate-100 bg-slate-50/50 text-slate-400",
+                        )}
+                      >
+                        <div className="flex items-center justify-center mb-1">
+                          {isCompleted ? (
+                            <Check className="h-4 w-4 text-emerald-600" />
+                          ) : (
+                            <span
+                              className={cn(
+                                "h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold",
+                                isCurrent
+                                  ? "bg-amber-700 text-white"
+                                  : "bg-slate-200 text-slate-600",
+                              )}
+                            >
+                              {s.step}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] font-semibold truncate">{s.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Main Action Buttons */}
+                <div className="pt-2 border-t border-slate-100 space-y-3">
+                  {!showDispatchForm ? (
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {selectedOrder.status === "confirmed" && (
+                        <>
+                          <Button
+                            variant="luxe"
+                            size="sm"
+                            onClick={() => handleStatusChange(selectedOrder.id, "processing")}
+                            className="cursor-pointer"
+                          >
+                            <Clock className="h-3.5 w-3.5 mr-1.5" />
+                            Start Handcrafted Preparation
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShowDispatchForm(true);
+                              setDispatchAwb(selectedOrder.shipment?.awb || "");
+                            }}
+                            className="cursor-pointer border-slate-300 hover:bg-slate-50"
+                          >
+                            <Truck className="h-3.5 w-3.5 mr-1.5" />
+                            Dispatch Order with Courier...
+                          </Button>
+                        </>
+                      )}
+
+                      {["processing", "packed", "ready_for_pickup"].includes(selectedOrder.status) && (
+                        <Button
+                          variant="luxe"
+                          size="sm"
+                          onClick={() => {
+                            setShowDispatchForm(true);
+                            setDispatchAwb(selectedOrder.shipment?.awb || "");
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Truck className="h-3.5 w-3.5 mr-1.5" />
+                          Dispatch Order with Courier...
+                        </Button>
+                      )}
+
+                      {["shipped", "in_transit", "out_for_delivery"].includes(selectedOrder.status) && (
+                        <Button
+                          variant="luxe"
+                          size="sm"
+                          onClick={() => handleStatusChange(selectedOrder.id, "delivered")}
+                          className="cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white"
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1.5" />
+                          Mark Order as Delivered
+                        </Button>
+                      )}
+
+                      {selectedOrder.status === "delivered" && (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                          <Check className="h-4 w-4" />
+                          This order has been delivered and fulfilled.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Manual Dispatch Input Form */
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-3.5 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <Truck className="h-4 w-4 text-amber-700" />
+                          Record Courier Dispatch (Self-Shipping)
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowDispatchForm(false)}
+                          className="text-slate-400 hover:text-slate-700 text-xs"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-[11px] font-medium text-slate-700">
+                            Courier Partner
+                          </Label>
+                          <select
+                            value={dispatchCourier}
+                            onChange={(e) => setDispatchCourier(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 shadow-xs focus:border-amber-700 focus:outline-none"
+                          >
+                            <option value="Blue Dart Express">Blue Dart Express</option>
+                            <option value="DTDC Courier">DTDC Courier</option>
+                            <option value="Speed Post / India Post">Speed Post / India Post</option>
+                            <option value="The Professional Couriers">The Professional Couriers</option>
+                            <option value="Delhivery">Delhivery</option>
+                            <option value="Local Hand Delivery (Kolkata)">Local Hand Delivery (Kolkata)</option>
+                            <option value="Other Express Courier">Other Express Courier</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <Label className="text-[11px] font-medium text-slate-700">
+                            Docket / Tracking / AWB #
+                          </Label>
+                          <Input
+                            value={dispatchAwb}
+                            onChange={(e) => setDispatchAwb(e.target.value)}
+                            placeholder="e.g. BD-9821437 or DTDC48291"
+                            className="mt-1 h-8 rounded-lg text-xs font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowDispatchForm(false)}
+                          className="text-xs"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="luxe"
+                          size="sm"
+                          onClick={() => {
+                            const awb = dispatchAwb.trim() || `EXP-${Date.now().toString().slice(-6)}`;
+                            void handleStatusChange(selectedOrder.id, "shipped", {
+                              courier: dispatchCourier,
+                              awb,
+                            });
+                          }}
+                          className="cursor-pointer text-xs"
+                        >
+                          <Check className="h-3.5 w-3.5 mr-1" />
+                          Confirm Dispatch &amp; Log Timestamp
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manual Administrative State Override */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-[11px] font-medium text-slate-500 mb-1.5">
+                      Manual State Override (Admin):
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(
+                        [
+                          "confirmed",
+                          "processing",
+                          "shipped",
+                          "delivered",
+                          "cancelled",
+                        ] as OrderStatus[]
+                      ).map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => handleStatusChange(selectedOrder.id, st)}
+                          className={cn(
+                            "border px-2.5 py-1 text-[11px] rounded-md capitalize transition-colors cursor-pointer",
+                            selectedOrder.status === st
+                              ? "border-slate-900 bg-slate-900 text-white font-medium"
+                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600",
+                          )}
+                        >
+                          {orderStatusLabels[st] || st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Audit Event Log & Timestamps */}
+                {selectedOrder.shipment?.events && selectedOrder.shipment.events.length > 0 && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+                      Fulfillment Event Log &amp; Timestamps
+                    </p>
+                    <div className="space-y-2">
+                      {selectedOrder.shipment.events.map((evt, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start justify-between text-xs py-1.5 border-b border-slate-100 last:border-none"
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="h-2 w-2 rounded-full bg-amber-600 mt-1 shrink-0" />
+                            <div>
+                              <p className="font-semibold text-slate-900">{evt.label}</p>
+                              {evt.note && <p className="text-slate-500 text-[11px]">{evt.note}</p>}
+                            </div>
+                          </div>
+                          <span className="text-slate-400 text-[11px] font-mono shrink-0 ml-2">
+                            {formatDateTime(evt.at)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Return Request Management */}
@@ -970,7 +1314,10 @@ function OrdersManagerTab() {
                     Reason: {selectedOrder.returnRequest.reason}
                   </p>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Current status: {selectedOrder.returnRequest.status}
+                    Current status: <strong className="capitalize">{selectedOrder.returnRequest.status}</strong>
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Customer instructed to ship parcel to: <strong>2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in)</strong>. Once package arrives and quality inspection clears, click below to issue the refund.
                   </p>
                   <div className="mt-3 flex gap-2">
                     <Button
@@ -978,7 +1325,7 @@ function OrdersManagerTab() {
                       size="sm"
                       onClick={() => handleApproveReturn(selectedOrder.id)}
                     >
-                      Approve Return &amp; Schedule Reverse Pickup
+                      Approve &amp; Issue Refund ({formatINR(selectedOrder.total)})
                     </Button>
                   </div>
                 </div>
@@ -3492,13 +3839,21 @@ function CustomersManagerTab() {
 }
 
 /* =========================================================================
-   7. LOGISTICS & DELHIVERY MANAGER TAB
+   7. MANUAL SHIPMENTS & DISPATCH MANAGER TAB
    ========================================================================= */
 function ShippingManagerTab() {
-  const { orders, updateOrder, settings } = useStore();
+  const { orders, updateOrder } = useStore();
+  const [shippingFilter, setShippingFilter] = useState<string>("all");
   const [selectedShipmentOrder, setSelectedShipmentOrder] = useState<Order | null>(null);
-  const shippedOrders = orders.filter((o) => Boolean(o.shipment));
 
+  // Manual dispatch dialog state
+  const [showDispatchModal, setShowDispatchModal] = useState<boolean>(false);
+  const [dispatchTargetOrder, setDispatchTargetOrder] = useState<Order | null>(null);
+  const [courierSelect, setCourierSelect] = useState<string>("Blue Dart Express");
+  const [awbInput, setAwbInput] = useState<string>("");
+
+  /*
+  // Reserved for future automated carrier API integration (Delhivery Automated Manifest API)
   async function handleSimulateDispatch(orderId: string) {
     const awb = `DLV${Math.floor(100000000 + Math.random() * 900000000)}`;
     try {
@@ -3518,116 +3873,232 @@ function ShippingManagerTab() {
               status: "shipped",
               at: new Date().toISOString(),
               label: "Package picked up by Delhivery Courier",
-              location: "Jaipur Hub",
+              location: "Kolkata Hub",
             },
           ],
         },
       });
-      if (selectedShipmentOrder && selectedShipmentOrder.id === orderId) {
-        setSelectedShipmentOrder((prev) =>
-          prev
-            ? {
-                ...prev,
-                status: "shipped",
-                shipment: {
-                  courier: "Delhivery",
-                  awb,
-                  shipmentId: `SHP-${Date.now().toString().slice(-6)}`,
-                  trackingUrl: null,
-                  estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-                  attempts: 0,
-                  ndrReason: null,
-                  rto: false,
-                  events: [
-                    {
-                      status: "shipped",
-                      at: new Date().toISOString(),
-                      label: "Package picked up by Delhivery Courier",
-                      location: "Jaipur Hub",
-                    },
-                  ],
-                },
-              }
-            : null,
-        );
-      }
       toast.success(`Generated Delhivery AWB: ${awb}`);
     } catch {
       toast.error("Couldn't generate the AWB. Please try again.");
     }
   }
+  */
+
+  async function handleManualDispatch(orderId: string, courier: string, awb: string) {
+    const docketAwb = awb.trim() || `EXP-${Date.now().toString().slice(-6)}`;
+    const nowIso = new Date().toISOString();
+    const existingEvents =
+      (selectedShipmentOrder?.id === orderId
+        ? selectedShipmentOrder.shipment?.events
+        : orders.find((o) => o.id === orderId)?.shipment?.events) ?? [];
+
+    const newEvent = {
+      status: "shipped" as OrderStatus,
+      at: nowIso,
+      label: `Dispatched via ${courier} · Docket: ${docketAwb}`,
+      location: "Kolkata Atelier",
+      note: `Courier: ${courier} | Docket: ${docketAwb}`,
+    };
+
+    const targetOrder = orders.find((o) => o.id === orderId);
+    const updatedShipment = {
+      courier,
+      awb: docketAwb,
+      shipmentId: targetOrder?.shipment?.shipmentId ?? `SHP-${Date.now().toString().slice(-6)}`,
+      trackingUrl: null,
+      estimatedDelivery: null,
+      attempts: 0,
+      ndrReason: null,
+      rto: false,
+      events: [...existingEvents, newEvent],
+    };
+
+    try {
+      await updateOrder(orderId, {
+        status: "shipped",
+        shipment: updatedShipment,
+      });
+
+      if (selectedShipmentOrder && selectedShipmentOrder.id === orderId) {
+        setSelectedShipmentOrder((prev) =>
+          prev ? { ...prev, status: "shipped", shipment: updatedShipment } : null,
+        );
+      }
+      setShowDispatchModal(false);
+      setDispatchTargetOrder(null);
+      setAwbInput("");
+      toast.success(`Order ${orderId} dispatched via ${courier} (Docket: ${docketAwb})`);
+    } catch {
+      toast.error("Couldn't update dispatch status. Please try again.");
+    }
+  }
+
+  async function handleMarkDelivered(orderId: string) {
+    const nowIso = new Date().toISOString();
+    const targetOrder = orders.find((o) => o.id === orderId);
+    const existingEvents = targetOrder?.shipment?.events ?? [];
+
+    const newEvent = {
+      status: "delivered" as OrderStatus,
+      at: nowIso,
+      label: "Delivered to recipient",
+      location: "Recipient Destination",
+    };
+
+    const updatedShipment = {
+      courier: targetOrder?.shipment?.courier ?? "Express Courier",
+      awb: targetOrder?.shipment?.awb ?? null,
+      shipmentId: targetOrder?.shipment?.shipmentId ?? `SHP-${Date.now().toString().slice(-6)}`,
+      trackingUrl: null,
+      estimatedDelivery: null,
+      attempts: 1,
+      ndrReason: null,
+      rto: false,
+      events: [...existingEvents, newEvent],
+    };
+
+    try {
+      await updateOrder(orderId, {
+        status: "delivered",
+        shipment: updatedShipment,
+      });
+
+      if (selectedShipmentOrder && selectedShipmentOrder.id === orderId) {
+        setSelectedShipmentOrder((prev) =>
+          prev ? { ...prev, status: "delivered", shipment: updatedShipment } : null,
+        );
+      }
+      toast.success(`Order ${orderId} marked as delivered.`);
+    } catch {
+      toast.error("Couldn't update delivery status. Please try again.");
+    }
+  }
+
+  // Filtered orders for the shipping queue
+  const queueOrders = orders.filter((o) => {
+    if (shippingFilter === "awaiting") {
+      return ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status);
+    }
+    if (shippingFilter === "transit") {
+      return ["shipped", "in_transit", "out_for_delivery"].includes(o.status);
+    }
+    if (shippingFilter === "delivered") {
+      return o.status === "delivered";
+    }
+    return Boolean(o.shipment) || ["confirmed", "processing", "shipped", "delivered"].includes(o.status);
+  });
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl">Delhivery Logistics &amp; Shipping</h2>
-        <p className="text-xs text-muted-foreground">
-          Simulate carrier manifests, AWB creation, and tracking events.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl">Manual Shipments &amp; Dispatch Manager</h2>
+          <p className="text-xs text-muted-foreground">
+            Fulfill and dispatch handcrafted garments in-house from Kolkata Atelier with your courier of choice.
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="border border-slate-200 bg-white rounded-xl shadow-sm p-5">
           <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
-            Carrier Status
+            Atelier Dispatch Hub
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-base font-semibold text-slate-900">
-              Delhivery Surface Express
+              Bansal NX Atelier (Kolutolla, Kolkata)
             </span>
-            {settings.delhiveryConnected ? (
-              <Badge
-                variant="outline"
-                className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs"
-              >
-                Active
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="border-amber-200 bg-amber-50 text-amber-800 rounded-full text-xs"
-              >
-                Simulated / Sandbox
-              </Badge>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-            {settings.delhiveryConnected
-              ? "Origin Hub: Jaipur Central Facility, Rajasthan (302001)"
-              : "AWB generation operates in simulated live courier mode until a production Delhivery account is toggled in Settings."}
-          </p>
-        </div>
-        <div className="border border-slate-200 bg-white rounded-xl shadow-sm p-5">
-          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
-            Tracking Engine
-          </p>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-base font-semibold text-slate-900">Webhook Real-time Sync</span>
             <Badge
               variant="outline"
-              className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs"
+              className="border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold"
             >
-              Live &amp; Synchronized
+              Self-Shipping Active
             </Badge>
           </div>
           <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-            Auto-updates customer tracking timeline on package scans and delivery checkpoints.
+            Direct dispatch from Bansal NX Studio: 2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in). All pieces are tailored, quality-inspected, and shipped in-house.
+          </p>
+        </div>
+
+        <div className="border border-slate-200 bg-white rounded-xl shadow-sm p-5">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
+            Courier Partner Network
+          </p>
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-base font-semibold text-slate-900">
+              Blue Dart, DTDC, India Post, Delhivery
+            </span>
+            <Badge
+              variant="outline"
+              className="border-slate-200 bg-slate-50 text-slate-700 rounded-full text-xs"
+            >
+              Manual Tracking
+            </Badge>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+            Enter tracking / docket AWB numbers upon handing parcels to couriers. Customers can track directly on your public tracking page.
           </p>
         </div>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { id: "all", label: "All Orders", count: orders.length },
+          {
+            id: "awaiting",
+            label: "Awaiting Dispatch",
+            count: orders.filter((o) =>
+              ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status),
+            ).length,
+          },
+          {
+            id: "transit",
+            label: "Dispatched & In Transit",
+            count: orders.filter((o) =>
+              ["shipped", "in_transit", "out_for_delivery"].includes(o.status),
+            ).length,
+          },
+          {
+            id: "delivered",
+            label: "Delivered",
+            count: orders.filter((o) => o.status === "delivered").length,
+          },
+        ].map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setShippingFilter(f.id)}
+            className={cn(
+              "border px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer",
+              shippingFilter === f.id
+                ? "border-slate-900 bg-slate-900 text-white font-semibold shadow-xs"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+            )}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Manifest & Dispatch Queue Table */}
       <div className="border border-slate-200 bg-white rounded-xl shadow-sm overflow-x-auto">
-        <div className="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+        <div className="border-b border-slate-100 px-5 py-4 bg-slate-50/50 flex items-center justify-between">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-            Manifest &amp; AWB Dispatch Queue ({shippedOrders.length})
+            Dispatch Queue ({queueOrders.length})
           </h3>
+          <p className="text-[11px] text-slate-400">
+            Click any row to inspect shipment or log courier tracking
+          </p>
         </div>
         <Table>
           <TableHeader>
             <TableRow className="border-b border-slate-100 bg-slate-50/50">
               <TableHead className="text-xs font-semibold text-slate-500">Order ID</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Customer</TableHead>
-              <TableHead className="text-xs font-semibold text-slate-500">AWB Code</TableHead>
+              <TableHead className="text-xs font-semibold text-slate-500">Courier</TableHead>
+              <TableHead className="text-xs font-semibold text-slate-500">Docket / AWB</TableHead>
               <TableHead className="text-xs font-semibold text-slate-500">Status</TableHead>
               <TableHead className="text-right text-xs font-semibold text-slate-500">
                 Action
@@ -3635,59 +4106,95 @@ function ShippingManagerTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {shippedOrders.length === 0 ? (
+            {queueOrders.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-xs text-slate-500">
-                  No shipments in queue. Process orders to manifest dispatch items.
+                <TableCell colSpan={6} className="py-8 text-center text-xs text-slate-500">
+                  No orders found for the selected dispatch filter.
                 </TableCell>
               </TableRow>
             ) : (
-              shippedOrders.map((o) => (
+              queueOrders.map((o) => (
                 <TableRow
                   key={o.id}
                   onClick={() => setSelectedShipmentOrder(o)}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   <TableCell className="font-semibold text-slate-900 text-xs">{o.id}</TableCell>
-                  <TableCell className="text-xs text-slate-700">{o.customerName}</TableCell>
+                  <TableCell className="text-xs text-slate-700">
+                    <div>
+                      <p className="font-medium text-slate-900">{o.customerName}</p>
+                      <p className="text-[11px] text-slate-400">{o.address?.city || o.email}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs font-medium text-slate-700">
+                    {o.shipment?.courier ?? "—"}
+                  </TableCell>
                   <TableCell className="font-mono text-xs font-semibold text-amber-800">
-                    {o.shipment?.awb ?? "Not generated"}
+                    {o.shipment?.awb ?? <span className="text-slate-400 font-sans italic font-normal">Pending dispatch</span>}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="rounded-full text-[11px] capitalize">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "rounded-full text-[11px] capitalize font-medium",
+                        o.status === "delivered" && "border-emerald-200 bg-emerald-50 text-emerald-700",
+                        ["shipped", "in_transit"].includes(o.status) && "border-amber-200 bg-amber-50 text-amber-800",
+                        ["confirmed", "processing"].includes(o.status) && "border-slate-200 bg-slate-50 text-slate-700",
+                      )}
+                    >
                       {o.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1.5">
+                    <div className="flex justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedShipmentOrder(o);
-                        }}
-                        className="text-xs font-medium border-slate-200 hover:bg-slate-100"
+                        onClick={() => setSelectedShipmentOrder(o)}
+                        className="text-xs font-medium border-slate-200 hover:bg-slate-100 h-7 px-2.5"
                       >
                         Inspect
                       </Button>
-                      {!o.shipment?.awb ? (
+
+                      {!o.shipment?.awb || ["confirmed", "processing", "packed", "ready_for_pickup"].includes(o.status) ? (
                         <Button
                           variant="luxe"
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void handleSimulateDispatch(o.id);
+                          onClick={() => {
+                            setDispatchTargetOrder(o);
+                            setAwbInput(o.shipment?.awb || "");
+                            setShowDispatchModal(true);
                           }}
+                          className="h-7 px-2.5 text-xs"
                         >
-                          Generate AWB
+                          <Truck className="h-3 w-3 mr-1" />
+                          Dispatch
                         </Button>
+                      ) : ["shipped", "in_transit", "out_for_delivery"].includes(o.status) ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void handleMarkDelivered(o.id)}
+                            className="h-7 px-2 text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            Deliver
+                          </Button>
+                          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs">
+                            <Link
+                              to={`/track?id=${o.id}&email=${encodeURIComponent(o.email)}`}
+                              target="_blank"
+                            >
+                              Track
+                            </Link>
+                          </Button>
+                        </div>
                       ) : (
-                        <Button asChild variant="outline" size="sm" className="border-slate-200">
+                        <Button asChild variant="outline" size="sm" className="h-7 px-2.5 text-xs border-slate-200">
                           <Link
                             to={`/track?id=${o.id}&email=${encodeURIComponent(o.email)}`}
                             target="_blank"
-                            onClick={(e) => e.stopPropagation()}
                           >
                             Track
                           </Link>
@@ -3701,6 +4208,81 @@ function ShippingManagerTab() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Manual Dispatch Modal */}
+      {showDispatchModal && dispatchTargetOrder && (
+        <Dialog open={showDispatchModal} onOpenChange={setShowDispatchModal}>
+          <DialogContent className="max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-display font-bold text-lg text-slate-900 flex items-center gap-2">
+                <Truck className="h-5 w-5 text-amber-700" />
+                Dispatch Order {dispatchTargetOrder.id}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500 mt-1">
+                Recipient: {dispatchTargetOrder.customerName} ({dispatchTargetOrder.address?.city}, {dispatchTargetOrder.address?.state})
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <Label className="text-xs font-semibold text-slate-700">
+                  Select Courier Partner
+                </Label>
+                <select
+                  value={courierSelect}
+                  onChange={(e) => setCourierSelect(e.target.value)}
+                  className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 shadow-xs focus:border-amber-700 focus:outline-none"
+                >
+                  <option value="Blue Dart Express">Blue Dart Express</option>
+                  <option value="DTDC Courier">DTDC Courier</option>
+                  <option value="Speed Post / India Post">Speed Post / India Post</option>
+                  <option value="The Professional Couriers">The Professional Couriers</option>
+                  <option value="Delhivery">Delhivery</option>
+                  <option value="Local Hand Delivery (Kolkata)">Local Hand Delivery (Kolkata)</option>
+                  <option value="Other Express Courier">Other Express Courier</option>
+                </select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-slate-700">
+                  Courier Tracking / Docket / AWB #
+                </Label>
+                <Input
+                  value={awbInput}
+                  onChange={(e) => setAwbInput(e.target.value)}
+                  placeholder="e.g. BD-8921345 or DTDC71290"
+                  className="mt-1.5 font-mono text-xs"
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  This tracking code will be immediately visible to the customer on their tracking page.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDispatchModal(false)}
+                  className="text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="luxe"
+                  size="sm"
+                  onClick={() => {
+                    void handleManualDispatch(dispatchTargetOrder.id, courierSelect, awbInput);
+                  }}
+                  className="text-xs"
+                >
+                  <Check className="h-3.5 w-3.5 mr-1.5" />
+                  Confirm Dispatch &amp; Log Timestamp
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Shipment & Tracking Details Modal */}
       {selectedShipmentOrder && (
@@ -3719,7 +4301,7 @@ function ShippingManagerTab() {
                     Recipient: {selectedShipmentOrder.customerName} ({selectedShipmentOrder.email})
                   </DialogDescription>
                 </div>
-                <Badge variant="outline" className="rounded-full text-xs capitalize">
+                <Badge variant="outline" className="rounded-full text-xs capitalize font-semibold">
                   {selectedShipmentOrder.status}
                 </Badge>
               </div>
@@ -3731,13 +4313,13 @@ function ShippingManagerTab() {
                 <div>
                   <p className="text-[11px] font-medium text-slate-500">Logistics Carrier</p>
                   <p className="text-sm font-bold text-slate-900 mt-0.5">
-                    {selectedShipmentOrder.shipment?.courier ?? "Delhivery Surface Express"}
+                    {selectedShipmentOrder.shipment?.courier ?? "Direct Kolkata Atelier Dispatch"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-slate-500">Waybill (AWB)</p>
+                  <p className="text-[11px] font-medium text-slate-500">Waybill (AWB / Docket #)</p>
                   <p className="font-mono text-sm font-bold text-amber-800 mt-0.5">
-                    {selectedShipmentOrder.shipment?.awb ?? "Pending Generation"}
+                    {selectedShipmentOrder.shipment?.awb ?? "Pending Dispatch"}
                   </p>
                 </div>
               </div>
@@ -3798,20 +4380,23 @@ function ShippingManagerTab() {
               {/* Tracking Event Log */}
               <div className="border border-slate-200 rounded-xl p-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-600 mb-3">
-                  Tracking Event Log
+                  Tracking Event Log &amp; Timestamps
                 </p>
                 {selectedShipmentOrder.shipment?.events &&
                 selectedShipmentOrder.shipment.events.length > 0 ? (
                   <div className="space-y-3">
                     {selectedShipmentOrder.shipment.events.map((evt, idx) => (
-                      <div key={idx} className="flex items-start gap-3 text-xs">
-                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
-                        <div>
-                          <p className="font-semibold text-slate-900">{evt.label}</p>
-                          <p className="text-slate-500">
-                            {evt.location} · {formatDateTime(evt.at)}
-                          </p>
+                      <div key={idx} className="flex items-start justify-between text-xs py-1">
+                        <div className="flex items-start gap-2.5">
+                          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
+                          <div>
+                            <p className="font-semibold text-slate-900">{evt.label}</p>
+                            <p className="text-slate-500">{evt.location}</p>
+                          </div>
                         </div>
+                        <span className="font-mono text-[11px] text-slate-400 shrink-0 ml-2">
+                          {formatDateTime(evt.at)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -3822,22 +4407,44 @@ function ShippingManagerTab() {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
-                {!selectedShipmentOrder.shipment?.awb ? (
+                {!selectedShipmentOrder.shipment?.awb ||
+                ["confirmed", "processing", "packed", "ready_for_pickup"].includes(
+                  selectedShipmentOrder.status,
+                ) ? (
                   <Button
                     variant="luxe"
                     size="sm"
-                    onClick={() => void handleSimulateDispatch(selectedShipmentOrder.id)}
+                    onClick={() => {
+                      setDispatchTargetOrder(selectedShipmentOrder);
+                      setAwbInput(selectedShipmentOrder.shipment?.awb || "");
+                      setShowDispatchModal(true);
+                    }}
                     className="flex-1"
                   >
-                    Generate Delhivery AWB Now
+                    <Truck className="h-3.5 w-3.5 mr-1.5" />
+                    Record Dispatch with Courier
                   </Button>
-                ) : (
-                  <Button asChild variant="luxe" size="sm" className="flex-1">
+                ) : ["shipped", "in_transit", "out_for_delivery"].includes(
+                    selectedShipmentOrder.status,
+                  ) ? (
+                  <Button
+                    variant="luxe"
+                    size="sm"
+                    onClick={() => void handleMarkDelivered(selectedShipmentOrder.id)}
+                    className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white"
+                  >
+                    <Check className="h-3.5 w-3.5 mr-1.5" />
+                    Mark Order as Delivered
+                  </Button>
+                ) : null}
+
+                {selectedShipmentOrder.shipment?.awb && (
+                  <Button asChild variant="outline" size="sm" className="border-slate-200">
                     <Link
                       to={`/track?id=${selectedShipmentOrder.id}&email=${encodeURIComponent(selectedShipmentOrder.email)}`}
                       target="_blank"
                     >
-                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
                       Open Public Tracking Portal
                     </Link>
                   </Button>

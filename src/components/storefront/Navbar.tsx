@@ -486,7 +486,7 @@ export function Navbar() {
             </nav>
 
             <div className="border-t border-slate-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-xs text-slate-500 space-y-1">
-              <p className="font-medium text-slate-700">Jaipur Studio · Handcrafted in India</p>
+              <p className="font-medium text-slate-700">Bansal NX &amp; CHAMAK · 15+ Years Kolkata Manufacturer</p>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
                 Crafted for the Extraordinary You
               </p>

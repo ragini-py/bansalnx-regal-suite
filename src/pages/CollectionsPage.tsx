@@ -28,7 +28,7 @@ export function CollectionsPage() {
           />
         }
         title="Curated Collections & Categories"
-        description="Explore our signature edits and categories handcrafted by master artisans in Jaipur."
+        description="Explore signature collections by Bansal NX and CHAMAK — combining over 15 years of Kolkata craftsmanship, elegance, and modern comfort."
       />
 
       <div className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-14 lg:px-12">

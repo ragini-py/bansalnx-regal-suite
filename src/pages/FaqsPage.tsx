@@ -10,6 +10,18 @@ import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/Sit
 
 const faqs = [
   {
+    q: "Who is Bansal NX and what is CHAMAK?",
+    a: "Bansal NX has been redefining women's fashion for over 15 years as a premier manufacturer of ethnic and contemporary wear in Kolkata. To extend our design philosophy to a wider audience, we introduced CHAMAK, a signature brand that celebrates authentic Indian craftsmanship with a contemporary approach for today's modern woman.",
+  },
+  {
+    q: "Where are your garments manufactured?",
+    a: "Every Bansal NX and CHAMAK collection is designed and manufactured in-house at our Kolkata atelier located at 2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in). From fabric selection and pattern design to hand embroidery and final stitching, every step is strictly supervised for superior quality and comfort.",
+  },
+  {
+    q: "Do you supply to retailers, wholesalers, and overseas buyers?",
+    a: "Yes! Bansal NX supplies to over 1,000+ retail partners and 20+ wholesalers and major traders across India and international markets. For commercial distribution and stockist queries, please contact our team via the Contact page.",
+  },
+  {
     q: "How do I find my correct size?",
     a: "Each product page includes a size guide with garment measurements. If you're between sizes, we recommend sizing up for structured silhouettes, or writing to us with your measurements for guidance.",
   },
@@ -27,7 +39,7 @@ const faqs = [
   },
   {
     q: "How do I return or exchange an item?",
-    a: "Unused items with tags, within 7 days of delivery, can be returned from Account → Orders. Made-to-order and customised pieces are final sale unless defective. See our Returns & Exchanges page for the full process.",
+    a: "Unused items with original tags, within 7 days of delivery, can be returned from Account → Orders or your Order page. Ship the parcel via Speed Post, DTDC, Blue Dart, or any courier to our Kolkata atelier: 2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in). Once the garment reaches our facility and clears quality inspection, your refund will be immediately processed.",
   },
   {
     q: "How should I care for my garment?",

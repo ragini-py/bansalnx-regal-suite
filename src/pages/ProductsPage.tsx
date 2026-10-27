@@ -369,7 +369,7 @@ export function ProductsPage() {
         }
         description={
           activeCollection?.description ||
-          "Every piece is handcrafted to perfection in Jaipur. Allow four to six weeks for custom ceremonial styles."
+          "Over 15 years of craftsmanship and in-house manufacturing in Kolkata. Explore premium ethnic and contemporary wear by Bansal NX and CHAMAK."
         }
         meta={
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">

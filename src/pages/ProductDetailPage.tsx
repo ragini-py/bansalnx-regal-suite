@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  Award,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -453,7 +454,7 @@ export function ProductDetailPage() {
                 )}
               </div>
               <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                Inclusive of all taxes · Handcrafted in Jaipur
+                Inclusive of all taxes · Handcrafted in Kolkata
               </p>
             </div>
 
@@ -645,7 +646,7 @@ export function ProductDetailPage() {
             </div>
 
             {/* Store trust badges */}
-            <ul className="grid gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:grid-cols-3">
+            <ul className="grid gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:grid-cols-2">
               <li className="flex items-start gap-2">
                 <Truck className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
                 Free express shipping above {formatINR(settings.freeShippingThreshold)}
@@ -657,6 +658,10 @@ export function ProductDetailPage() {
               <li className="flex items-start gap-2">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
                 100% certified pure fabrics
+              </li>
+              <li className="flex items-start gap-2">
+                <Award className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+                15+ years Kolkata manufacturer · CHAMAK quality
               </li>
             </ul>
 
@@ -713,7 +718,28 @@ export function ProductDetailPage() {
                     In-stock items are dispatched in 1–3 business days. Made-to-order creations are
                     crafted and dispatched within 7–12 business days.
                   </p>
-                  <p>All parcels are insured and shipped via Delhivery Express.</p>
+                  <p>All parcels are insured and shipped via reliable express couriers.</p>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="returns">
+                <AccordionTrigger className="text-xs uppercase tracking-[0.2em]">
+                  Returns &amp; Refund Policy
+                </AccordionTrigger>
+                <AccordionContent className="space-y-2 text-sm leading-relaxed text-muted-foreground">
+                  <p>
+                    Eligible unworn pieces with original designer tags intact can be returned within 7 days of delivery.
+                  </p>
+                  <p>
+                    To return, submit a return request in your Account / Order page, and ship the parcel by Speed Post, DTDC, Blue Dart, or any postal or courier service of your choice to our central facility:
+                  </p>
+                  <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3 text-xs text-slate-800 leading-relaxed space-y-0.5">
+                    <p className="font-bold text-slate-900">Bansal NX (Returns Dept)</p>
+                    <p>2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073</p>
+                    <p className="text-amber-850 font-mono text-[11px]">bansalnx.in · care@bansalnx.in</p>
+                  </div>
+                  <p className="text-xs text-emerald-800 font-semibold">
+                    ✓ Once your parcel reaches our Kolkata facility and clears quality inspection, your refund will be immediately issued back to you.
+                  </p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

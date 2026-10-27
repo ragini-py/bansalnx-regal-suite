@@ -39,11 +39,11 @@ export function ShippingPage() {
             </p>
           </div>
           <div>
-            <h2 className="text-xl text-foreground">Courier partner</h2>
+            <h2 className="text-xl text-foreground">Courier and Dispatch</h2>
             <p className="mt-3">
-              Deliveries are fulfilled through Delhivery. Live tracking and automated status updates
-              are pending final integration with our courier partner — order pages currently show
-              the latest status we have on file.
+              Orders are dispatched directly from our Kolkata atelier via insured express couriers
+              (including Blue Dart, DTDC, and Speed Post). You will receive dispatch updates with
+              courier details and tracking information once your parcel leaves our studio.
             </p>
           </div>
           <div>

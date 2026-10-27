@@ -24,6 +24,7 @@ export const imagery = {
   aboutEditorial,
   promo,
   craft,
+  crafft: craft,
   craftOrange,
   collection1,
   collection2,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { z } from "zod";
 
@@ -156,10 +156,14 @@ export function ContactPage() {
                   <dt className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
                     Address
                   </dt>
-                  <dd className="mt-1 text-slate-700">
-                    Bansal·nx Studio, C-Scheme,
+                  <dd className="mt-1 text-slate-700 leading-relaxed">
+                    <strong className="text-slate-900 font-semibold">Bansal NX</strong>
                     <br />
-                    Jaipur, Rajasthan 302001, India
+                    2nd Flr, Rm No. 38, 134/1,
+                    <br />
+                    Mahatma Gandhi Rd, Central Avenue,
+                    <br />
+                    Kolutolla, Kolkata, West Bengal 700073
                   </dd>
                 </div>
               </div>
@@ -172,6 +176,24 @@ export function ContactPage() {
                   <dd className="mt-1">
                     <a href={`mailto:${settings.supportEmail}`} className="link-underline">
                       {settings.supportEmail}
+                    </a>
+                  </dd>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Globe className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
+                <div>
+                  <dt className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    Website
+                  </dt>
+                  <dd className="mt-1">
+                    <a
+                      href="https://bansalnx.in"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-amber-800 hover:underline"
+                    >
+                      bansalnx.in
                     </a>
                   </dd>
                 </div>
@@ -199,6 +221,15 @@ export function ContactPage() {
                 </div>
               </div>
             </dl>
+
+            <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50/60 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                Wholesale &amp; Retail Inquiries
+              </p>
+              <p className="mt-2 text-xs text-slate-700 leading-relaxed">
+                With 15+ years of direct manufacturing in Kolkata, Bansal NX partners with 1,000+ retailers and 20+ wholesalers across India &amp; overseas. Contact us for bulk catalogs, custom manufacturing, and CHAMAK brand retail distribution.
+              </p>
+            </div>
           </div>
         </div>
       </section>

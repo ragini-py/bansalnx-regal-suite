@@ -10,6 +10,7 @@ import { ProductGrid } from "@/components/storefront/ProductCard";
 import { SiteLayout } from "@/components/storefront/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { imagery, sortProductsWithStockPriority } from "@/data/catalog";
+import craftImage from "@/assets/craft.jpg";
 import { useStore } from "@/lib/store";
 import type { Collection, HomepageContent, Product } from "@/data/types";
 import { cn } from "@/lib/utils";
@@ -407,30 +408,37 @@ function ProductBlock({
 }
 
 function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
+  const bgImage =
+    editorial.image && !editorial.image.includes("editorial-1.jpg")
+      ? editorial.image
+      : imagery.aboutEditorial;
+
   return (
-    <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-6">
-      <Reveal className="group relative isolate overflow-hidden bg-[#183d40]/80 py-12 px-6 sm:py-16 sm:px-10 rounded-[24px] text-white text-center shadow-[0_22px_45px_-28px_rgba(17,43,47,0.55)] backdrop-blur-lg border border-white/10 transition-all duration-500 hover:border-amber-300/40 hover:shadow-[0_28px_50px_-20px_rgba(17,43,47,0.7)] shimmer-hover">
+    <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12 my-8">
+      <Reveal className="group relative isolate overflow-hidden rounded-[24px] text-white text-center shadow-[0_24px_50px_-24px_rgba(36,19,11,0.6)] border border-amber-200/20 pt-20 pb-16 px-6 sm:pt-24 sm:pb-20 sm:px-10 min-h-[480px] sm:min-h-[540px] flex items-center justify-center transition-all duration-500 hover:border-amber-300/40 hover:shadow-[0_28px_55px_-20px_rgba(36,19,11,0.7)] shimmer-hover">
         <img
-          src={editorial.image || imagery.editorial}
-          alt="Bansal-nx couture portrait"
+          src={bgImage}
+          alt="Bansal NX & CHAMAK Editorial"
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-25 transition-transform duration-[1400ms] ease-out group-hover:scale-108"
+          className="absolute inset-0 h-full w-full object-cover object-[center_35%] transition-transform duration-[1600ms] ease-out group-hover:scale-105"
         />
-        <div className="relative mx-auto max-w-2xl">
-          <p className="text-xs uppercase font-bold tracking-wider text-amber-300">
+        {/* Matching warm mocha/terracotta translucent overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#24130b]/80 via-[#24130b]/40 to-[#24130b]/60 pointer-events-none transition-opacity duration-300 group-hover:opacity-90" />
+        <div className="relative z-10 mx-auto max-w-2xl">
+          <p className="text-xs uppercase font-bold tracking-[0.2em] text-amber-300 drop-shadow-sm">
             Bespoke Excellence
           </p>
-          <h2 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-snug">
+          <h2 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight drop-shadow-md">
             {editorial.heading}
           </h2>
-          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-slate-200">
+          <p className="mt-4 text-xs sm:text-base leading-relaxed text-slate-100 drop-shadow-sm max-w-xl mx-auto">
             {editorial.caption}
           </p>
           <Button
             asChild
             variant="luxe"
             size="lg"
-            className="mt-8 bg-white text-slate-900 hover:bg-slate-100 font-semibold shadow-md"
+            className="mt-8 bg-white text-slate-900 hover:bg-amber-50 font-bold shadow-xl transition-all duration-300 hover:shadow-amber-950/30"
           >
             <Link to="/collections">{editorial.cta}</Link>
           </Button>
@@ -453,7 +461,7 @@ function Promo({
       <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-5 sm:p-12 rounded-[20px] sm:rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
         <div className="relative z-10 max-w-xl">
           <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800">
-            Exclusive Client Privilege
+            Signature Brand by Bansal NX
           </p>
           <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
             {promo.heading}
@@ -469,7 +477,7 @@ function Promo({
               size="lg"
               className="h-10 text-xs sm:text-sm border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-medium transition-all active:scale-95"
             >
-              <Link to="/contact">Book Private Consultation</Link>
+              <Link to="/about">Our Story &amp; Craftsmanship</Link>
             </Button>
           </div>
         </div>
@@ -480,45 +488,55 @@ function Promo({
 
 function Craft() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-6 sm:px-8 sm:py-8 lg:px-12 border-t border-slate-200">
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
+    <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-8 sm:py-12 lg:px-12 border-t border-slate-200">
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
         <Reveal className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-500 shimmer-hover">
           <img
-            src={imagery.craft}
-            alt="Artisan embroidering silk fabric"
+            src={craftImage}
+            alt="Handcrafted embroidery at Bansal NX atelier"
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-108"
           />
         </Reveal>
         <Reveal delay={150} className="space-y-4">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-700">
-            Mastery &amp; Lineage
+            15+ Years of Manufacturing Excellence
           </p>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-none">
-            Generations of Jaipur Artistry
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+            Redefining Women&apos;s Fashion
           </h2>
           <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
-            We preserve centuries-old embroidery techniques: Gota Patti from Jaipur, Zardozi from
-            Lucknow, and Marodi needlework. Each garment requires upwards of 80 hours of meticulous
-            hand-needlework.
+            For over 15 years, <strong className="font-semibold text-slate-900">BANSAL NX</strong> has been a trusted Kolkata manufacturer of premium ethnic and contemporary wear. Driven by creativity and uncompromising quality, our collections—together with our signature brand <strong className="font-semibold text-slate-900">CHAMAK</strong>—combine authentic Indian craftsmanship, elegance, and effortless modern comfort.
           </p>
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
-            <div className="p-3 rounded-xl border border-transparent hover:border-amber-200/80 hover:bg-amber-50/40 transition-all duration-300">
-              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
-                80+ Hours
+            <div className="p-3.5 rounded-xl border border-amber-200/60 bg-amber-50/30 transition-all duration-300">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-900 leading-none">
+                15+ Years
               </p>
-              <p className="mt-1.5 text-xs text-slate-600 font-medium">Hand-embroidery per piece</p>
+              <p className="mt-1 text-xs text-slate-600 font-medium">Design &amp; Manufacturing</p>
             </div>
-            <div className="p-3 rounded-xl border border-transparent hover:border-amber-200/80 hover:bg-amber-50/40 transition-all duration-300">
-              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-800 leading-none">
-                100% Pure
+            <div className="p-3.5 rounded-xl border border-amber-200/60 bg-amber-50/30 transition-all duration-300">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-900 leading-none">
+                1,000+
               </p>
-              <p className="mt-1.5 text-xs text-slate-600 font-medium">Mulberry &amp; raw silks</p>
+              <p className="mt-1 text-xs text-slate-600 font-medium">Retail Partners Across India</p>
+            </div>
+            <div className="p-3.5 rounded-xl border border-amber-200/60 bg-amber-50/30 transition-all duration-300">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-900 leading-none">
+                20+
+              </p>
+              <p className="mt-1 text-xs text-slate-600 font-medium">Wholesalers &amp; Major Traders</p>
+            </div>
+            <div className="p-3.5 rounded-xl border border-amber-200/60 bg-amber-50/30 transition-all duration-300">
+              <p className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-amber-900 leading-none">
+                Global
+              </p>
+              <p className="mt-1 text-xs text-slate-600 font-medium">India &amp; Overseas Markets</p>
             </div>
           </div>
           <div className="pt-2">
-            <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm">
-              <Link to="/about">Discover Jaipur Artistry</Link>
+            <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm font-semibold">
+              <Link to="/about">Our Story &amp; CHAMAK Brand</Link>
             </Button>
           </div>
         </Reveal>
@@ -665,16 +683,20 @@ function Newsletter() {
 
 function Story({ story }: { story: HomepageContent["story"] }) {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
-      <Reveal className="mx-auto max-w-2xl text-center space-y-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-amber-700">Our Philosophy</p>
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 leading-none">
+    <section className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 sm:py-16 lg:px-12">
+      <Reveal className="mx-auto max-w-3xl text-center space-y-4">
+        <p className="text-xs font-bold uppercase tracking-wider text-amber-700">15+ Years of Legacy</p>
+        <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
           {story.heading}
         </h2>
-        <p className="text-sm leading-relaxed text-slate-700">{story.body}</p>
-        <Button asChild variant="luxe" size="lg" className="font-semibold">
-          <Link to="/about">{story.cta}</Link>
-        </Button>
+        <p className="text-sm sm:text-base leading-relaxed text-slate-700 max-w-2xl mx-auto">
+          {story.body}
+        </p>
+        <div className="pt-2">
+          <Button asChild variant="luxe" size="lg" className="font-semibold shadow-sm">
+            <Link to="/about">{story.cta || "About Bansal NX & CHAMAK"}</Link>
+          </Button>
+        </div>
       </Reveal>
     </section>
   );

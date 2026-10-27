@@ -5,6 +5,7 @@ import {
   ExternalLink,
   LayoutGrid,
   Loader2,
+  MapPin,
   Package,
   RotateCcw,
   Search,
@@ -368,6 +369,41 @@ export function AccountOrdersPage() {
                   <span className="text-base text-amber-700">{formatINR(selectedOrder.total)}</span>
                 </div>
               </div>
+
+              {/* Return Request Details & Shipping Instructions */}
+              {selectedOrder.returnRequest && (
+                <div className="border border-amber-300 bg-amber-50/70 rounded-xl p-4 text-xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-bold text-amber-950 flex items-center gap-1.5 text-xs">
+                      <RotateCcw className="h-3.5 w-3.5 text-amber-800" />
+                      Return Request: {selectedOrder.returnRequest.status}
+                    </p>
+                    <Badge variant="outline" className="border-amber-300 bg-amber-100 text-amber-900 capitalize text-[10px] px-2 py-0.5">
+                      {selectedOrder.returnRequest.status}
+                    </Badge>
+                  </div>
+                  <p className="text-slate-700">
+                    <strong>Reason:</strong> {selectedOrder.returnRequest.reason}
+                  </p>
+                  <div className="rounded-lg bg-white p-3 border border-amber-200 text-slate-800 leading-relaxed space-y-1">
+                    <p className="font-bold text-slate-900 flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5 text-amber-700" />
+                      Ship Return Parcel To:
+                    </p>
+                    <p className="text-[11px] text-slate-600">
+                      Send via <strong>Speed Post, DTDC, Blue Dart, or any courier / postal service</strong> to:
+                    </p>
+                    <p className="font-semibold text-slate-900 text-xs">
+                      Bansal NX (Returns Dept)<br />
+                      2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073
+                    </p>
+                    <p className="text-amber-850 font-mono text-[10px]">bansalnx.in</p>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 font-semibold">
+                    ✓ Once the parcel reaches our Kolkata facility and clears inspection, your refund will be immediately issued.
+                  </p>
+                </div>
+              )}
 
               {/* Delivery Address */}
               {selectedOrder.address && (

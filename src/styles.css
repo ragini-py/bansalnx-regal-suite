@@ -478,8 +478,8 @@
 
 /* =========================================================================
  * Luxury Regal Toast Notification System for Bansal NX
- * Matches the royal Jaipur palette: Royal Teal-Emerald (#143538 / #183d40),
- * Antique Jaipur Gold (#d8b378 / #c5a059), and Warm Ivory (#fcf9f2).
+ * Matches the royal palette: Royal Teal-Emerald (#143538 / #183d40),
+ * Antique Gold (#d8b378 / #c5a059), and Warm Ivory (#fcf9f2).
  * ========================================================================= */
 :root {
   /* Default light/dark variables */
@@ -548,7 +548,7 @@
   letter-spacing: 0.01em !important;
 }
 
-/* SUCCESS TOAST: Deep Royal Emerald & Jaipur Gold */
+/* SUCCESS TOAST: Deep Royal Emerald & Royal Gold */
 .Toastify__toast-theme--colored.Toastify__toast--success,
 .Toastify__toast--colored.Toastify__toast--success,
 .Toastify__toast--success {

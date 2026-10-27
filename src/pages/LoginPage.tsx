@@ -269,7 +269,7 @@ export function LoginPage() {
                         <span>Customer Account</span>
                       </div>
                       <p className="mt-0.5 font-mono text-[11px] text-muted-foreground truncate">
-                        user@bansalnx.com
+                        user@bansalnx.in
                       </p>
                       <p className="font-mono text-[10px] text-muted-foreground/80">
                         Password: <span className="text-foreground font-semibold">User@12345</span>
@@ -280,7 +280,7 @@ export function LoginPage() {
                       variant="outline"
                       size="sm"
                       className="h-7 text-[11px] px-2.5 shrink-0 rounded-none border-border hover:bg-muted"
-                      onClick={() => handleAutofill("user@bansalnx.com", "User@12345", "Customer")}
+                      onClick={() => handleAutofill("user@bansalnx.in", "User@12345", "Customer")}
                     >
                       Autofill
                     </Button>

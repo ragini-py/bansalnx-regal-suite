@@ -133,9 +133,17 @@ export function Footer() {
               {settings.tagline}
             </p>
             <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600">
-              Made to order in India. Hand-embroidered by master karigars in limited bespoke
-              editions.
+              Manufacturer of premium ethnic &amp; contemporary wear for over 15 years. Proud makers of CHAMAK, serving 1,000+ retailers across India and overseas.
             </p>
+            <div className="mt-3.5 max-w-sm text-xs text-slate-600 leading-relaxed border-l-2 border-amber-600/50 pl-3 space-y-0.5">
+              <p className="font-semibold text-slate-900">Studio &amp; Office:</p>
+              <p>2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073</p>
+              <p className="pt-0.5">
+                <a href="https://bansalnx.in" className="font-semibold text-amber-800 hover:underline">
+                  bansalnx.in
+                </a>
+              </p>
+            </div>
             <form onSubmit={subscribe} className="mt-6 max-w-sm" noValidate>
               <label htmlFor="footer-email" className="text-xs font-medium text-slate-700">
                 Join Our Newsletter
@@ -224,9 +232,9 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Bansal·nx. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bansal NX (bansalnx.in). All rights reserved.</p>
           <p>
-            {settings.supportEmail} · {settings.supportPhone}
+            2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Kolutolla, Kolkata 700073 · {settings.supportEmail}
           </p>
         </div>
       </div>

@@ -73,7 +73,7 @@ const CANCELLATION_REASONS = [
   {
     id: "found_alternative",
     label: "Decided on a different outfit or changed preference",
-    subtitle: "Browsing another Jaipur heritage style",
+    subtitle: "Browsing another Kolkata heritage style",
   },
   {
     id: "other",
