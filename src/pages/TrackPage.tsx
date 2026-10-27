@@ -142,12 +142,7 @@ export function TrackPage() {
                     : "To be confirmed"}
                 </p>
               </div>
-              {/* Reserved for future automated carrier API integration (Delhivery) */}
-              {/* {!settings.delhiveryConnected && (
-                <p className="col-span-2 text-[11px] text-muted-foreground sm:col-span-4">
-                  Live carrier tracking activates once Delhivery is connected.
-                </p>
-              )} */}
+
               <p className="col-span-2 text-[11px] text-slate-500 sm:col-span-4">
                 Handcrafted &amp; dispatched from our Kolkata atelier. For assistance, contact our concierge at {settings.supportPhone}.
               </p>

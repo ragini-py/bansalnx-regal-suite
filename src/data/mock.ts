@@ -119,10 +119,10 @@ export const homepageContent: HomepageContent = {
 
 export const orderStatusLabels: Record<Order["status"], string> = {
   confirmed: "Order Confirmed",
-  processing: "Processing",
-  packed: "Packed",
-  ready_for_pickup: "Ready for Pickup",
-  shipped: "Shipped",
+  processing: "In Tailoring & Prep",
+  packed: "Packed & Quality Inspected",
+  ready_for_pickup: "Ready for Dispatch",
+  shipped: "Dispatched (Kolkata)",
   in_transit: "In Transit",
   out_for_delivery: "Out for Delivery",
   delivered: "Delivered",
@@ -135,10 +135,9 @@ export const orderStatusLabels: Record<Order["status"], string> = {
 
 export const trackingStages: { status: Order["status"]; label: string }[] = [
   { status: "confirmed", label: "Order Confirmed" },
-  { status: "processing", label: "Processing" },
-  { status: "packed", label: "Packed" },
-  { status: "ready_for_pickup", label: "Ready for Pickup" },
-  { status: "shipped", label: "Shipped" },
+  { status: "processing", label: "In Tailoring & Handcrafted Prep" },
+  { status: "packed", label: "Packed & Quality Inspected" },
+  { status: "shipped", label: "Dispatched from Kolkata Atelier" },
   { status: "in_transit", label: "In Transit" },
   { status: "out_for_delivery", label: "Out for Delivery" },
   { status: "delivered", label: "Delivered" },

@@ -28,7 +28,7 @@ export async function updateSettingsRequest(
   return data.settings;
 }
 export async function checkPincodeRequest(pincode: string): Promise<{
-  provider: "shiprocket";
+  provider: string;
   mode: "demo" | "live";
   available: boolean;
   pincode: string;
@@ -36,7 +36,7 @@ export async function checkPincodeRequest(pincode: string): Promise<{
   message: string;
 }> {
   const { data } = await apiClient.get<{
-    provider: "shiprocket";
+    provider: string;
     mode: "demo" | "live";
     available: boolean;
     pincode: string;

@@ -416,7 +416,7 @@ function OverviewTab({ onNavigateTab }: { onNavigateTab: (tab: AdminTab) => void
               <p className="text-xs font-semibold text-slate-900">Manual Self-Dispatch</p>
               <p className="text-[11px] text-slate-500">In-house courier fulfillment &amp; tracking</p>
             </div>
-            {/* Reserved for future automated carrier API integration (Delhivery) */}
+
             <StatusBadge
               status="success"
               label="Active"
@@ -637,11 +637,19 @@ function OrdersManagerTab() {
       const awbCode = courierDetails?.awb || selectedOrder?.shipment?.awb || null;
 
       let eventLabel = `Status updated to ${orderStatusLabels[newStatus] || newStatus}`;
-      if (newStatus === "confirmed") eventLabel = "Order confirmed & sent to atelier";
+      if (newStatus === "confirmed") eventLabel = "Order confirmed & received at Kolkata atelier";
       if (newStatus === "processing")
         eventLabel = "In tailoring & handcrafted preparation at Kolkata atelier";
+      if (newStatus === "packed")
+        eventLabel = "Garments packed & quality checked at Kolkata atelier";
+      if (newStatus === "ready_for_pickup")
+        eventLabel = "Packed & ready for self-shipping dispatch";
       if (newStatus === "shipped")
         eventLabel = `Dispatched via ${courierName}${awbCode ? ` · Tracking #: ${awbCode}` : ""}`;
+      if (newStatus === "in_transit")
+        eventLabel = "Shipment in transit to destination";
+      if (newStatus === "out_for_delivery")
+        eventLabel = "Out for delivery to customer";
       if (newStatus === "delivered") eventLabel = "Order delivered to recipient";
       if (newStatus === "cancelled") eventLabel = "Order cancelled";
 
@@ -1028,252 +1036,165 @@ function OrdersManagerTab() {
                 </div>
               )}
 
-              {/* Status Stepper & Manual Fulfillment Controls */}
-              <div className="border border-slate-200 rounded-xl p-4 space-y-4">
-                <div className="flex items-center justify-between">
+              {/* Product State Selector & Manual Self-Shipping Toggle */}
+              <div className="border border-slate-200 rounded-xl p-4 space-y-4 bg-slate-50/40">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Order Fulfillment Progression
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                      <Truck className="h-4 w-4 text-amber-700" />
+                      Product State Selector (Self-Shipping Toggle)
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Manual dispatch workflow — transitions require explicit admin action.
+                      Bansal NX ships directly from Kolkata atelier — toggle any state below to update and log with live timestamp.
                     </p>
                   </div>
-                  <Badge variant="outline" className="rounded-full text-xs capitalize font-semibold">
-                    {orderStatusLabels[selectedOrder.status] || selectedOrder.status}
+                  <Badge variant="outline" className="rounded-full text-xs capitalize font-bold border-amber-300 bg-amber-100 text-amber-950 px-3 py-1">
+                    Current: {orderStatusLabels[selectedOrder.status] || selectedOrder.status}
                   </Badge>
                 </div>
 
-                {/* 4-Step Stepper */}
-                <div className="grid grid-cols-4 gap-2 pt-1">
-                  {[
-                    { key: "confirmed", label: "Confirmed", step: 1 },
-                    { key: "processing", label: "In Prep", step: 2 },
-                    { key: "shipped", label: "Dispatched", step: 3 },
-                    { key: "delivered", label: "Delivered", step: 4 },
-                  ].map((s) => {
-                    const stepRanks: Record<string, number> = {
-                      confirmed: 1,
-                      processing: 2,
-                      packed: 2,
-                      ready_for_pickup: 2,
-                      shipped: 3,
-                      in_transit: 3,
-                      out_for_delivery: 3,
-                      delivered: 4,
-                    };
-                    const currentRank = stepRanks[selectedOrder.status] ?? 0;
-                    const isCompleted = currentRank > s.step;
-                    const isCurrent = currentRank === s.step;
+                {/* Interactive Toggle Pills with Timestamps */}
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-2">
+                    Click to Toggle Order State:
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { key: "confirmed", label: "Confirmed", desc: "Received at Atelier" },
+                      { key: "processing", label: "In Prep", desc: "Tailoring & Crafting" },
+                      { key: "packed", label: "Packed", desc: "Quality Inspected" },
+                      { key: "shipped", label: "Shipped", desc: "Courier Handover" },
+                      { key: "in_transit", label: "In Transit", desc: "En Route" },
+                      { key: "out_for_delivery", label: "Out for Delivery", desc: "Final Delivery Run" },
+                      { key: "delivered", label: "Delivered", desc: "Fulfilled to Recipient" },
+                      { key: "cancelled", label: "Cancelled", desc: "Order Voided" },
+                    ].map((s) => {
+                      const isCurrent = selectedOrder.status === s.key;
+                      const latestEventForState = selectedOrder.shipment?.events?.find(
+                        (e) => e.status === s.key,
+                      );
 
-                    return (
-                      <div
-                        key={s.key}
-                        className={cn(
-                          "rounded-lg p-2.5 text-center border transition-all",
-                          isCurrent
-                            ? "border-amber-700 bg-amber-50/80 text-amber-950 font-bold shadow-xs"
-                            : isCompleted
-                              ? "border-emerald-200 bg-emerald-50/60 text-emerald-800"
-                              : "border-slate-100 bg-slate-50/50 text-slate-400",
-                        )}
-                      >
-                        <div className="flex items-center justify-center mb-1">
-                          {isCompleted ? (
-                            <Check className="h-4 w-4 text-emerald-600" />
-                          ) : (
-                            <span
-                              className={cn(
-                                "h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold",
-                                isCurrent
-                                  ? "bg-amber-700 text-white"
-                                  : "bg-slate-200 text-slate-600",
-                              )}
-                            >
-                              {s.step}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] font-semibold truncate">{s.label}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Main Action Buttons */}
-                <div className="pt-2 border-t border-slate-100 space-y-3">
-                  {!showDispatchForm ? (
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      {selectedOrder.status === "confirmed" && (
-                        <>
-                          <Button
-                            variant="luxe"
-                            size="sm"
-                            onClick={() => handleStatusChange(selectedOrder.id, "processing")}
-                            className="cursor-pointer"
-                          >
-                            <Clock className="h-3.5 w-3.5 mr-1.5" />
-                            Start Handcrafted Preparation
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
+                      return (
+                        <button
+                          key={s.key}
+                          type="button"
+                          onClick={() => {
+                            if (s.key === "shipped") {
                               setShowDispatchForm(true);
                               setDispatchAwb(selectedOrder.shipment?.awb || "");
-                            }}
-                            className="cursor-pointer border-slate-300 hover:bg-slate-50"
-                          >
-                            <Truck className="h-3.5 w-3.5 mr-1.5" />
-                            Dispatch Order with Courier...
-                          </Button>
-                        </>
-                      )}
-
-                      {["processing", "packed", "ready_for_pickup"].includes(selectedOrder.status) && (
-                        <Button
-                          variant="luxe"
-                          size="sm"
-                          onClick={() => {
-                            setShowDispatchForm(true);
-                            setDispatchAwb(selectedOrder.shipment?.awb || "");
+                            } else {
+                              setShowDispatchForm(false);
+                              void handleStatusChange(selectedOrder.id, s.key as OrderStatus);
+                            }
                           }}
-                          className="cursor-pointer"
-                        >
-                          <Truck className="h-3.5 w-3.5 mr-1.5" />
-                          Dispatch Order with Courier...
-                        </Button>
-                      )}
-
-                      {["shipped", "in_transit", "out_for_delivery"].includes(selectedOrder.status) && (
-                        <Button
-                          variant="luxe"
-                          size="sm"
-                          onClick={() => handleStatusChange(selectedOrder.id, "delivered")}
-                          className="cursor-pointer bg-emerald-700 hover:bg-emerald-800 text-white"
-                        >
-                          <Check className="h-3.5 w-3.5 mr-1.5" />
-                          Mark Order as Delivered
-                        </Button>
-                      )}
-
-                      {selectedOrder.status === "delivered" && (
-                        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
-                          <Check className="h-4 w-4" />
-                          This order has been delivered and fulfilled.
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    /* Manual Dispatch Input Form */
-                    <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-3.5 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                          <Truck className="h-4 w-4 text-amber-700" />
-                          Record Courier Dispatch (Self-Shipping)
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setShowDispatchForm(false)}
-                          className="text-slate-400 hover:text-slate-700 text-xs"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-[11px] font-medium text-slate-700">
-                            Courier Partner
-                          </Label>
-                          <select
-                            value={dispatchCourier}
-                            onChange={(e) => setDispatchCourier(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 shadow-xs focus:border-amber-700 focus:outline-none"
-                          >
-                            <option value="Blue Dart Express">Blue Dart Express</option>
-                            <option value="DTDC Courier">DTDC Courier</option>
-                            <option value="Speed Post / India Post">Speed Post / India Post</option>
-                            <option value="The Professional Couriers">The Professional Couriers</option>
-                            <option value="Delhivery">Delhivery</option>
-                            <option value="Local Hand Delivery (Kolkata)">Local Hand Delivery (Kolkata)</option>
-                            <option value="Other Express Courier">Other Express Courier</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <Label className="text-[11px] font-medium text-slate-700">
-                            Docket / Tracking / AWB #
-                          </Label>
-                          <Input
-                            value={dispatchAwb}
-                            onChange={(e) => setDispatchAwb(e.target.value)}
-                            placeholder="e.g. BD-9821437 or DTDC48291"
-                            className="mt-1 h-8 rounded-lg text-xs font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-end gap-2 pt-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowDispatchForm(false)}
-                          className="text-xs"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="luxe"
-                          size="sm"
-                          onClick={() => {
-                            const awb = dispatchAwb.trim() || `EXP-${Date.now().toString().slice(-6)}`;
-                            void handleStatusChange(selectedOrder.id, "shipped", {
-                              courier: dispatchCourier,
-                              awb,
-                            });
-                          }}
-                          className="cursor-pointer text-xs"
-                        >
-                          <Check className="h-3.5 w-3.5 mr-1" />
-                          Confirm Dispatch &amp; Log Timestamp
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Manual Administrative State Override */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <p className="text-[11px] font-medium text-slate-500 mb-1.5">
-                      Manual State Override (Admin):
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(
-                        [
-                          "confirmed",
-                          "processing",
-                          "shipped",
-                          "delivered",
-                          "cancelled",
-                        ] as OrderStatus[]
-                      ).map((st) => (
-                        <button
-                          key={st}
-                          type="button"
-                          onClick={() => handleStatusChange(selectedOrder.id, st)}
                           className={cn(
-                            "border px-2.5 py-1 text-[11px] rounded-md capitalize transition-colors cursor-pointer",
-                            selectedOrder.status === st
-                              ? "border-slate-900 bg-slate-900 text-white font-medium"
-                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600",
+                            "rounded-xl p-3 text-left border transition-all cursor-pointer relative",
+                            isCurrent
+                              ? "border-amber-700 bg-amber-900 text-white shadow-md ring-2 ring-amber-700/20"
+                              : "border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-50/50 text-slate-700",
                           )}
                         >
-                          {orderStatusLabels[st] || st}
+                          <div className="flex items-center justify-between">
+                            <span className={cn("text-xs font-bold", isCurrent ? "text-white" : "text-slate-900")}>
+                              {s.label}
+                            </span>
+                            {isCurrent && <Check className="h-3.5 w-3.5 text-amber-200" />}
+                          </div>
+                          <p className={cn("text-[10px] mt-0.5 truncate", isCurrent ? "text-amber-200" : "text-slate-500")}>
+                            {s.desc}
+                          </p>
+                          {latestEventForState ? (
+                            <p className={cn("text-[10px] font-mono mt-1 pt-1 border-t truncate", isCurrent ? "border-amber-800 text-amber-300" : "border-slate-100 text-slate-400")}>
+                              ✓ {formatDateTime(latestEventForState.at)}
+                            </p>
+                          ) : (
+                            <p className={cn("text-[10px] mt-1 pt-1 border-t truncate italic", isCurrent ? "border-amber-800 text-amber-300" : "border-slate-100 text-slate-400")}>
+                              Not recorded
+                            </p>
+                          )}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* Dispatch Input Form (when dispatched or clicked) */}
+                {showDispatchForm && (
+                  <div className="rounded-xl border border-amber-300 bg-white p-4 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <Truck className="h-4 w-4 text-amber-700" />
+                        Record Courier Dispatch (Self-Shipping from Kolkata)
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowDispatchForm(false)}
+                        className="text-slate-400 hover:text-slate-700 text-xs"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-[11px] font-medium text-slate-700">
+                          Courier Partner
+                        </Label>
+                        <select
+                          value={dispatchCourier}
+                          onChange={(e) => setDispatchCourier(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 shadow-xs focus:border-amber-700 focus:outline-none"
+                        >
+                          <option value="Speed Post / India Post">Speed Post / India Post</option>
+                          <option value="Blue Dart Express">Blue Dart Express</option>
+                          <option value="DTDC Courier">DTDC Courier</option>
+                          <option value="The Professional Couriers">The Professional Couriers</option>
+                          <option value="Delhivery">Delhivery</option>
+                          <option value="Local Hand Delivery (Kolkata)">Local Hand Delivery (Kolkata)</option>
+                          <option value="Other Express Courier">Other Express Courier</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <Label className="text-[11px] font-medium text-slate-700">
+                          Docket / Tracking / AWB #
+                        </Label>
+                        <Input
+                          value={dispatchAwb}
+                          onChange={(e) => setDispatchAwb(e.target.value)}
+                          placeholder="e.g. SP-WB700073 or BD-9821437"
+                          className="mt-1 h-8 rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowDispatchForm(false)}
+                        className="text-xs"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="luxe"
+                        size="sm"
+                        onClick={() => {
+                          const awb = dispatchAwb.trim() || `EXP-${Date.now().toString().slice(-6)}`;
+                          void handleStatusChange(selectedOrder.id, "shipped", {
+                            courier: dispatchCourier,
+                            awb,
+                          });
+                        }}
+                        className="cursor-pointer text-xs"
+                      >
+                        <Check className="h-3.5 w-3.5 mr-1" />
+                        Confirm Dispatch &amp; Log Timestamp
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Audit Event Log & Timestamps */}
                 {selectedOrder.shipment?.events && selectedOrder.shipment.events.length > 0 && (
@@ -3852,38 +3773,7 @@ function ShippingManagerTab() {
   const [courierSelect, setCourierSelect] = useState<string>("Blue Dart Express");
   const [awbInput, setAwbInput] = useState<string>("");
 
-  /*
-  // Reserved for future automated carrier API integration (Delhivery Automated Manifest API)
-  async function handleSimulateDispatch(orderId: string) {
-    const awb = `DLV${Math.floor(100000000 + Math.random() * 900000000)}`;
-    try {
-      await updateOrder(orderId, {
-        status: "shipped",
-        shipment: {
-          courier: "Delhivery",
-          awb,
-          shipmentId: `SHP-${Date.now().toString().slice(-6)}`,
-          trackingUrl: null,
-          estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          attempts: 0,
-          ndrReason: null,
-          rto: false,
-          events: [
-            {
-              status: "shipped",
-              at: new Date().toISOString(),
-              label: "Package picked up by Delhivery Courier",
-              location: "Kolkata Hub",
-            },
-          ],
-        },
-      });
-      toast.success(`Generated Delhivery AWB: ${awb}`);
-    } catch {
-      toast.error("Couldn't generate the AWB. Please try again.");
-    }
-  }
-  */
+
 
   async function handleManualDispatch(orderId: string, courier: string, awb: string) {
     const docketAwb = awb.trim() || `EXP-${Date.now().toString().slice(-6)}`;
@@ -4027,7 +3917,7 @@ function ShippingManagerTab() {
           </p>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-base font-semibold text-slate-900">
-              Blue Dart, DTDC, India Post, Delhivery
+              Speed Post, Blue Dart, DTDC &amp; Couriers
             </span>
             <Badge
               variant="outline"
@@ -4233,11 +4123,10 @@ function ShippingManagerTab() {
                   onChange={(e) => setCourierSelect(e.target.value)}
                   className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-800 shadow-xs focus:border-amber-700 focus:outline-none"
                 >
+                  <option value="Speed Post / India Post">Speed Post / India Post</option>
                   <option value="Blue Dart Express">Blue Dart Express</option>
                   <option value="DTDC Courier">DTDC Courier</option>
-                  <option value="Speed Post / India Post">Speed Post / India Post</option>
                   <option value="The Professional Couriers">The Professional Couriers</option>
-                  <option value="Delhivery">Delhivery</option>
                   <option value="Local Hand Delivery (Kolkata)">Local Hand Delivery (Kolkata)</option>
                   <option value="Other Express Courier">Other Express Courier</option>
                 </select>
