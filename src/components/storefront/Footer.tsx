@@ -133,7 +133,7 @@ export function Footer() {
               {settings.tagline}
             </p>
             <p className="mt-3 max-w-sm text-xs sm:text-sm leading-relaxed text-slate-600">
-              Manufacturer of premium ethnic &amp; contemporary wear for over 15 years. Proud makers of CHAMAK, serving 1,000+ retailers across India and overseas.
+              Manufacturer of premium ethnic &amp; contemporary wear for over 15 years, serving 1,000+ retailers across India and overseas.
             </p>
             <div className="mt-3.5 max-w-sm text-xs text-slate-600 leading-relaxed border-l-2 border-amber-600/50 pl-3 space-y-0.5">
               <p className="font-semibold text-slate-900">Studio &amp; Office:</p>

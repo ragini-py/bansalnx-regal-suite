@@ -661,7 +661,7 @@ export function ProductDetailPage() {
               </li>
               <li className="flex items-start gap-2">
                 <Award className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
-                15+ years Kolkata manufacturer · CHAMAK quality
+                15+ years Kolkata manufacturer · In-house craftsmanship
               </li>
             </ul>
 

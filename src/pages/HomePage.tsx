@@ -418,7 +418,7 @@ function Editorial({ editorial }: { editorial: HomepageContent["editorial"] }) {
       <Reveal className="group relative isolate overflow-hidden rounded-[24px] text-white text-center shadow-[0_24px_50px_-24px_rgba(36,19,11,0.6)] border border-amber-200/20 pt-20 pb-16 px-6 sm:pt-24 sm:pb-20 sm:px-10 min-h-[480px] sm:min-h-[540px] flex items-center justify-center transition-all duration-500 hover:border-amber-300/40 hover:shadow-[0_28px_55px_-20px_rgba(36,19,11,0.7)] shimmer-hover">
         <img
           src={bgImage}
-          alt="Bansal NX & CHAMAK Editorial"
+          alt="Bansal NX Atelier Editorial"
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover object-[center_35%] transition-transform duration-[1600ms] ease-out group-hover:scale-105"
         />
@@ -461,7 +461,7 @@ function Promo({
       <Reveal className="relative overflow-hidden border border-[#e3d0a8]/80 bg-[linear-gradient(135deg,rgba(248,241,229,0.75),rgba(255,255,255,0.68),rgba(248,241,229,0.78))] p-5 sm:p-12 rounded-[20px] sm:rounded-[28px] text-slate-900 shadow-[0_18px_35px_-28px_rgba(17,43,47,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_24px_45px_-20px_rgba(17,43,47,0.45)] hover:border-[#c6903c] shimmer-hover">
         <div className="relative z-10 max-w-xl">
           <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800">
-            Signature Brand by Bansal NX
+            The Signature Edit
           </p>
           <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
             {promo.heading}
@@ -506,7 +506,7 @@ function Craft() {
             Redefining Women&apos;s Fashion
           </h2>
           <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
-            For over 15 years, <strong className="font-semibold text-slate-900">BANSAL NX</strong> has been a trusted Kolkata manufacturer of premium ethnic and contemporary wear. Driven by creativity and uncompromising quality, our collections—together with our signature brand <strong className="font-semibold text-slate-900">CHAMAK</strong>—combine authentic Indian craftsmanship, elegance, and effortless modern comfort.
+            For over 15 years, <strong className="font-semibold text-slate-900">BANSAL NX</strong> has been a trusted Kolkata manufacturer of premium ethnic and contemporary wear. Driven by creativity and uncompromising quality, our collections combine authentic Indian craftsmanship, elegance, and effortless modern comfort.
           </p>
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
             <div className="p-3.5 rounded-xl border border-amber-200/60 bg-amber-50/30 transition-all duration-300">
@@ -536,7 +536,7 @@ function Craft() {
           </div>
           <div className="pt-2">
             <Button asChild variant="luxe" size="lg" className="h-10 text-xs sm:text-sm font-semibold">
-              <Link to="/about">Our Story &amp; CHAMAK Brand</Link>
+              <Link to="/about">Our Story &amp; Craftsmanship</Link>
             </Button>
           </div>
         </Reveal>
@@ -694,7 +694,7 @@ function Story({ story }: { story: HomepageContent["story"] }) {
         </p>
         <div className="pt-2">
           <Button asChild variant="luxe" size="lg" className="font-semibold shadow-sm">
-            <Link to="/about">{story.cta || "About Bansal NX & CHAMAK"}</Link>
+            <Link to="/about">{story.cta || "About Bansal NX"}</Link>
           </Button>
         </div>
       </Reveal>

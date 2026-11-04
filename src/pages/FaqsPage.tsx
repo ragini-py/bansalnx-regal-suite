@@ -10,12 +10,12 @@ import { Breadcrumbs, PageHeader, SiteLayout } from "@/components/storefront/Sit
 
 const faqs = [
   {
-    q: "Who is Bansal NX and what is CHAMAK?",
-    a: "Bansal NX has been redefining women's fashion for over 15 years as a premier manufacturer of ethnic and contemporary wear in Kolkata. To extend our design philosophy to a wider audience, we introduced CHAMAK, a signature brand that celebrates authentic Indian craftsmanship with a contemporary approach for today's modern woman.",
+    q: "Who is Bansal NX?",
+    a: "Bansal NX has been redefining women's fashion for over 15 years as a premier manufacturer of ethnic and contemporary wear in Kolkata. We create collections that combine elegance, comfort, and evolving fashion trends thoughtfully designed for today's modern woman.",
   },
   {
     q: "Where are your garments manufactured?",
-    a: "Every Bansal NX and CHAMAK collection is designed and manufactured in-house at our Kolkata atelier located at 2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in). From fabric selection and pattern design to hand embroidery and final stitching, every step is strictly supervised for superior quality and comfort.",
+    a: "Every Bansal NX collection is designed and manufactured in-house at our Kolkata atelier located at 2nd Flr, Rm No. 38, 134/1, Mahatma Gandhi Rd, Central Avenue, Kolutolla, Kolkata, West Bengal 700073 (bansalnx.in). From fabric selection and pattern design to hand embroidery and final stitching, every step is strictly supervised for superior quality and comfort.",
   },
   {
     q: "Do you supply to retailers, wholesalers, and overseas buyers?",

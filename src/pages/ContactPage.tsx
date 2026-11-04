@@ -227,7 +227,7 @@ export function ContactPage() {
                 Wholesale &amp; Retail Inquiries
               </p>
               <p className="mt-2 text-xs text-slate-700 leading-relaxed">
-                With 15+ years of direct manufacturing in Kolkata, Bansal NX partners with 1,000+ retailers and 20+ wholesalers across India &amp; overseas. Contact us for bulk catalogs, custom manufacturing, and CHAMAK brand retail distribution.
+                With 15+ years of direct manufacturing in Kolkata, Bansal NX partners with 1,000+ retailers and 20+ wholesalers across India &amp; overseas. Contact us for bulk catalogs, custom manufacturing, and wholesale distribution.
               </p>
             </div>
           </div>

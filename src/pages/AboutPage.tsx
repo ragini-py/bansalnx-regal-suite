@@ -173,37 +173,36 @@ export function AboutPage() {
         </div>
       </section>
 
-      {/* CHAMAK Brand Feature */}
+      {/* Atelier & Craftsmanship Showcase */}
       <section className="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
         <div className="rounded-3xl border border-slate-200 bg-slate-900 text-white overflow-hidden shadow-2xl">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div className="p-8 sm:p-12 lg:p-16 space-y-5">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-widest text-amber-300">
-                <Sparkles className="h-3.5 w-3.5" /> A Signature Brand by BANSAL NX
+                <Sparkles className="h-3.5 w-3.5" /> The Kolkata Atelier
               </span>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Introducing CHAMAK
+                Crafted for the Extraordinary You
               </h2>
               <p className="text-amber-200/90 text-sm sm:text-base font-medium">
-                Celebrating Indian Craftsmanship with a Contemporary Design Approach
+                Celebrating Authentic Indian Craftsmanship with Contemporary Silhouette Design
               </p>
               <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed pt-2">
                 <p>
-                  To extend our design philosophy to a wider audience, we introduced{" "}
-                  <strong className="text-white font-semibold">CHAMAK</strong>, a premium women&apos;s
-                  fashion brand that celebrates authentic Indian craftsmanship with a fresh,
-                  contemporary design sensibility.
+                  Every Bansal NX creation begins at our Kolkata design studio and manufacturing atelier.
+                  From hand-drawn motifs and pure silk sourcing to precision needlework, each garment is
+                  sculpted to deliver uncompromising elegance, flattering drape, and enduring luxury.
                 </p>
                 <p>
-                  Every CHAMAK collection is thoughtfully created to deliver exceptional quality,
-                  elegance, and style for today&apos;s modern woman — designed for effortless wear,
-                  flattering silhouettes, and celebratory radiance.
+                  Whether bespoke ceremonial wear or contemporary occasion edits, our signature collections
+                  are thoughtfully tailored for the modern woman — designed for effortless grace and
+                  celebratory radiance.
                 </p>
               </div>
 
               <div className="pt-4 flex flex-wrap items-center gap-4">
                 <Button asChild variant="luxe" size="lg" className="bg-amber-400 text-slate-950 hover:bg-amber-300 font-bold">
-                  <Link to="/products?category=chamak">Explore CHAMAK Edit</Link>
+                  <Link to="/collections">Explore All Collections</Link>
                 </Button>
                 <div className="flex items-center gap-2 text-xs text-amber-200">
                   <CheckCircle2 className="h-4 w-4 text-amber-400" />
@@ -215,7 +214,7 @@ export function AboutPage() {
             <div className="relative h-full min-h-[360px] lg:min-h-[500px]">
               <img
                 src={imagery.aboutEditorial}
-                alt="CHAMAK collection by Bansal NX"
+                alt="Bansal NX signature collection"
                 className="absolute inset-0 h-full w-full object-cover object-[center_25%]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent lg:bg-gradient-to-r lg:from-slate-900 lg:via-transparent lg:to-transparent" />
