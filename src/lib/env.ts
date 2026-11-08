@@ -16,7 +16,11 @@ const schema = z.object({
       "VITE_API_URL must be a valid absolute URL (e.g. http://localhost:4000/api) or a root-relative path (e.g. /api)",
     ),
   VITE_RAZORPAY_KEY_ID: z.string().trim().min(1).default("rzp_test_dummy_key_id"),
-  VITE_GOOGLE_CLIENT_ID: z.string().trim().optional().default(""),
+  VITE_GOOGLE_CLIENT_ID: z
+    .string()
+    .trim()
+    .optional()
+    .default("977648781327-qbcho2u2o1f47kjkq872h1fhn15omhs4.apps.googleusercontent.com"),
 });
 
 const parsed = schema.safeParse(import.meta.env);

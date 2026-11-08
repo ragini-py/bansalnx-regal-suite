@@ -6,9 +6,11 @@ WORKDIR /app
 # Build arguments for Vite compilation
 ARG VITE_API_URL=/api
 ARG VITE_RAZORPAY_KEY_ID=rzp_test_dummy_key_id
+ARG VITE_GOOGLE_CLIENT_ID=977648781327-qbcho2u2o1f47kjkq872h1fhn15omhs4.apps.googleusercontent.com
 
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_RAZORPAY_KEY_ID=$VITE_RAZORPAY_KEY_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 COPY package.json package-lock.json ./
 RUN npm ci
